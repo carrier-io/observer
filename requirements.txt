@@ -1,0 +1,4 @@
+selenium==3.141.0
+selene==2.0.0a18
+jinja2==2.10.3
+junit_xml==1.8

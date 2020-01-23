@@ -1,0 +1,10 @@
+version: '3'
+services:
+  observer:
+    build: .
+
+  observer_chrome:
+    image: getcarrier/observer-chrome:latest
+    ports:
+      - 4444:4444
+    container_name: observer-chrome
