@@ -28,7 +28,9 @@ def process_report(report, config):
     for record in report:
         if 'xml' in config and 'html_report' not in record.keys():
             test_cases.append(TestCase(record['name'], record.get('class_name', 'observer'),
-                                       record['actual'], '', record['message']))
+                                       record['actual'], '', ''))
+            if record['message']:
+                test_cases[-1].add_failure_info(record['message'])
         elif 'html' in config and 'html_report' in record.keys():
             with open(f'/tmp/reports/{record["title"]}_{html_report}.html', 'w') as f:
                 f.write(record['html_report'])
