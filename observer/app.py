@@ -52,7 +52,7 @@ def main():
         with open(args.yaml) as f:
             steps = list(yaml.load(f.read()).values())
     else:
-        steps = args.steps
+        steps = args.step
     for st in steps:
         if 'html' in args.report:
             st['html'] = True
