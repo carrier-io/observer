@@ -1,8 +1,9 @@
 import tempfile
 from os import environ, path
 from time import sleep
-from selenium import webdriver
+from selenium import webdriver, common
 from time import time
+from traceback import format_exc
 from selene.support.shared import browser
 from selene import by
 from requests import get
@@ -48,8 +49,11 @@ def step(step_definition):
     if step_definition.get('html'):
         get(f'http://{listener_address}/record/start')
     current_time = time() - start_time
-    execute_step(step_definition)
-    results = driver.execute_script(check_ui_performance)
+    try:
+        execute_step(step_definition)
+        results = driver.execute_script(check_ui_performance)
+    except common.exceptions.WebDriverException:
+        return None
     results['info']['testStart'] = int(current_time)
     if step_definition.get('html'):
         video_results = get(f'http://{listener_address}/record/stop').content

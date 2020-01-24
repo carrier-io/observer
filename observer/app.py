@@ -57,6 +57,8 @@ def main():
         if 'html' in args.report:
             st['html'] = True
         report = step(st)
+        if not report:
+            continue
         if st.get('html'):
             results.append({'html_report': report.get_report(), 'title': report.title})
         if args.firstPaint > 0:
