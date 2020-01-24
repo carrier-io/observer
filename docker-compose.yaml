@@ -1,10 +1,13 @@
 version: '3'
 services:
   observer:
-    build: .
-
+    images: getcarrier/observer:latest
+    environment:
+      - remote=observer-chrome:4444
+      - listener=observer-chrome:9999
+    volumes:
+      -  $(pwd)/reports:/tmp/reports
+    command: '-s "{\"url\": \"https://www.google.com\", \"el\": \"//img[@tag=\\\"Google\\\"]\"}" -s "{\"url\": \"https://www.youtube.com\"}" -fp 100 -si 400 -tl 500 -r xml -r html'
   observer_chrome:
     image: getcarrier/observer-chrome:latest
-    ports:
-      - 4444:4444
     container_name: observer-chrome
