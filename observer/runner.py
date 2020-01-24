@@ -6,7 +6,7 @@ from time import time
 from selene.support.shared import browser
 from selene import by
 from requests import get
-from observer.constants import check_ui_performance
+from observer.constants import check_ui_performance, listener_address
 from shutil import rmtree
 from observer.processors.results_processor import resultsProcessor
 
@@ -45,7 +45,6 @@ def step(step_definition):
     start_time = time()
     videofolder = None
     video_path = None
-    listener_address = environ.get("listener", "127.0.0.1:9999")
     if step_definition.get('html'):
         get(f'http://{listener_address}/record/start')
     current_time = time() - start_time
@@ -65,5 +64,14 @@ def step(step_definition):
 
 
 def terminate_runner():
-    listener_address = environ.get("listener", "127.0.0.1:9999")
     return get(f'http://{listener_address}/terminate').content
+
+
+def wait_for_agent():
+    for _ in range(120):
+        try:
+            if get(f'http://{listener_address}', timeout=1).content == 'OK':
+                break
+        except:
+            pass
+        sleep(1)

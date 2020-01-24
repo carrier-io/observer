@@ -1,6 +1,6 @@
 import argparse
 from json import loads
-from observer.runner import step, close_driver, terminate_runner
+from observer.runner import step, close_driver, terminate_runner, wait_for_agent
 from junit_xml import TestSuite, TestCase
 
 
@@ -44,6 +44,7 @@ def process_report(report, config):
 def main():
     args = parse_args()
     results = []
+    wait_for_agent()
     for st in args.step:
         if 'html' in args.report:
             st['html'] = True

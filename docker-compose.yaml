@@ -7,7 +7,7 @@ services:
       - remote=chrome:4444
       - listener=chrome:9999
     volumes:
-      -  $(pwd)/reports:/tmp/reports
+      -  /tmp/reports:/tmp/reports
     command: '-s "{\"url\": \"https://www.google.com\", \"el\": \"//img[@tag=\\\"Google\\\"]\"}" -s "{\"url\": \"https://www.youtube.com\"}" -fp 100 -si 400 -tl 500 -r xml -r html'
   chrome:
     image: getcarrier/observer-chrome:latest
@@ -16,5 +16,4 @@ services:
       interval: 1m
       timeout: 10s
       retries: 3
-      start_period: 20s
     container_name: chrome
