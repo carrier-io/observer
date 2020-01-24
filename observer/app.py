@@ -1,6 +1,6 @@
 import argparse
 from json import loads
-from observer.runner import step, close_driver
+from observer.runner import step, close_driver, terminate_runner
 from junit_xml import TestSuite, TestCase
 
 
@@ -74,6 +74,7 @@ def main():
                             "expected": args.totalLoad, "message": message})
     process_report(results, args.report)
     close_driver()
+    terminate_runner()
 
 
 if __name__ == "__main__":

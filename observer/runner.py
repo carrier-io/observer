@@ -62,3 +62,8 @@ def step(step_definition):
     if videofolder:
         rmtree(videofolder)
     return report
+
+
+def terminate_runner():
+    listener_address = environ.get("listener", "127.0.0.1:9999")
+    return get(f'http://{listener_address}/terminate').content
