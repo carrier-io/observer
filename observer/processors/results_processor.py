@@ -45,12 +45,14 @@ class resultsProcessor(object):
         elif self.total_score > 75 and request_params['timing']['speedIndex'] < 3000:
             self.test_result = 'warning'
         if generate_html:
-            self.report = self.generate_html(
-                self.title, video_path, self.test_result,
-                request_params['info'].get('testStart', 0), self.perf_score, self.priv_score,
-                self.acc_score, self.bp_score, self.acc_data, self.perf_data, self.bp_data, self.priv_data,
-                request_params['performanceResources'], request_params['marks'], request_params['measures'],
-                self.performance_timing, request_params['info'], self.timing)
+            self.report = self.generate_html(request_params['info']['title'], video_path, self.test_result,
+                                             request_params['info'].get('testStart', 0), self.perf_score,
+                                             self.priv_score,
+                                             self.acc_score, self.bp_score, self.acc_data, self.perf_data, self.bp_data,
+                                             self.priv_data, request_params['performanceResources'],
+                                             request_params['marks'], request_params['measures'],
+                                             request_params['performancetiming'], request_params['info'],
+                                             request_params['timing'])
 
     @staticmethod
     def privacy_audit(privacy_data):

@@ -21,17 +21,17 @@ def get_driver():
         driver = webdriver.Remote(
             command_executor=f'http://{remote_driver_address}/wd/hub',
             desired_capabilities=chrome_options.to_capabilities())
-        browser.set_driver(driver)
+    browser.set_driver(driver)
     return driver
 
 
 def execute_step(step_definition):
-    get_driver()
+    driver = get_driver()
     browser.open(step_definition['url'])
     if step_definition.get('el'):
         browser.element(by.xpath(step_definition['el'])).is_displayed()
     for _ in range(1200):
-        if browser.execute_script('return document.readyState === "complete" && performance.timing.loadEventEnd > 0'):
+        if driver.execute_script('return document.readyState === "complete" && performance.timing.loadEventEnd > 0'):
             break
         sleep(0.1)
 
@@ -41,7 +41,7 @@ def close_driver():
 
 
 def step(step_definition):
-    get_driver()
+    driver = get_driver()
     start_time = time()
     videofolder = None
     video_path = None
@@ -68,10 +68,12 @@ def terminate_runner():
 
 
 def wait_for_agent():
+    sleep(5)
     for _ in range(120):
+        sleep(1)
         try:
             if get(f'http://{listener_address}', timeout=1).content == b'OK':
                 break
         except:
             pass
-        sleep(1)
+
