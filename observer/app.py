@@ -1,3 +1,5 @@
+import os
+import yaml
 import argparse
 from json import loads
 from observer.runner import step, close_driver, terminate_runner, wait_for_agent
@@ -16,6 +18,7 @@ def parse_args():
     parser.add_argument("-s", '--step', action="append", type=str2json)
     parser.add_argument("-fp", '--firstPaint', type=int, default=0)
     parser.add_argument("-si", '--speedIndex', type=int, default=0)
+    parser.add_argument("-y", "--yaml", type=str, default="")
     parser.add_argument("-tl", '--totalLoad', type=int, default=0)
     parser.add_argument("-r", '--report', action="append", type=str, default=['xml'])
     args, _ = parser.parse_known_args()
@@ -45,7 +48,12 @@ def main():
     args = parse_args()
     results = []
     wait_for_agent()
-    for st in args.step:
+    if args.yaml and os.path.exists(args.yaml):
+        with open(args.yaml) as f:
+            steps = list(yaml.load(f.read()).values())
+    else:
+        steps = args.steps
+    for st in steps:
         if 'html' in args.report:
             st['html'] = True
         report = step(st)

@@ -1,0 +1,5 @@
+Google:
+  url: https://www.google.com
+  el: //img[@tag="Google"]
+YouTube:
+  url: https://www.youtube.com
