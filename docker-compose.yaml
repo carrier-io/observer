@@ -1,13 +1,20 @@
 version: '3'
 services:
   observer:
-    images: getcarrier/observer:latest
+    depends_on: chrome
+    image: getcarrier/observer:latest
     environment:
-      - remote=observer-chrome:4444
-      - listener=observer-chrome:9999
+      - remote=chrome:4444
+      - listener=chrome:9999
     volumes:
       -  $(pwd)/reports:/tmp/reports
     command: '-s "{\"url\": \"https://www.google.com\", \"el\": \"//img[@tag=\\\"Google\\\"]\"}" -s "{\"url\": \"https://www.youtube.com\"}" -fp 100 -si 400 -tl 500 -r xml -r html'
-  observer_chrome:
+  chrome:
     image: getcarrier/observer-chrome:latest
-    container_name: observer-chrome
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9999"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    container_name: chrome
