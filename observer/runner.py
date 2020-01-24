@@ -70,7 +70,7 @@ def terminate_runner():
 def wait_for_agent():
     for _ in range(120):
         try:
-            if get(f'http://{listener_address}', timeout=1).content == 'OK':
+            if get(f'http://{listener_address}', timeout=1).content == b'OK':
                 break
         except:
             pass
