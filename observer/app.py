@@ -1,9 +1,11 @@
 import os
-import yaml
+from observer.parser import parse_tests
 import argparse
 from json import loads
 from observer.runner import step, close_driver, terminate_runner, wait_for_agent
 from junit_xml import TestSuite, TestCase
+
+from observer.scenario_executor import execute_scenario
 
 
 def str2json(v):
@@ -13,15 +15,21 @@ def str2json(v):
         raise argparse.ArgumentTypeError('Json is not properly formatted.')
 
 
-def parse_args():
+def create_parser():
     parser = argparse.ArgumentParser(description="UI performance benchmarking for CI")
     parser.add_argument("-s", '--step', action="append", type=str2json)
     parser.add_argument("-fp", '--firstPaint', type=int, default=0)
     parser.add_argument("-si", '--speedIndex', type=int, default=0)
     parser.add_argument("-y", "--yaml", type=str, default="")
+    parser.add_argument("-f", "--file", type=str, default="")
+    parser.add_argument("-l", "--local", type=str, default="")
     parser.add_argument("-tl", '--totalLoad', type=int, default=0)
     parser.add_argument("-r", '--report', action="append", type=str, default=['xml'])
-    args, _ = parser.parse_known_args()
+    return parser
+
+
+def parse_args():
+    args, _ = create_parser().parse_known_args()
     return args
 
 
@@ -44,13 +52,14 @@ def process_report(report, config):
         TestSuite.to_file(f, [ts], prettyprint=True)
 
 
-def main():
-    args = parse_args()
+def main(args):
     results = []
-    wait_for_agent()
-    if args.yaml and os.path.exists(args.yaml):
-        with open(args.yaml) as f:
-            steps = list(yaml.load(f.read()).values())
+    if args.local:
+        wait_for_agent()
+    if args.file and os.path.exists(args.file):
+        scenario = parse_tests(args.file)
+        execute_scenario(scenario)
+
     else:
         steps = args.step
     for st in steps:
@@ -59,29 +68,29 @@ def main():
         report = step(st)
         if not report:
             continue
-        if st.get('html'):
+        if 'html' in args.report:
             results.append({'html_report': report.get_report(), 'title': report.title})
         if args.firstPaint > 0:
             message = ''
             if args.firstPaint < report.timing['firstPaint']:
                 message = f"First paint exceeded threshold of {args.firstPaint}ms by " \
-                          f"{report.timing['firstPaint']-args.firstPaint} ms"
+                          f"{report.timing['firstPaint'] - args.firstPaint} ms"
             results.append({"name": f"First Paint {report.title}",
                             "actual": report.timing['firstPaint'], "expected": args.firstPaint, "message": message})
         if args.speedIndex > 0:
             message = ''
             if args.speedIndex < report.timing['speedIndex']:
                 message = f"Speed index exceeded threshold of {args.speedIndex}ms by " \
-                          f"{report.timing['speedIndex']-args.speedIndex} ms"
-            results.append({"name": f"Speed Index {report.title}",  "actual": report.timing['speedIndex'],
+                          f"{report.timing['speedIndex'] - args.speedIndex} ms"
+            results.append({"name": f"Speed Index {report.title}", "actual": report.timing['speedIndex'],
                             "expected": args.speedIndex, "message": message})
         if args.totalLoad > 0:
-            totalLoad = report.performance_timing['loadEventEnd']-report.performance_timing['navigationStart']
+            totalLoad = report.performance_timing['loadEventEnd'] - report.performance_timing['navigationStart']
             message = ''
             if args.totalLoad < totalLoad:
                 message = f"Total Load exceeded threshold of {args.totalLoad}ms by " \
-                          f"{totalLoad-args.speedIndex} ms"
-            results.append({"name": f"Total Load {report.title}",  "actual": totalLoad,
+                          f"{totalLoad - args.speedIndex} ms"
+            results.append({"name": f"Total Load {report.title}", "actual": totalLoad,
                             "expected": args.totalLoad, "message": message})
     process_report(results, args.report)
     close_driver()
@@ -89,4 +98,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = parse_args()
+    main(args)

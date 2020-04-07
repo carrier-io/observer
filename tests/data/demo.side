@@ -1,0 +1,213 @@
+{
+  "id": "aab4c45e-c171-4277-9fc0-05c70b79d43a",
+  "version": "2.0",
+  "name": "demo",
+  "url": "http://localhost:8087",
+  "tests": [{
+    "id": "af6289f6-aab7-4389-b6fe-46de06a477e4",
+    "name": "Login",
+    "commands": [{
+      "id": "dc2c40fc-ee2e-4a8c-8d39-93a4e9e4410c",
+      "comment": "",
+      "command": "open",
+      "target": "/login",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "47b0efeb-dfce-4347-86e2-64b6d61a9c24",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1657x993",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "a209d078-9f1e-4a59-b202-8b417be61a37",
+      "comment": "",
+      "command": "click",
+      "target": "css=.form-group:nth-child(1)",
+      "targets": [
+        ["css=.form-group:nth-child(1)", "css:finder"],
+        ["xpath=//form/div", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "dabcdf47-c137-4d52-922c-8cd502357af3",
+      "comment": "",
+      "command": "click",
+      "target": "id=usernameOrEmail",
+      "targets": [
+        ["id=usernameOrEmail", "id"],
+        ["css=#usernameOrEmail", "css:finder"],
+        ["xpath=//input[@id='usernameOrEmail']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "77b8a844-2c3d-4915-a243-330f6945e98b",
+      "comment": "",
+      "command": "type",
+      "target": "id=usernameOrEmail",
+      "targets": [
+        ["id=usernameOrEmail", "id"],
+        ["css=#usernameOrEmail", "css:finder"],
+        ["xpath=//input[@id='usernameOrEmail']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "admin"
+    }, {
+      "id": "cc4d82a2-498e-4953-a0e5-1bb3813e8fa8",
+      "comment": "",
+      "command": "type",
+      "target": "id=password",
+      "targets": [
+        ["id=password", "id"],
+        ["css=#password", "css:finder"],
+        ["xpath=//input[@id='password']", "xpath:attributes"],
+        ["xpath=//div[2]/input", "xpath:position"]
+      ],
+      "value": "demo123"
+    }, {
+      "id": "ebe3f5b1-2254-4fd6-ae1a-a1f5165b22eb",
+      "comment": "",
+      "command": "click",
+      "target": "css=body > app-root > app-layout > div > app-login > div > div > form > div:nth-child(3) > button",
+      "targets": [
+      ],
+      "value": ""
+    }, {
+      "id": "cfd05aa1-b92f-4804-afa0-d928d2fa5cf6",
+      "comment": "",
+      "command": "assertText",
+      "target": "css=.custom:nth-child(2)",
+      "targets": [
+        ["css=.custom:nth-child(2)", "css:finder"],
+        ["xpath=(//button[@type='button'])[5]", "xpath:attributes"],
+        ["xpath=//div[@id='navbarTogglerDemo01']/button", "xpath:idRelative"],
+        ["xpath=//div/button", "xpath:position"],
+        ["xpath=//button[contains(.,'Logout')]", "xpath:innerText"]
+      ],
+      "value": "Logout"
+    }]
+  }, {
+    "id": "97b25d40-7620-422f-9f10-116199882cea",
+    "name": "Create episode",
+    "commands": [{
+      "id": "4093689a-8351-4bcd-be02-f9bfc8db986e",
+      "comment": "",
+      "command": "open",
+      "target": "/login",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "e3b2a42c-5762-428f-9d3a-6b75697027d1",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1657x993",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "c9876b01-e8b3-46c5-bd9b-37259ff9b128",
+      "comment": "",
+      "command": "click",
+      "target": "css=.form-group:nth-child(1)",
+      "targets": [
+        ["css=.form-group:nth-child(1)", "css:finder"],
+        ["xpath=//form/div", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "310ace71-4235-4486-88dc-040baf5baf89",
+      "comment": "",
+      "command": "click",
+      "target": "id=usernameOrEmail",
+      "targets": [
+        ["id=usernameOrEmail", "id"],
+        ["css=#usernameOrEmail", "css:finder"],
+        ["xpath=//input[@id='usernameOrEmail']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "1365347e-1b59-4db4-ac04-35f1a4733ab8",
+      "comment": "",
+      "command": "type",
+      "target": "id=usernameOrEmail",
+      "targets": [
+        ["id=usernameOrEmail", "id"],
+        ["css=#usernameOrEmail", "css:finder"],
+        ["xpath=//input[@id='usernameOrEmail']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "admin"
+    }, {
+      "id": "d57a92ba-f000-4622-b058-3186d2e06154",
+      "comment": "",
+      "command": "type",
+      "target": "id=password",
+      "targets": [
+        ["id=password", "id"],
+        ["css=#password", "css:finder"],
+        ["xpath=//input[@id='password']", "xpath:attributes"],
+        ["xpath=//div[2]/input", "xpath:position"]
+      ],
+      "value": "demo123"
+    }, {
+      "id": "ebe3f5b1-2254-4fd6-ae1a-a1f5165b22eb",
+      "comment": "",
+      "command": "click",
+      "target": "css=body > app-root > app-layout > div > app-login > div > div > form > div:nth-child(3) > button",
+      "targets": [
+      ],
+      "value": ""
+    }, {
+      "id": "e7e9aec8-8876-4ee2-bebf-6682902ad478",
+      "comment": "",
+      "command": "click",
+      "target": "id=episodeName",
+      "targets": [
+        ["id=episodeName", "id"],
+        ["name=name", "name"],
+        ["css=#episodeName", "css:finder"],
+        ["xpath=//input[@id='episodeName']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "86c2e5e6-7fe1-49c9-9f84-9645ef61745c",
+      "comment": "",
+      "command": "type",
+      "target": "id=episodeName",
+      "targets": [
+        ["id=episodeName", "id"],
+        ["name=name", "name"],
+        ["css=#episodeName", "css:finder"],
+        ["xpath=//input[@id='episodeName']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "Test1"
+    }, {
+      "id": "0c8f9b5f-e08a-45ab-befe-8c1bf9caa23a",
+      "comment": "",
+      "command": "click",
+      "target": "css=body > app-root > app-layout > div > app-episode-list > div > div > form > div > div.col-4 > button",
+      "targets": [
+        ["id=episodeName", "id"],
+        ["name=name", "name"],
+        ["css=#episodeName", "css:finder"],
+        ["xpath=//input[@id='episodeName']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "713a84a0-8023-472b-9e94-99cfef0f212b",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["af6289f6-aab7-4389-b6fe-46de06a477e4"]
+  }],
+  "urls": ["http://localhost:8087/"],
+  "plugins": []
+}

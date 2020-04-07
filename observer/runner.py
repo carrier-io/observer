@@ -3,7 +3,6 @@ from os import environ, path
 from time import sleep
 from selenium import webdriver, common
 from time import time
-from traceback import format_exc
 from selene.support.shared import browser
 from selene import by
 from requests import get
@@ -12,6 +11,7 @@ from shutil import rmtree
 from observer.processors.results_processor import resultsProcessor
 
 driver = None
+
 
 def get_driver():
     remote_driver_address = environ.get("remote", "127.0.0.1:4444")
@@ -24,6 +24,10 @@ def get_driver():
             desired_capabilities=chrome_options.to_capabilities())
     browser.set_driver(driver)
     return driver
+
+
+
+
 
 
 def execute_step(step_definition):
@@ -80,4 +84,3 @@ def wait_for_agent():
                 break
         except:
             pass
-
