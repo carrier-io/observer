@@ -1,3 +1,5 @@
+from time import sleep
+
 from selene import have
 
 from observer.driver_manager import get_driver
@@ -11,7 +13,12 @@ def get_locator_strategy(locator):
 
 
 def open(url, value):
-    get_driver().open_url(url)
+    driver = get_driver()
+    driver.open_url(url)
+    for _ in range(1200):
+        if driver.execute_script('return document.readyState === "complete" && performance.timing.loadEventEnd > 0'):
+            break
+        sleep(0.1)
 
 
 def setWindowSize(size, value):
