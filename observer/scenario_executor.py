@@ -1,32 +1,32 @@
+import tempfile
 from os import path
 from shutil import rmtree
+from time import time
+from unittest import TestSuite, TestCase
 
+from requests import get
 from selene.support.shared import browser, SharedConfig
 from selenium.common.exceptions import WebDriverException
-from time import time
+
 from observer.actions import browser_actions
-from observer.app import process_report
 from observer.constants import check_ui_performance, listener_address
 from observer.driver_manager import get_driver
-from requests import get
-import tempfile
-
 from observer.processors.results_processor import resultsProcessor
 from observer.runner import close_driver, terminate_runner
 
 load_event_end = 0
 
 
-def execute_scenario(scenario):
-    urls = scenario['urls']
+def execute_scenario(scenario, args):
+    url = scenario['url']
     config = SharedConfig()
-    config.base_url = urls[0]
+    config.base_url = url
     browser._config = config
     for test in scenario['tests']:
-        _execute_test(test)
+        _execute_test(test, args)
 
 
-def _execute_test(test):
+def _execute_test(test, args):
     print(f"'\nExecuting test: {test['name']}")
     for command in test['commands']:
         print(command)
@@ -139,3 +139,21 @@ command_type = {
     "sendKeys": browser_actions.type,
     "assertText": browser_actions.assert_text
 }
+
+def process_report(report, config):
+    test_cases = []
+    html_report = 0
+    for record in report:
+        if 'xml' in config and 'html_report' not in record.keys():
+            test_cases.append(TestCase(record['name'], record.get('class_name', 'observer'),
+                                       record['actual'], '', ''))
+            if record['message']:
+                test_cases[-1].add_failure_info(record['message'])
+        elif 'html' in config and 'html_report' in record.keys():
+            with open(f'/tmp/reports/{record["title"]}_{html_report}.html', 'w') as f:
+                f.write(record['html_report'])
+            html_report += 1
+
+    ts = TestSuite("Observer UI Benchmarking Test ", test_cases)
+    with open("/tmp/reports/report.xml", 'w') as f:
+        TestSuite.to_file(f, [ts], prettyprint=True)

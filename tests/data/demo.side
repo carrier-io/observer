@@ -2,7 +2,7 @@
   "id": "aab4c45e-c171-4277-9fc0-05c70b79d43a",
   "version": "2.0",
   "name": "demo",
-  "url": "http://localhost:8087",
+  "url": "http://138.68.225.28/",
   "tests": [{
     "id": "af6289f6-aab7-4389-b6fe-46de06a477e4",
     "name": "Login",

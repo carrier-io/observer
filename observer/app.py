@@ -58,43 +58,43 @@ def main(args):
         wait_for_agent()
     if args.file and os.path.exists(args.file):
         scenario = parse_tests(args.file)
-        execute_scenario(scenario)
+        execute_scenario(scenario, args)
 
-    else:
-        steps = args.step
-    for st in steps:
-        if 'html' in args.report:
-            st['html'] = True
-        report = step(st)
-        if not report:
-            continue
-        if 'html' in args.report:
-            results.append({'html_report': report.get_report(), 'title': report.title})
-        if args.firstPaint > 0:
-            message = ''
-            if args.firstPaint < report.timing['firstPaint']:
-                message = f"First paint exceeded threshold of {args.firstPaint}ms by " \
-                          f"{report.timing['firstPaint'] - args.firstPaint} ms"
-            results.append({"name": f"First Paint {report.title}",
-                            "actual": report.timing['firstPaint'], "expected": args.firstPaint, "message": message})
-        if args.speedIndex > 0:
-            message = ''
-            if args.speedIndex < report.timing['speedIndex']:
-                message = f"Speed index exceeded threshold of {args.speedIndex}ms by " \
-                          f"{report.timing['speedIndex'] - args.speedIndex} ms"
-            results.append({"name": f"Speed Index {report.title}", "actual": report.timing['speedIndex'],
-                            "expected": args.speedIndex, "message": message})
-        if args.totalLoad > 0:
-            totalLoad = report.performance_timing['loadEventEnd'] - report.performance_timing['navigationStart']
-            message = ''
-            if args.totalLoad < totalLoad:
-                message = f"Total Load exceeded threshold of {args.totalLoad}ms by " \
-                          f"{totalLoad - args.speedIndex} ms"
-            results.append({"name": f"Total Load {report.title}", "actual": totalLoad,
-                            "expected": args.totalLoad, "message": message})
-    process_report(results, args.report)
-    close_driver()
-    terminate_runner()
+    # else:
+    #     steps = args.step
+    # for st in steps:
+    #     if 'html' in args.report:
+    #         st['html'] = True
+    #     report = step(st)
+    #     if not report:
+    #         continue
+    #     if 'html' in args.report:
+    #         results.append({'html_report': report.get_report(), 'title': report.title})
+    #     if args.firstPaint > 0:
+    #         message = ''
+    #         if args.firstPaint < report.timing['firstPaint']:
+    #             message = f"First paint exceeded threshold of {args.firstPaint}ms by " \
+    #                       f"{report.timing['firstPaint'] - args.firstPaint} ms"
+    #         results.append({"name": f"First Paint {report.title}",
+    #                         "actual": report.timing['firstPaint'], "expected": args.firstPaint, "message": message})
+    #     if args.speedIndex > 0:
+    #         message = ''
+    #         if args.speedIndex < report.timing['speedIndex']:
+    #             message = f"Speed index exceeded threshold of {args.speedIndex}ms by " \
+    #                       f"{report.timing['speedIndex'] - args.speedIndex} ms"
+    #         results.append({"name": f"Speed Index {report.title}", "actual": report.timing['speedIndex'],
+    #                         "expected": args.speedIndex, "message": message})
+    #     if args.totalLoad > 0:
+    #         totalLoad = report.performance_timing['loadEventEnd'] - report.performance_timing['navigationStart']
+    #         message = ''
+    #         if args.totalLoad < totalLoad:
+    #             message = f"Total Load exceeded threshold of {args.totalLoad}ms by " \
+    #                       f"{totalLoad - args.speedIndex} ms"
+    #         results.append({"name": f"Total Load {report.title}", "actual": totalLoad,
+    #                         "expected": args.totalLoad, "message": message})
+    # process_report(results, args.report)
+    # close_driver()
+    # terminate_runner()
 
 
 if __name__ == "__main__":
