@@ -2,14 +2,14 @@ version: '3'
 services:
   observer:
     depends_on: [chrome]
-    image: getcarrier/observer:latest
+    image: spirogov/ffmpeg:0.0.9
     environment:
       - remote=chrome:4444
       - listener=chrome:9999
       - ffmpeg_path=ffmpeg
     volumes:
       - /tmp/reports:/tmp/reports
-      - /home/sergey/Github/observer/tests/data/:/tmp/scenarios
+      - ${PWD}/tests/data/:/tmp/scenarios
     command: '-f /tmp/scenarios/real-world.side -fp 100 -si 400 -tl 500 -r xml -r html'
   chrome:
     image: getcarrier/observer-chrome:latest
