@@ -97,8 +97,8 @@ def _execute_command(command):
     if results:
         report = resultsProcessor(video_path, results, video_folder, True, True)
 
-    # if video_folder:
-    #     rmtree(video_folder)
+    if video_folder:
+        rmtree(video_folder)
 
     return report
 
