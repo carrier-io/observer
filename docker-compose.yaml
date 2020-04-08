@@ -2,7 +2,7 @@ version: '3'
 services:
   observer:
     depends_on: [chrome]
-    image: spirogov/ffmpeg:0.0.9
+    image: getcarrier/observer:latest
     environment:
       - remote=chrome:4444
       - listener=chrome:9999
