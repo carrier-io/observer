@@ -26,7 +26,7 @@ def execute_scenario(scenario, args):
         _execute_test(test, args)
 
     close_driver()
-    if not args.local:
+    if not args.video:
         terminate_runner()
 
 
@@ -69,7 +69,7 @@ def _execute_test(test, args):
 
 
 def is_video_enabled(args):
-    return "html" in args.report and not args.local
+    return "html" in args.report and args.video
 
 
 def _execute_command(command, enable_video=True):

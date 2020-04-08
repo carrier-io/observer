@@ -22,7 +22,6 @@ def create_parser():
     parser.add_argument("-si", '--speedIndex', type=int, default=0)
     parser.add_argument("-y", "--yaml", type=str, default="")
     parser.add_argument("-f", "--file", type=str, default="")
-    parser.add_argument("-l", "--local", type=bool, default=False)
     parser.add_argument("-tl", '--totalLoad', type=int, default=0)
     parser.add_argument("-v", '--video', type=bool, default=True)
     parser.add_argument("-r", '--report', action="append", type=str, default=['xml'])
@@ -54,7 +53,7 @@ def process_report(report, config):
 
 
 def main(args):
-    if not args.local:
+    if not args.video:
         wait_for_agent()
     if args.file and os.path.exists(args.file):
         scenario = parse_tests(args.file)
