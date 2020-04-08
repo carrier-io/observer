@@ -11,6 +11,7 @@ def get_driver():
     remote_driver_address = environ.get("remote", "127.0.0.1:4444")
     if not driver:
         chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--window-size=1360,1020')
         driver = webdriver.Remote(
             command_executor=f'http://{remote_driver_address}/wd/hub',
             desired_capabilities=chrome_options.to_capabilities())

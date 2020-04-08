@@ -52,7 +52,12 @@ def process_report(report, config):
         TestSuite.to_file(f, [ts], prettyprint=True)
 
 
-def main(args):
+def main():
+    args = parse_args()
+    execute(args)
+
+
+def execute(args):
     if not args.video:
         wait_for_agent()
     if args.file and os.path.exists(args.file):
@@ -61,5 +66,5 @@ def main(args):
 
 
 if __name__ == "__main__":
-    args = parse_args()
-    main(args)
+    print("Starting analysis...")
+    main()

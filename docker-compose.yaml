@@ -6,9 +6,11 @@ services:
     environment:
       - remote=chrome:4444
       - listener=chrome:9999
+      - ffmpeg_path=ffmpeg
     volumes:
-      -  /tmp/reports:/tmp/reports
-    command: '-s "{\"url\": \"https://www.google.com\", \"el\": \"//img[@tag=\\\"Google\\\"]\"}" -s "{\"url\": \"https://www.youtube.com\"}" -fp 100 -si 400 -tl 500 -r xml -r html'
+      - /tmp/reports:/tmp/reports
+      - /home/sergey/Github/observer/tests/data/:/tmp/scenarios
+    command: '-f /tmp/scenarios/real-world.side -fp 100 -si 400 -tl 500 -r xml -r html'
   chrome:
     image: getcarrier/observer-chrome:latest
     healthcheck:
@@ -18,5 +20,5 @@ services:
       retries: 3
     container_name: chrome
     ports:
-      - 4445:4444
+      - 4444:4444
       - 9999:9999
