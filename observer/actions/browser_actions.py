@@ -1,6 +1,6 @@
 from time import sleep
 
-from selene import have
+from selene import have, by
 
 from observer.driver_manager import get_driver
 
@@ -10,6 +10,8 @@ def get_locator_strategy(locator):
         return locator.replace("css=", "")
     elif "id=" in locator:
         return locator.replace("id=", "#")
+    elif "linkText=" in locator:
+        return by.link_text(locator.replace("linkText=", ""))
 
 
 def open(url, value):

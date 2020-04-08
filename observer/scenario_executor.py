@@ -2,7 +2,7 @@ import tempfile
 from os import path
 from shutil import rmtree
 from time import time
-from unittest import TestSuite, TestCase
+from junit_xml import TestSuite, TestCase
 
 from requests import get
 from selene.support.shared import browser, SharedConfig
@@ -24,6 +24,9 @@ def execute_scenario(scenario, args):
     browser._config = config
     for test in scenario['tests']:
         _execute_test(test, args)
+
+    close_driver()
+    terminate_runner()
 
 
 def _execute_test(test, args):
@@ -62,8 +65,6 @@ def _execute_test(test, args):
             results.append({"name": f"Total Load {report.title}", "actual": totalLoad,
                             "expected": args.totalLoad, "message": message})
         process_report(results, args.report)
-        close_driver()
-        terminate_runner()
 
 
 def _execute_command(command):
@@ -88,6 +89,7 @@ def _execute_command(command):
 
     except WebDriverException as e:
         print(e)
+        return None
     finally:
         video_folder, video_path = stop_recording()
 
@@ -95,8 +97,8 @@ def _execute_command(command):
     if results:
         report = resultsProcessor(video_path, results, video_folder, True, True)
 
-    if video_folder:
-        rmtree(video_folder)
+    # if video_folder:
+    #     rmtree(video_folder)
 
     return report
 
@@ -139,6 +141,7 @@ command_type = {
     "sendKeys": browser_actions.type,
     "assertText": browser_actions.assert_text
 }
+
 
 def process_report(report, config):
     test_cases = []

@@ -6,5 +6,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def test_main():
-    args = create_parser().parse_args(["--file", f"{ROOT_DIR}/data/demo.side", "--local", ""])
+    os.environ.setdefault("ffmpg_path", "ffmpeg")  # for local debug only
+
+    args = create_parser().parse_args(["--file", f"{ROOT_DIR}/data/real-world.side", "--local", "", "-r", "html"])
     main(args)
