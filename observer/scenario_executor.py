@@ -26,7 +26,8 @@ def execute_scenario(scenario, args):
         _execute_test(test, args)
 
     close_driver()
-    terminate_runner()
+    if not args.local:
+        terminate_runner()
 
 
 def _execute_test(test, args):
@@ -35,7 +36,7 @@ def _execute_test(test, args):
         print(command)
         results = []
 
-        report = _execute_command(command)
+        report = _execute_command(command, is_video_enabled(args))
 
         if not report:
             continue
@@ -67,7 +68,11 @@ def _execute_test(test, args):
         process_report(results, args.report)
 
 
-def _execute_command(command):
+def is_video_enabled(args):
+    return "html" in args.report and not args.local
+
+
+def _execute_command(command, enable_video=True):
     global load_event_end
     results = None
 
@@ -77,7 +82,8 @@ def _execute_command(command):
     c = command_type[cmd]
 
     start_time = time()
-    start_recording()
+    if enable_video:
+        start_recording()
     current_time = time() - start_time
     try:
         c(target, value)
@@ -91,7 +97,10 @@ def _execute_command(command):
         print(e)
         return None
     finally:
-        video_folder, video_path = stop_recording()
+        video_folder = None
+        video_path = None
+        if enable_video:
+            video_folder, video_path = stop_recording()
 
     report = None
     if results:
@@ -138,7 +147,7 @@ command_type = {
     "setWindowSize": browser_actions.setWindowSize,
     "click": browser_actions.click,
     "type": browser_actions.type,
-    "sendKeys": browser_actions.type,
+    "sendKeys": browser_actions.sendKeys,
     "assertText": browser_actions.assert_text
 }
 

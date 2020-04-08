@@ -1,6 +1,7 @@
 from time import sleep
 
 from selene import have, by
+from selenium.webdriver.common.keys import Keys
 
 from observer.driver_manager import get_driver
 
@@ -12,6 +13,12 @@ def get_locator_strategy(locator):
         return locator.replace("id=", "#")
     elif "linkText=" in locator:
         return by.link_text(locator.replace("linkText=", ""))
+
+
+def process_text(text):
+    if "${KEY_ENTER}" == text:
+        return Keys.ENTER
+    return text
 
 
 def open(url, value):
@@ -37,6 +44,11 @@ def click(locator, value):
 def type(locator, text):
     css_or_xpath = get_locator_strategy(locator)
     get_driver().s(css_or_xpath).set_value(text)
+
+
+def sendKeys(locator, text):
+    css_or_xpath = get_locator_strategy(locator)
+    get_driver().s(css_or_xpath).send_keys(process_text(text))
 
 
 def assert_text(locator, text):
