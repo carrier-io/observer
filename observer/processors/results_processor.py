@@ -5,7 +5,7 @@ from subprocess import Popen, PIPE
 from multiprocessing import Pool
 
 
-ffmpeg_path = environ.get("ffmpg_path", "/opt/ffmpeg/bin/ffmpeg")
+ffmpeg_path = environ.get("ffmpeg_path", "ffmpeg")
 report_path = '/tmp'
 
 

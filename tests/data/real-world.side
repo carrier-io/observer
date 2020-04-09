@@ -1,0 +1,104 @@
+{
+  "id": "a455b475-023f-4202-90dd-06c3f9500f74",
+  "version": "2.0",
+  "name": "real-world",
+  "url": "https://angular.realworld.io",
+  "tests": [{
+    "id": "a3299c3f-4341-443a-a41f-d0d8ba0230a1",
+    "name": "IncorectLogin",
+    "commands": [{
+      "id": "5268a76b-dbe0-46f7-947b-c0a696155937",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "cdb01326-e7b4-4133-ac3c-c50b42b1998c",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1360x1020",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "0f1b1c75-bd93-4e1f-b60b-0ed4c4901cd6",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Sign in",
+      "targets": [
+        ["linkText=Sign in", "linkText"],
+        ["css=.navbar-nav > .nav-item:nth-child(2) > .nav-link", "css:finder"],
+        ["xpath=//a[contains(text(),'Sign in')]", "xpath:link"],
+        ["xpath=//a[contains(@href, '/login')]", "xpath:href"],
+        ["xpath=//li[2]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Sign in')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "eb41400d-1e84-42a1-91c2-df5e22279e63",
+      "comment": "",
+      "command": "click",
+      "target": "css=.form-group:nth-child(2) > .form-control",
+      "targets": [
+        ["css=.form-group:nth-child(2) > .form-control", "css:finder"],
+        ["xpath=//input[@type='text']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "0393fc80-8a0a-400b-a29f-70ee07e5f86a",
+      "comment": "",
+      "command": "type",
+      "target": "css=body > app-root > app-auth-page > div > div > div > div > form > fieldset > fieldset:nth-child(2) > input",
+      "targets": [
+        ["css=.ng-valid", "css:finder"],
+        ["xpath=//input[@type='text']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "admin"
+    }, {
+      "id": "47fe94d2-106d-4f13-ad7a-5ce712b71288",
+      "comment": "",
+      "command": "type",
+      "target": "css=body > app-root > app-auth-page > div > div > div > div > form > fieldset > fieldset:nth-child(3) > input",
+      "targets": [
+        ["css=.ng-untouched", "css:finder"],
+        ["xpath=//input[@type='password']", "xpath:attributes"],
+        ["xpath=//fieldset[3]/input", "xpath:position"]
+      ],
+      "value": "admin"
+    }, {
+      "id": "c9722401-0846-49fb-bf77-c6094ac7b393",
+      "comment": "",
+      "command": "sendKeys",
+      "target": "css=body > app-root > app-auth-page > div > div > div > div > form > fieldset > fieldset:nth-child(3) > input",
+      "targets": [
+        ["css=.ng-untouched", "css:finder"],
+        ["xpath=//input[@type='password']", "xpath:attributes"],
+        ["xpath=//fieldset[3]/input", "xpath:position"]
+      ],
+      "value": "${KEY_ENTER}"
+    }, {
+      "id": "8829ec2d-40b1-4cea-bdf6-b3871c54b3a6",
+      "comment": "",
+      "command": "assertText",
+      "target": "css=.error-messages > li",
+      "targets": [
+        ["css=.error-messages > li", "css:finder"],
+        ["xpath=//app-list-errors/ul/li", "xpath:position"],
+        ["xpath=//li[contains(.,'email or password is invalid')]", "xpath:innerText"]
+      ],
+      "value": "email or password is invalid"
+    }]
+  }],
+  "suites": [{
+    "id": "c6760a44-d9e3-4f60-b2f0-c1b4519caed1",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["a3299c3f-4341-443a-a41f-d0d8ba0230a1"]
+  }],
+  "urls": ["https://angular.realworld.io/"],
+  "plugins": []
+}

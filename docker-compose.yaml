@@ -1,14 +1,16 @@
 version: '3'
 services:
   observer:
-    depends_on: chrome
+    depends_on: [chrome]
     image: getcarrier/observer:latest
     environment:
       - remote=chrome:4444
       - listener=chrome:9999
+      - ffmpeg_path=ffmpeg
     volumes:
-      -  /tmp/reports:/tmp/reports
-    command: '-s "{\"url\": \"https://www.google.com\", \"el\": \"//img[@tag=\\\"Google\\\"]\"}" -s "{\"url\": \"https://www.youtube.com\"}" -fp 100 -si 400 -tl 500 -r xml -r html'
+      - /tmp/reports:/tmp/reports
+      - ${PWD}/tests/data/:/tmp/scenarios
+    command: '-f /tmp/scenarios/real-world.side -fp 100 -si 400 -tl 500 -r xml -r html'
   chrome:
     image: getcarrier/observer-chrome:latest
     healthcheck:
@@ -17,3 +19,6 @@ services:
       timeout: 10s
       retries: 3
     container_name: chrome
+    ports:
+      - 4444:4444
+      - 9999:9999
