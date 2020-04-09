@@ -26,10 +26,6 @@ def get_driver():
     return driver
 
 
-
-
-
-
 def execute_step(step_definition):
     driver = get_driver()
     browser.open(step_definition['url'])

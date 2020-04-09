@@ -1,6 +1,6 @@
 import os
 
-from observer.parser import parse_tests
+from observer.app import parse_tests
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 

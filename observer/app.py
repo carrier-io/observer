@@ -1,5 +1,5 @@
+import json
 import os
-from observer.parser import parse_tests
 import argparse
 from json import loads
 from observer.runner import wait_for_agent
@@ -50,6 +50,11 @@ def process_report(report, config):
     ts = TestSuite("Observer UI Benchmarking Test ", test_cases)
     with open("/tmp/reports/report.xml", 'w') as f:
         TestSuite.to_file(f, [ts], prettyprint=True)
+
+
+def parse_tests(data_path):
+    with open(data_path) as data:
+        return json.load(data)
 
 
 def main():
