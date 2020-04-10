@@ -7,6 +7,10 @@ def parse_json_file(path):
         return json.load(data)
 
 
+def _pairwise(iterable):
+    return zip(iterable, iterable[1:])
+
+
 def str2json(v):
     try:
         return json.loads(v)
