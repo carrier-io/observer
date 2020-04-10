@@ -1,6 +1,6 @@
 from time import sleep
 
-from selene import have, by
+from selene import have, by, be
 from selenium.webdriver.common.keys import Keys
 
 from observer.driver_manager import get_driver
@@ -54,3 +54,7 @@ def sendKeys(locator, text):
 def assert_text(locator, text):
     css_or_xpath = get_locator_strategy(locator)
     get_driver().s(css_or_xpath).should_have(have.exact_text(text))
+
+
+def wait_for_visibility(locator):
+    get_driver().s(locator).wait_until(be.visible)

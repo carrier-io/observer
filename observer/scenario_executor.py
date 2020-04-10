@@ -30,13 +30,17 @@ def execute_scenario(scenario, args):
         terminate_runner()
 
 
+def _pairwise(iterable):
+    return zip(iterable, iterable[1:])
+
+
 def _execute_test(test, args):
     print(f"'\nExecuting test: {test['name']}")
-    for command in test['commands']:
-        print(command)
+    for current_command, next_command in _pairwise(test['commands']):
+        print(current_command)
         results = []
 
-        report = _execute_command(command, is_video_enabled(args))
+        report = _execute_command(current_command, next_command, is_video_enabled(args))
 
         if not report:
             continue
@@ -72,38 +76,48 @@ def is_video_enabled(args):
     return "html" in args.report and args.video
 
 
-def _execute_command(command, enable_video=True):
+def _execute_command(current_command, next_command, enable_video=True):
     global load_event_end
     results = None
 
-    cmd = command['command']
-    target = command['target']
-    value = command['value']
-    c = command_type[cmd]
+    current_cmd = current_command['command']
+    current_target = current_command['target']
+    current_value = current_command['value']
+    current_cmd, current_is_actionable = command_type[current_cmd]
+
+    next_cmd = next_command['command']
+    next_cmd, next_is_actionable = command_type[next_cmd]
 
     start_time = time()
-    if enable_video:
+    if enable_video and current_is_actionable:
         start_recording()
     current_time = time() - start_time
     try:
-        c(target, value)
+        current_cmd(current_target, current_value)
 
-        if is_navigation_happened():
+        if next_is_actionable:
+            pass
+
+        if is_navigation_happened() and next_is_actionable:
+            browser_actions.wait_for_visibility(next_command['target'])
+
             load_event_end = get_performance_timing()['loadEventEnd']
             results = get_performance_metrics()
             results['info']['testStart'] = int(current_time)
-
     except WebDriverException as e:
         print(e)
         return None
     finally:
+        if not next_is_actionable:
+            return None
+
         video_folder = None
         video_path = None
-        if enable_video:
+        if enable_video and next_is_actionable:
             video_folder, video_path = stop_recording()
 
     report = None
-    if results:
+    if results and video_folder:
         report = resultsProcessor(video_path, results, video_folder, True, True)
 
     if video_folder:
@@ -142,13 +156,17 @@ def get_performance_metrics():
     return get_driver().execute_script(check_ui_performance)
 
 
+def command(func, actionable=True):
+    return func, actionable
+
+
 command_type = {
-    "open": browser_actions.open,
-    "setWindowSize": browser_actions.setWindowSize,
-    "click": browser_actions.click,
-    "type": browser_actions.type,
-    "sendKeys": browser_actions.sendKeys,
-    "assertText": browser_actions.assert_text
+    "open": command(browser_actions.open),
+    "setWindowSize": command(browser_actions.setWindowSize, actionable=False),
+    "click": command(browser_actions.click),
+    "type": command(browser_actions.type),
+    "sendKeys": command(browser_actions.sendKeys),
+    "assertText": command(browser_actions.assert_text)
 }
 
 
