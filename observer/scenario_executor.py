@@ -9,6 +9,7 @@ from selene.support.shared import browser, SharedConfig
 from selenium.common.exceptions import WebDriverException
 
 from observer.actions import browser_actions
+from observer.processors.time_series_processor import export_to_telegraph_json
 from observer.util import parse_json_file
 from observer.constants import check_ui_performance, listener_address
 from observer.driver_manager import get_driver
@@ -135,6 +136,7 @@ def _execute_command(current_command, next_command, test_data, enable_video=True
 
     report = None
     if results and video_folder:
+        export_to_telegraph_json(results)
         report = resultsProcessor(video_path, results, video_folder, True, True)
 
     if video_folder:

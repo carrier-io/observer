@@ -1,6 +1,7 @@
 from os import environ
 
 listener_address = environ.get("listener", "127.0.0.1:9999")
+exporters_path = environ.get("exporters_path", "/tmp/reports")
 
 check_ui_performance = '''return (function() {
 var metas=Array.prototype.slice.call(document.querySelectorAll('meta[name][content]'));
