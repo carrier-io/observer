@@ -5,7 +5,7 @@
   "url": "https://angular.realworld.io",
   "tests": [{
     "id": "a3299c3f-4341-443a-a41f-d0d8ba0230a1",
-    "name": "IncorectLogin",
+    "name": "IncorrectLogin",
     "commands": [{
       "id": "5268a76b-dbe0-46f7-947b-c0a696155937",
       "comment": "",
@@ -55,7 +55,7 @@
         ["xpath=//input[@type='text']", "xpath:attributes"],
         ["xpath=//input", "xpath:position"]
       ],
-      "value": "admin"
+      "value": "${username}"
     }, {
       "id": "47fe94d2-106d-4f13-ad7a-5ce712b71288",
       "comment": "",
@@ -66,7 +66,7 @@
         ["xpath=//input[@type='password']", "xpath:attributes"],
         ["xpath=//fieldset[3]/input", "xpath:position"]
       ],
-      "value": "admin"
+      "value": "${password}"
     }, {
       "id": "c9722401-0846-49fb-bf77-c6094ac7b393",
       "comment": "",

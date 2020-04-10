@@ -3,12 +3,13 @@ from os import path
 from shutil import rmtree
 from time import time
 from junit_xml import TestSuite, TestCase
-
+import re
 from requests import get
 from selene.support.shared import browser, SharedConfig
 from selenium.common.exceptions import WebDriverException
 
 from observer.actions import browser_actions
+from observer.util import parse_json_file
 from observer.constants import check_ui_performance, listener_address
 from observer.driver_manager import get_driver
 from observer.processors.results_processor import resultsProcessor
@@ -34,13 +35,28 @@ def _pairwise(iterable):
     return zip(iterable, iterable[1:])
 
 
+def get_test_data(test_name, args):
+    if not args.data:
+        return None
+
+    data = parse_json_file(args.data)
+    if test_name not in data:
+        return None
+
+    return data[test_name]
+
+
 def _execute_test(test, args):
-    print(f"'\nExecuting test: {test['name']}")
+    test_name = test['name']
+    print(f"\nExecuting test: {test_name}")
+
+    test_data = get_test_data(test_name, args)
+
     for current_command, next_command in _pairwise(test['commands']):
         print(current_command)
         results = []
 
-        report = _execute_command(current_command, next_command, is_video_enabled(args))
+        report = _execute_command(current_command, next_command, test_data, is_video_enabled(args))
 
         if not report:
             continue
@@ -76,13 +92,13 @@ def is_video_enabled(args):
     return "html" in args.report and args.video
 
 
-def _execute_command(current_command, next_command, enable_video=True):
+def _execute_command(current_command, next_command, test_data, enable_video=True):
     global load_event_end
     results = None
 
     current_cmd = current_command['command']
     current_target = current_command['target']
-    current_value = current_command['value']
+    current_value = process_test_data(current_command['value'], test_data)
     current_cmd, current_is_actionable = command_type[current_cmd]
 
     next_cmd = next_command['command']
@@ -93,6 +109,7 @@ def _execute_command(current_command, next_command, enable_video=True):
         start_recording()
     current_time = time() - start_time
     try:
+
         current_cmd(current_target, current_value)
 
         if next_is_actionable:
@@ -126,6 +143,20 @@ def _execute_command(current_command, next_command, enable_video=True):
     return report
 
 
+def process_test_data(current_value, test_data):
+    if not current_value:
+        return current_value
+
+    if not re.match(r'^\${[a-zA-Z0-9_.-]+}$', current_value):
+        return current_value
+
+    current_value = current_value.replace("${", "").replace("}", "")
+
+    if current_value not in test_data:
+        return current_value
+    return test_data[current_value]
+
+
 def start_recording():
     get(f'http://{listener_address}/record/start')
 
@@ -153,7 +184,7 @@ def get_performance_timing():
 
 
 def get_performance_metrics():
-    return get_driver().execute_script(check_ui_performance)
+    return get_driver().driver.execute_script(check_ui_performance)
 
 
 def command(func, actionable=True):
