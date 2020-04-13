@@ -1,8 +1,7 @@
 import os
-import time
 
 from observer.app import parse_json_file
-from observer.processors.time_series_processor import export_to_telegraph_json
+from observer.exporter import export_to_telegraph_json
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 

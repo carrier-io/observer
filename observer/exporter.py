@@ -1,0 +1,78 @@
+import abc
+import json
+import os
+import re
+import time
+from urllib.parse import urlparse
+
+from observer.constants import exporters_path
+import uuid
+
+
+class Exporter(object):
+
+    def __init__(self, raw_data):
+        self.raw_data = raw_data
+
+        resources = raw_data['performanceResources']
+        perf_timing = raw_data['performancetiming']
+        timing = raw_data['timing']
+
+        self.requests = self.count_request_number(resources)
+        self.domains = self.count_unique_domain_number(resources)
+        self.total_load_time = perf_timing['loadEventEnd'] - perf_timing['navigationStart']
+        self.speed_index = timing['speedIndex']
+        self.time_to_first_byte = perf_timing['responseStart'] - perf_timing['navigationStart']
+        self.time_to_first_paint = timing['firstPaint']
+        self.dom_content_loading = perf_timing['domContentLoadedEventStart'] - perf_timing['domLoading']
+        self.dom_processing = perf_timing['domComplete'] - perf_timing['domLoading']
+
+    def count_request_number(self, resources):
+        return list(filter(
+            lambda x: not re.match(r'/http[s]?:\/\/(micmro|nurun).github.io\/performance-bookmarklet\/.*/', x['name']),
+            resources))
+
+    def count_unique_domain_number(self, resources):
+        result = set()
+        for e in resources:
+            url = urlparse(e['name'])
+            result.add(url.netloc)
+        return result
+
+    @abc.abstractmethod
+    def export(self):
+        pass
+
+
+class TelegraphJsonExporter(Exporter):
+
+    def __init__(self, raw_data):
+        super().__init__(raw_data)
+
+    def export(self):
+        # https://github.com/influxdata/telegraf/tree/master/plugins/serializers/json
+
+        result = {
+            "fields": {
+                "requests": len(self.requests),
+                "domains": len(self.domains),
+                "total": self.total_load_time,
+                "speed_index": self.speed_index,
+                "time_to_first_byte": self.time_to_first_byte,
+                "time_to_first_paint": self.time_to_first_paint,
+                "dom_content_loading": self.dom_content_loading,
+                "dom_processing": self.dom_processing
+            },
+            "name": self.raw_data['info']['title'],
+            "tags": {},
+            "timestamp": time.time()
+        }
+        os.makedirs(exporters_path, exist_ok=True)
+        with open(os.path.join(exporters_path, f'{uuid.uuid1()}.json'), 'w') as outfile:
+            json.dump(result, outfile, indent=4)
+        return json.dumps(result)
+
+
+def export(data, args):
+    if "json" in args.export:
+        TelegraphJsonExporter(data).export()

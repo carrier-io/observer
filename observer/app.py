@@ -18,6 +18,7 @@ def create_parser():
     parser.add_argument("-tl", '--totalLoad', type=int, default=0)
     parser.add_argument("-v", '--video', type=bool, default=True)
     parser.add_argument("-r", '--report', action="append", type=str, default=['xml'])
+    parser.add_argument("-e", '--export', action="append", type=str, default=['json'])
     return parser
 
 

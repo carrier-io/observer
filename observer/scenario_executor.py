@@ -2,20 +2,20 @@ import tempfile
 from os import path
 from shutil import rmtree
 from time import time
+
 from junit_xml import TestSuite, TestCase
-import re
 from requests import get
 from selene.support.shared import browser, SharedConfig
 from selenium.common.exceptions import WebDriverException
 
 from observer.actions import browser_actions
-from observer.processors.test_data_processor import JsonFileDataProcessor, get_test_data_processor
-from observer.processors.time_series_processor import export_to_telegraph_json
-from observer.util import parse_json_file, _pairwise
 from observer.constants import check_ui_performance, listener_address
 from observer.driver_manager import get_driver
 from observer.processors.results_processor import resultsProcessor
+from observer.processors.test_data_processor import get_test_data_processor
+from observer.exporter import export
 from observer.runner import close_driver, terminate_runner
+from observer.util import _pairwise
 
 load_event_end = 0
 
@@ -41,12 +41,17 @@ def _execute_test(test, args):
 
     for current_command, next_command in _pairwise(test['commands']):
         print(current_command)
-        results = []
 
-        report = _execute_command(current_command, next_command, test_data_processor, is_video_enabled(args))
+        report, cmd_results = _execute_command(current_command, next_command, test_data_processor,
+                                               is_video_enabled(args))
 
         if not report:
             continue
+
+        if args.export:
+            export(cmd_results, args)
+
+        results = []
 
         if 'html' in args.report:
             results.append({'html_report': report.get_report(), 'title': report.title})
@@ -110,10 +115,10 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
             results['info']['testStart'] = int(current_time)
     except WebDriverException as e:
         print(e)
-        return None
+        return None, None
     finally:
         if not next_is_actionable:
-            return None
+            return None, None
 
         video_folder = None
         video_path = None
@@ -122,13 +127,12 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
 
     report = None
     if results and video_folder:
-        export_to_telegraph_json(results)
         report = resultsProcessor(video_path, results, video_folder, True, True)
 
     if video_folder:
         rmtree(video_folder)
 
-    return report
+    return report, results
 
 
 def start_recording():
