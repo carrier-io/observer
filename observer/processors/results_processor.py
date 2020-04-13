@@ -17,7 +17,7 @@ def trim_screenshot(kwargs):
     try:
         image_path = f'{path.join(kwargs["processing_path"], sanitize(kwargs["test_name"]), str(kwargs["ms"]))}_out.jpg'
         command = f'{ffmpeg_path} -ss {str(round(kwargs["ms"] / 1000, 3))} -i {kwargs["video_path"]} ' \
-            f'-vframes 1 {image_path}'
+                  f'-vframes 1 {image_path}'
         Popen(command, stderr=PIPE, shell=True, universal_newlines=True).communicate()
         with open(image_path, "rb") as image_file:
             return {kwargs["ms"]: base64.b64encode(image_file.read()).decode("utf-8")}
@@ -39,20 +39,31 @@ class resultsProcessor(object):
         self.perf_score, self.perf_data = self.performance_audit(request_params['performance'])
         self.priv_score, self.priv_data = self.privacy_audit(request_params['privacy'])
         self.test_result = 'fail'
-        self.total_score = (self.acc_score * 30 + self.priv_score * 50 + self.bp_score * 22 + self.perf_score * 44) / 146
+        self.total_score = (
+                                       self.acc_score * 30 + self.priv_score * 50 + self.bp_score * 22 + self.perf_score * 44) / 146
         if self.total_score > 90 and request_params['timing']['speedIndex'] < 1000:
             self.test_result = 'pass'
         elif self.total_score > 75 and request_params['timing']['speedIndex'] < 3000:
             self.test_result = 'warning'
         if generate_html:
-            self.report = self.generate_html(request_params['info']['title'], video_path, self.test_result,
-                                             request_params['info'].get('testStart', 0), self.perf_score,
-                                             self.priv_score,
-                                             self.acc_score, self.bp_score, self.acc_data, self.perf_data, self.bp_data,
-                                             self.priv_data, request_params['performanceResources'],
-                                             request_params['marks'], request_params['measures'],
-                                             request_params['performancetiming'], request_params['info'],
-                                             request_params['timing'])
+            self.report = self.generate_html(page_name=request_params['info']['title'],
+                                             video_path=video_path,
+                                             test_status=self.test_result,
+                                             start_time=request_params['info'].get('testStart', 0),
+                                             perf_score=self.perf_score,
+                                             priv_score=self.priv_score,
+                                             acc_score=self.acc_score,
+                                             bp_score=self.bp_score,
+                                             acc_findings=self.acc_data,
+                                             perf_findings=self.perf_data,
+                                             bp_findings=self.bp_data,
+                                             priv_findings=self.priv_data,
+                                             resource_timing=request_params['performanceResources'],
+                                             marks=request_params['marks'],
+                                             measures=request_params['measures'],
+                                             navigation_timing=request_params['performancetiming'],
+                                             info=request_params['info'],
+                                             timing=request_params['timing'])
 
     @staticmethod
     def privacy_audit(privacy_data):
@@ -116,9 +127,9 @@ class resultsProcessor(object):
                 'score': 0,
             })
 
-        score = (privacy_data['amp'][0]*8 + privacy_data['facebook'][0]*8 +
+        score = (privacy_data['amp'][0] * 8 + privacy_data['facebook'][0] * 8 +
                  privacy_data['ga'][0] * 8 + privacy_data['https'][0] * 10 + privacy_data['survilance'][0] * 10 +
-                 privacy_data['youtube'][0] * 6)/ 50
+                 privacy_data['youtube'][0] * 6) / 50
 
         return int(score), result
 
@@ -129,10 +140,10 @@ class resultsProcessor(object):
             advice = ''
             if accessibility_data['altImage'][2]:
                 advice = f"The page has {accessibility_data['altImage'][2]} images that lack alt attribute(s) " \
-                    f"and {len(list(accessibility_data['altImage'][1].keys()))} of them are unique."
+                         f"and {len(list(accessibility_data['altImage'][1].keys()))} of them are unique."
             if accessibility_data['altImage'][3]:
                 advice += f"<br />The page has {accessibility_data['altImage'][3]} images where the alt text are " \
-                    f"too long (longer than 125 characters)."
+                          f"too long (longer than 125 characters)."
             result.append({
                 'title': 'Always use an alt attribute on image tags',
                 'description': 'All img tags require an alt attribute. This goes without exception. '
@@ -168,7 +179,7 @@ class resultsProcessor(object):
                                'element to be present. '
                                'https://www.marcozehe.de/2015/12/14/the-web-accessibility-basics/',
                 'advice': f"There are {len(accessibility_data['labelOnInput'][1])} input(s) that are missing labels "
-                f"on a form.",
+                          f"on a form.",
                 'score': accessibility_data['labelOnInput'][0],
                 'details': accessibility_data['labelOnInput'][1]
             })
@@ -197,7 +208,7 @@ class resultsProcessor(object):
                 "title": 'Use headings tags within section tags to better structure your page',
                 "description": 'Section tags should have at least one heading element as a direct descendant.',
                 "advice": f"The page is missing heading(s) within a section tag on the page. "
-                f"It happens {accessibility_data['section'][1]} times.",
+                          f"It happens {accessibility_data['section'][1]} times.",
                 "score": accessibility_data['section'][0],
                 'details': []})
         if accessibility_data['table'][0] != 100:
@@ -279,8 +290,8 @@ class resultsProcessor(object):
             advice = 'The page is missing a meta description.'
             if bestpractice_data['bestPracticeMetaDescription'][0] == 50:
                 advice = f"The meta description is too long. " \
-                    f"It has {bestpractice_data['bestPracticeMetaDescription'][1]} " \
-                    f"characters, the recommended max is 155 "
+                         f"It has {bestpractice_data['bestPracticeMetaDescription'][1]} " \
+                         f"characters, the recommended max is 155 "
             result.append({
                 "title": 'Meta description',
                 "description": 'Use a page description to make the page more relevant to search engines.',
@@ -292,7 +303,7 @@ class resultsProcessor(object):
             advice = 'The page is missing a title.'
             if bestpractice_data['bestPracticePageTitle'][0] == 50:
                 advice = f"The title is too long by {bestpractice_data['bestPracticePageTitle'][1] - 60} " \
-                    f"characters. The recommended max is 60"
+                         f"characters. The recommended max is 60"
             result.append({
                 "title": 'Page title',
                 "description": 'Use a title to make the page more relevant to search engines.',
@@ -310,7 +321,7 @@ class resultsProcessor(object):
                           'and try to minimize the number of parameters. '
             if bestpractice_data['bestPracticePageURL'][1]['len'] > 100:
                 advice += f"The URL is {bestpractice_data['bestPracticePageURL'][1]['len']} " \
-                    f"characters long. Try to make it less than 100 characters. "
+                          f"characters long. Try to make it less than 100 characters. "
             if bestpractice_data['bestPracticePageURL'][1]['spaces']:
                 advice += 'Could the developer or the CMS be on Windows? Avoid using spaces in the ' \
                           'URLs, use hyphens or underscores. '
@@ -351,7 +362,7 @@ class resultsProcessor(object):
             advice = ""
             if len(performance_data['performanceCssPrint'][1]) > 0:
                 advice += f"The page has {len(performance_data['performanceCssPrint'][1])} print stylesheets. You " \
-                    f"should include that stylesheet using @media type print instead. "
+                          f"should include that stylesheet using @media type print instead. "
             result.append({
                 "title": "Do not load specific print stylesheets.",
                 "description": "Loading a specific stylesheet for printing slows down the page, even though it is not "
@@ -370,17 +381,17 @@ class resultsProcessor(object):
                     advice += "Make sure that the server pushes your CSS resources for faster rendering. "
                     advice += "The style(s): "
                     for css_resource in fast_render_data['blockingCSS']:
-                         advice += f"<p>{css_resource}</p>"
+                        advice += f"<p>{css_resource}</p>"
                     advice += "is larger than the magic number TCP window size 14.5 kB. " \
                               "Make the file smaller and the page will render faster. "
                 if fast_render_data['blockingJS']:
                     advice += "Avoid loading synchronously JavaScript inside of head, you shouldn't" \
                               " need JavaScript to render your page! <br /> list of blocking JS: <br />"
                     for js_resource in fast_render_data['blockingCSS']:
-                         advice += f"<p>{js_resource}</p>"
+                        advice += f"<p>{js_resource}</p>"
 
             advice += f"The page has {len(fast_render_data['blockingCSS'])} render blocking CSS request(s) and " \
-                f" {len(fast_render_data['blockingJS'])} blocking JavaScript request(s) inside of head."
+                      f" {len(fast_render_data['blockingJS'])} blocking JavaScript request(s) inside of head."
 
             result.append({
                 "title": "Avoid slowing down the critical rendering path",
@@ -418,7 +429,7 @@ class resultsProcessor(object):
                               "your own tests and check the waterfall graph to see what happens. "
                 else:
                     advice += f"The page has both inline styles as well as it is requesting {data['head_css']} " \
-                        f"CSS file(s) inside of the head. Let's only inline CSS for really fast render. "
+                              f"CSS file(s) inside of the head. Let's only inline CSS for really fast render. "
             if data['head_css'] > 0 & data['style_css'] == 0:
                 if data['isHTTP2']:
                     advice += "The page has inline CSS and uses HTTP/2. Do you have a lot of users with " \
@@ -427,7 +438,7 @@ class resultsProcessor(object):
                               "push the CSS files instead."
                 else:
                     advice += f"The page loads {data['head_css']} CSS request(s) inside of head, " \
-                        f"try to inline the CSS for the first render and lazy load the rest."
+                              f"try to inline the CSS for the first render and lazy load the rest."
             if data['isHTTP2'] & data['head_css'] > 0:
                 advice += "It is always faster for the user if you inline CSS instead of making a CSS request."
             result.append({
@@ -453,7 +464,7 @@ class resultsProcessor(object):
                                "shouldn't do that because the user will then unnecessarily download extra data. "
                                "Cleanup the code and make sure you only use one version.",
                 "advice": f"The page uses {len(performance_data['performanceJQuery'][1])} versions of jQuery! You only "
-                f"need one version, please remove the unnecessary version(s).",
+                          f"need one version, please remove the unnecessary version(s).",
                 "score": performance_data['performanceJQuery'][0],
                 "details": performance_data['performanceJQuery'][1]
             })
@@ -487,7 +498,7 @@ class resultsProcessor(object):
                 "advice": advice,
                 "score": performance_data['performanceScalingImages'][0],
                 "details": performance_data['performanceScalingImages'][1]
-                })
+            })
 
         if performance_data['performanceThirdPartyAsyncJs'][0] != 100:
             result.append({
@@ -501,12 +512,15 @@ class resultsProcessor(object):
             })
 
         total_score = round((
-            performance_data['performanceCssPrint'][0] * 1 + performance_data['performanceFastRender'][0] * 10 +
-            performance_data['performanceGoogleTagManager'][0] * 5 + performance_data['performanceInlineCss'][0] * 7 +
-            performance_data['performanceJQuery'][0] * 4 + performance_data['performanceSPOF'][0] * 7 +
-            performance_data['performanceScalingImages'][0] * 5 +
-            performance_data['performanceThirdPartyAsyncJs'][0] * 5)/44)
-        return total_score,result
+                                    performance_data['performanceCssPrint'][0] * 1 +
+                                    performance_data['performanceFastRender'][0] * 10 +
+                                    performance_data['performanceGoogleTagManager'][0] * 5 +
+                                    performance_data['performanceInlineCss'][0] * 7 +
+                                    performance_data['performanceJQuery'][0] * 4 + performance_data['performanceSPOF'][
+                                        0] * 7 +
+                                    performance_data['performanceScalingImages'][0] * 5 +
+                                    performance_data['performanceThirdPartyAsyncJs'][0] * 5) / 44)
+        return total_score, result
 
     def concut_video(self, start, end, page_name, video_path):
         p = Pool(7)
@@ -518,7 +532,7 @@ class resultsProcessor(object):
                 "ms": part,
                 "test_name": page_name,
                 "processing_path": self.processing_path,
-            } for part in range(start, end, (end-start)//8)][1:]
+            } for part in range(start, end, (end - start) // 8)][1:]
             if not path.exists(path.join(self.processing_path, page_name)):
                 mkdir(path.join(self.processing_path, sanitize(page_name)))
             res = p.map(trim_screenshot, process_params)
