@@ -23,7 +23,7 @@ def process_text(text):
 
 def open(url, value):
     driver = get_driver()
-    driver.open_url(url)
+    driver.open(url)
     for _ in range(1200):
         if driver.execute_script('return document.readyState === "complete" && performance.timing.loadEventEnd > 0'):
             break
@@ -38,23 +38,23 @@ def setWindowSize(size, value):
 
 def click(locator, value):
     css_or_xpath = get_locator_strategy(locator)
-    get_driver().s(css_or_xpath).click()
+    get_driver().element(css_or_xpath).click()
 
 
 def type(locator, text):
     css_or_xpath = get_locator_strategy(locator)
-    get_driver().s(css_or_xpath).set_value(text)
+    get_driver().element(css_or_xpath).set_value(text)
 
 
 def sendKeys(locator, text):
     css_or_xpath = get_locator_strategy(locator)
-    get_driver().s(css_or_xpath).send_keys(process_text(text))
+    get_driver().element(css_or_xpath).send_keys(process_text(text))
 
 
 def assert_text(locator, text):
     css_or_xpath = get_locator_strategy(locator)
-    get_driver().s(css_or_xpath).should_have(have.exact_text(text))
+    get_driver().element(css_or_xpath).should_have(have.exact_text(text))
 
 
 def wait_for_visibility(locator):
-    get_driver().s(locator).wait_until(be.visible)
+    get_driver().element(locator).wait_until(be.visible)

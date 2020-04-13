@@ -1,27 +1,20 @@
-import json
-import os
 import argparse
-from json import loads
-from observer.runner import wait_for_agent
+import os
+
 from junit_xml import TestSuite, TestCase
 
+from observer.runner import wait_for_agent
 from observer.scenario_executor import execute_scenario
-
-
-def str2json(v):
-    try:
-        return loads(v)
-    except:
-        raise argparse.ArgumentTypeError('Json is not properly formatted.')
+from observer.util import parse_json_file
 
 
 def create_parser():
     parser = argparse.ArgumentParser(description="UI performance benchmarking for CI")
-    parser.add_argument("-s", '--step', action="append", type=str2json)
     parser.add_argument("-fp", '--firstPaint', type=int, default=0)
     parser.add_argument("-si", '--speedIndex', type=int, default=0)
     parser.add_argument("-y", "--yaml", type=str, default="")
     parser.add_argument("-f", "--file", type=str, default="")
+    parser.add_argument("-d", "--data", type=str, default="")
     parser.add_argument("-tl", '--totalLoad', type=int, default=0)
     parser.add_argument("-v", '--video', type=bool, default=True)
     parser.add_argument("-r", '--report', action="append", type=str, default=['xml'])
@@ -52,11 +45,6 @@ def process_report(report, config):
         TestSuite.to_file(f, [ts], prettyprint=True)
 
 
-def parse_tests(data_path):
-    with open(data_path) as data:
-        return json.load(data)
-
-
 def main():
     args = parse_args()
     execute(args)
@@ -66,7 +54,7 @@ def execute(args):
     if not args.video:
         wait_for_agent()
     if args.file and os.path.exists(args.file):
-        scenario = parse_tests(args.file)
+        scenario = parse_json_file(args.file)
         execute_scenario(scenario, args)
 
 
