@@ -13,5 +13,5 @@ def test_main():
 
 def test_main_with_data_params():
     args = create_parser().parse_args(
-        ["-f", f"{ROOT_DIR}/data/real-world.side", "-d", f"{ROOT_DIR}/data/data.json", "-fp", "100", "-si", "400", "-tl", "500", "-r", "html"])
+        ["-f", f"{ROOT_DIR}/data/real-world.side", "-d", f"{ROOT_DIR}/data/data.json", "-e","influx","-fp", "100", "-si", "400", "-tl", "500", "-r", "html"])
     execute(args)
