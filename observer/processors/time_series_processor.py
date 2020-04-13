@@ -12,21 +12,29 @@ def export_to_telegraph_json(raw_data):
 
     resources = raw_data['performanceResources']
     perf_timing = raw_data['performancetiming']
+    timing = raw_data['timing']
 
     requests = count_request_number(resources)
     domains = count_unique_domain_number(resources)
-    total_load_time = get_total_load_time(perf_timing)
-    speed_index = raw_data['timing']['speedIndex']
+    total_load_time = perf_timing['loadEventEnd'] - perf_timing['navigationStart']
+    speed_index = timing['speedIndex']
+    time_to_first_byte = perf_timing['responseStart'] - perf_timing['navigationStart']
+    time_to_first_paint = timing['firstPaint']
+    dom_content_loading = perf_timing['domContentLoadedEventStart'] - perf_timing['domLoading']
+    dom_processing = perf_timing['domComplete'] - perf_timing['domLoading']
 
     result = {
         "fields": {
             "requests": len(requests),
             "domains": len(domains),
             "total": total_load_time,
-            "speed_index": speed_index
-
+            "speed_index": speed_index,
+            "time_to_first_byte": time_to_first_byte,
+            "time_to_first_paint": time_to_first_paint,
+            "dom_content_loading": dom_content_loading,
+            "dom_processing": dom_processing
         },
-        "name": "",
+        "name": raw_data['info']['title'],
         "tags": {},
         "timestamp": time.time()
     }
@@ -48,7 +56,3 @@ def count_unique_domain_number(resources):
         url = urlparse(e['name'])
         result.add(url.netloc)
     return result
-
-
-def get_total_load_time(perf_timing):
-    return perf_timing['loadEventEnd'] - perf_timing['navigationStart']
