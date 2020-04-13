@@ -79,9 +79,9 @@ class TelegraphJsonExporter(Exporter):
 class InfluxExporter(Exporter):
 
     def __init__(self, raw_data):
-        influx_host = os.getenv("INFLUX_HOST", "localhost")
-        influx_port = os.getenv("INFLUX_PORT", "8088")
-        influx_db_name = os.getenv("INFLUX_DB", "perf_ui")
+        influx_host = os.getenv("INFLUX_HOST", "carrier-influx")
+        influx_port = os.getenv("INFLUX_PORT", "8086")
+        influx_db_name = os.getenv("INFLUX_DB", "perfui")
 
         self.client = InfluxDBClient(host=influx_host, port=influx_port)
         self.client.switch_database(influx_db_name)
