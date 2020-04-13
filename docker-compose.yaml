@@ -7,6 +7,9 @@ services:
       - remote=chrome:4444
       - listener=chrome:9999
       - ffmpeg_path=ffmpeg
+      #- INFLUX_HOST=localhost
+      #- INFLUX_PORT=8086
+      #- INFLUX_DB=perf_ui
     volumes:
       - /tmp/reports:/tmp/reports
       - ${PWD}/tests/data/:/tmp/scenarios
