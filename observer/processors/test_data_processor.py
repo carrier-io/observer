@@ -34,6 +34,22 @@ class TestDataProcessor(object):
 
 class JsonFileDataProcessor(TestDataProcessor):
 
+    # processor for json data format
+    # {
+    #   "testName": {
+    #     "field": "value"
+    #   }
+    # }
+    #
+    # Example:
+    #
+    # {
+    #   "IncorrectLogin": {
+    #     "username": "admin",
+    #     "password": "admin"
+    #   }
+    # }
+
     def __init__(self, name, args):
         super(JsonFileDataProcessor, self).__init__(name, args)
 
