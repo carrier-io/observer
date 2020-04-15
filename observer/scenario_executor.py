@@ -23,31 +23,45 @@ from observer.util import _pairwise
 load_event_end = 0
 galloper_api_url = os.getenv("GALLOPER_API_URL", "http://localhost:80/api/v1")
 galloper_project_id = int(os.getenv("GALLOPER_PROJECT_ID", "1"))
+env = os.getenv("ENV", "")
 
 
 def execute_scenario(scenario, args):
-    url = scenario['url']
+    base_url = scenario['url']
     config = SharedConfig()
-    config.base_url = url
+    config.base_url = base_url
     browser._config = config
     for test in scenario['tests']:
-        _execute_test(test, args)
+        _execute_test(base_url, config.browser_name, test, args)
 
     close_driver()
     if not args.video:
         terminate_runner()
 
 
-def _execute_test(test, args):
+def _execute_test(base_url, browser_name, test, args):
     test_name = test['name']
     print(f"\nExecuting test: {test_name}")
 
     test_data_processor = get_test_data_processor(test_name, args.data)
-    #  report_id <- post to galloper // ReportAboutTestRun
-    report_id = notify_on_test_start(galloper_project_id, test_name)
+    #  report_id <- post to galloper
+    # browser
+    # test_name
+    # project_id
+    # start_time
+    # env //dev, qa
+    # base_url
+
+    report_id = notify_on_test_start(galloper_project_id, test_name, browser_name, env, base_url)
+
+    locators = []
+    previous_results_id = None
+    visited_pages = 0
 
     for current_command, next_command in _pairwise(test['commands']):
         print(current_command)
+
+        locators.append(current_command)
 
         report, cmd_results = _execute_command(current_command, next_command, test_data_processor,
                                                is_video_enabled(args))
@@ -58,17 +72,35 @@ def _execute_test(test, args):
         if args.export:
             export(cmd_results, args)
 
+        visited_pages += 1
+
         complete_report(report, args)
         # with project_id, report_id send step metrics
-        notify_on_command_end(galloper_project_id, report_id, current_command)
+        # send report with locators
+
+        # send locators for previous step if exists
+        # call api for prevoius report
+
+        previous_results_id = notify_on_command_end(galloper_project_id, report_id)
+        # add 8 metrics
+        # html
+        # passed and failed trashholds for this page
+        # minio_bucket_name
 
     # put to galloper to info about test end
-    notify_on_test_end(galloper_project_id, report_id)
+    # end_time
+    # visited_pages
+    # trash holds passed / failed
+
+    notify_on_test_end(galloper_project_id, report_id, visited_pages)
 
 
-def notify_on_test_start(project_id: int, test_name):
+def notify_on_test_start(project_id: int, test_name, browser_name, env, base_url):
     data = {
         "test_name": test_name,
+        "base_url": base_url,
+        "browser_name": browser_name,
+        "env": env,
         "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
@@ -76,16 +108,28 @@ def notify_on_test_start(project_id: int, test_name):
     return res.json()['id']
 
 
-def notify_on_test_end(project_id: int, report_id: int):
+def notify_on_test_end(project_id: int, report_id: int, visited_pages):
     data = {
         "report_id": report_id,
-        "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        "visited_pages": visited_pages
     }
     res = requests.put(f"{galloper_api_url}/observer/{project_id}", json=data, auth=('user', 'user'))
     return res.json()
 
 
-def notify_on_command_end(project_id: int, report_id: int, command):
+def notify_on_command_start(project_id: int, report_id: int, command):
+    data = {
+        "command": command["command"],
+        "target": command["target"],
+        "value": command["value"]
+    }
+
+    res = requests.post(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=data, auth=('user', 'user'))
+    return res.json()["id"]
+
+
+def notify_on_command_end(project_id: int, report_id: int):
     data = {
 
     }
