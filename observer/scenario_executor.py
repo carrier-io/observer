@@ -1,23 +1,27 @@
+import os
 import tempfile
+from datetime import datetime
 from os import path
 from shutil import rmtree
 from time import time
 
-from junit_xml import TestSuite, TestCase
+import requests
 from requests import get
 from selene.support.shared import browser, SharedConfig
 from selenium.common.exceptions import WebDriverException
 
 from observer.actions import browser_actions
-from observer.constants import check_ui_performance, listener_address
-from observer.driver_manager import get_driver
+from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type
+from observer.constants import listener_address
+from observer.exporter import export
 from observer.processors.results_processor import resultsProcessor
 from observer.processors.test_data_processor import get_test_data_processor
-from observer.exporter import export
+from observer.reporter import complete_report
 from observer.runner import close_driver, terminate_runner
 from observer.util import _pairwise
 
 load_event_end = 0
+galloper_api_url = os.getenv("GALLOPER_API_URL", "http://localhost:80/api/v1")
 
 
 def execute_scenario(scenario, args):
@@ -38,6 +42,8 @@ def _execute_test(test, args):
     print(f"\nExecuting test: {test_name}")
 
     test_data_processor = get_test_data_processor(test_name, args.data)
+    #  report_id <- post to galloper // ReportAboutTestRun
+    report_id = notify_on_test_start(1, test_name)
 
     for current_command, next_command in _pairwise(test['commands']):
         print(current_command)
@@ -51,33 +57,30 @@ def _execute_test(test, args):
         if args.export:
             export(cmd_results, args)
 
-        results = []
+        complete_report(report, args)
+        # with project_id, report_id send step metrics
 
-        if 'html' in args.report:
-            results.append({'html_report': report.get_report(), 'title': report.title})
-        if args.firstPaint > 0:
-            message = ''
-            if args.firstPaint < report.timing['firstPaint']:
-                message = f"First paint exceeded threshold of {args.firstPaint}ms by " \
-                          f"{report.timing['firstPaint'] - args.firstPaint} ms"
-            results.append({"name": f"First Paint {report.title}",
-                            "actual": report.timing['firstPaint'], "expected": args.firstPaint, "message": message})
-        if args.speedIndex > 0:
-            message = ''
-            if args.speedIndex < report.timing['speedIndex']:
-                message = f"Speed index exceeded threshold of {args.speedIndex}ms by " \
-                          f"{report.timing['speedIndex'] - args.speedIndex} ms"
-            results.append({"name": f"Speed Index {report.title}", "actual": report.timing['speedIndex'],
-                            "expected": args.speedIndex, "message": message})
-        if args.totalLoad > 0:
-            totalLoad = report.performance_timing['loadEventEnd'] - report.performance_timing['navigationStart']
-            message = ''
-            if args.totalLoad < totalLoad:
-                message = f"Total Load exceeded threshold of {args.totalLoad}ms by " \
-                          f"{totalLoad - args.speedIndex} ms"
-            results.append({"name": f"Total Load {report.title}", "actual": totalLoad,
-                            "expected": args.totalLoad, "message": message})
-        process_report(results, args.report)
+    # put to galloper to info about test end
+    notify_on_test_end(1, report_id)
+
+
+def notify_on_test_start(project_id: int, test_name):
+    data = {
+        "test_name": test_name,
+        "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+
+    res = requests.post(f"{galloper_api_url}/observer/{project_id}", json=data, auth=('user', 'user'))
+    return res.json()['id']
+
+
+def notify_on_test_end(project_id: int, report_id: int):
+    data = {
+        "report_id": report_id,
+        "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+    res = requests.put(f"{galloper_api_url}/observer/{project_id}", json=data, auth=('user', 'user'))
+    return res.json()
 
 
 def is_video_enabled(args):
@@ -155,44 +158,3 @@ def is_navigation_happened():
         return True
 
     return False
-
-
-def get_performance_timing():
-    return get_driver().execute_script("return performance.timing")
-
-
-def get_performance_metrics():
-    return get_driver().driver.execute_script(check_ui_performance)
-
-
-def command(func, actionable=True):
-    return func, actionable
-
-
-command_type = {
-    "open": command(browser_actions.open),
-    "setWindowSize": command(browser_actions.setWindowSize, actionable=False),
-    "click": command(browser_actions.click),
-    "type": command(browser_actions.type),
-    "sendKeys": command(browser_actions.sendKeys),
-    "assertText": command(browser_actions.assert_text)
-}
-
-
-def process_report(report, config):
-    test_cases = []
-    html_report = 0
-    for record in report:
-        if 'xml' in config and 'html_report' not in record.keys():
-            test_cases.append(TestCase(record['name'], record.get('class_name', 'observer'),
-                                       record['actual'], '', ''))
-            if record['message']:
-                test_cases[-1].add_failure_info(record['message'])
-        elif 'html' in config and 'html_report' in record.keys():
-            with open(f'/tmp/reports/{record["title"]}_{html_report}.html', 'w') as f:
-                f.write(record['html_report'])
-            html_report += 1
-
-    ts = TestSuite("Observer UI Benchmarking Test ", test_cases)
-    with open("/tmp/reports/report.xml", 'w') as f:
-        TestSuite.to_file(f, [ts], prettyprint=True)
