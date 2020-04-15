@@ -57,6 +57,10 @@ def _execute_test(base_url, browser_name, test, args):
     locators = []
     previous_results_id = None
     visited_pages = 0
+    total_thresholds = {
+        "total": 0,
+        "failed": 0
+    }
 
     for current_command, next_command in _pairwise(test['commands']):
         print(current_command)
@@ -74,7 +78,9 @@ def _execute_test(base_url, browser_name, test, args):
 
         visited_pages += 1
 
-        complete_report(report, args)
+        thresholds = complete_report(report, args)
+        total_thresholds["total"] += thresholds["total"]
+        total_thresholds["failed"] += thresholds["failed"]
         # with project_id, report_id send step metrics
         # send report with locators
 
@@ -92,7 +98,7 @@ def _execute_test(base_url, browser_name, test, args):
     # visited_pages
     # trash holds passed / failed
 
-    notify_on_test_end(galloper_project_id, report_id, visited_pages)
+    notify_on_test_end(galloper_project_id, report_id, visited_pages, total_thresholds)
 
 
 def notify_on_test_start(project_id: int, test_name, browser_name, env, base_url):
@@ -108,11 +114,13 @@ def notify_on_test_start(project_id: int, test_name, browser_name, env, base_url
     return res.json()['id']
 
 
-def notify_on_test_end(project_id: int, report_id: int, visited_pages):
+def notify_on_test_end(project_id: int, report_id: int, visited_pages, total_thresholds):
     data = {
         "report_id": report_id,
         "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        "visited_pages": visited_pages
+        "visited_pages": visited_pages,
+        "thresholds_total": total_thresholds["total"],
+        "thresholds_failed": total_thresholds["failed"]
     }
     res = requests.put(f"{galloper_api_url}/observer/{project_id}", json=data, auth=('user', 'user'))
     return res.json()
