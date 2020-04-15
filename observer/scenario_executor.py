@@ -22,6 +22,7 @@ from observer.util import _pairwise
 
 load_event_end = 0
 galloper_api_url = os.getenv("GALLOPER_API_URL", "http://localhost:80/api/v1")
+galloper_project_id = int(os.getenv("GALLOPER_PROJECT_ID", "1"))
 
 
 def execute_scenario(scenario, args):
@@ -43,7 +44,7 @@ def _execute_test(test, args):
 
     test_data_processor = get_test_data_processor(test_name, args.data)
     #  report_id <- post to galloper // ReportAboutTestRun
-    report_id = notify_on_test_start(1, test_name)
+    report_id = notify_on_test_start(galloper_project_id, test_name)
 
     for current_command, next_command in _pairwise(test['commands']):
         print(current_command)
@@ -59,9 +60,10 @@ def _execute_test(test, args):
 
         complete_report(report, args)
         # with project_id, report_id send step metrics
+        notify_on_command_end(galloper_project_id, report_id, current_command)
 
     # put to galloper to info about test end
-    notify_on_test_end(1, report_id)
+    notify_on_test_end(galloper_project_id, report_id)
 
 
 def notify_on_test_start(project_id: int, test_name):
@@ -80,6 +82,15 @@ def notify_on_test_end(project_id: int, report_id: int):
         "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
     res = requests.put(f"{galloper_api_url}/observer/{project_id}", json=data, auth=('user', 'user'))
+    return res.json()
+
+
+def notify_on_command_end(project_id: int, report_id: int, command):
+    data = {
+
+    }
+
+    res = requests.put(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=data, auth=('user', 'user'))
     return res.json()
 
 
