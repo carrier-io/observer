@@ -24,7 +24,7 @@ load_event_end = 0
 galloper_api_url = os.getenv("GALLOPER_API_URL", "http://localhost:80/api/v1")
 galloper_project_id = int(os.getenv("GALLOPER_PROJECT_ID", "1"))
 env = os.getenv("ENV", "")
-minio_bucket_name = os.getenv("MINIO_BUCKET_NAME", "")
+minio_bucket_name = os.getenv("MINIO_BUCKET_NAME", "reports")
 
 
 def execute_scenario(scenario, args):
@@ -91,11 +91,12 @@ def _execute_test(base_url, browser_name, test, args):
             # send locators for previous results
             send_report_locators(galloper_project_id, previous_report_id, locators)
 
+        report_path = f"/tmp/reports/{report.title}_0.html"
         previous_report_id = notify_on_command_end(galloper_project_id,
                                                    report_id,
                                                    minio_bucket_name,
                                                    cmd_results,
-                                                   thresholds, locators)
+                                                   thresholds, locators, report_path)
         # add 8 metrics
         # html
         # passed and failed trashholds for this page
@@ -130,6 +131,7 @@ def notify_on_test_end(project_id: int, report_id: int, visited_pages, total_thr
         "thresholds_total": total_thresholds["total"],
         "thresholds_failed": total_thresholds["failed"]
     }
+
     res = requests.put(f"{galloper_api_url}/observer/{project_id}", json=data, auth=('user', 'user'))
     return res.json()
 
@@ -149,7 +151,7 @@ def send_report_locators(project_id: int, report_id: int, locators):
     requests.put(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=locators, auth=('user', 'user'))
 
 
-def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators):
+def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators, report_path):
     result = GalloperExporter(metrics).export()
 
     data = {
@@ -160,7 +162,10 @@ def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics,
         "locators": locators
     }
 
-    res = requests.post(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=data, auth=('user', 'user'))
+    file = {'file': open(report_path, 'rb')}
+
+    res = requests.post(f"{galloper_api_url}/artifacts/{project_id}/{bucket_name}/demo.html", files=file,
+                        auth=('user', 'user'))
     return res.json()["id"]
 
 
