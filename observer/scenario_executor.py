@@ -56,7 +56,7 @@ def _execute_test(base_url, browser_name, test, args):
     report_id = notify_on_test_start(galloper_project_id, test_name, browser_name, env, base_url)
 
     locators = []
-    previous_results_id = None
+    previous_report_id = None
     visited_pages = 0
     total_thresholds = {
         "total": 0,
@@ -87,14 +87,15 @@ def _execute_test(base_url, browser_name, test, args):
 
         # send locators for previous step if exists
         # call api for prevoius report
-        if previous_results_id:
+        if previous_report_id:
             # send locators for previous results
-            pass
-        previous_results_id = notify_on_command_end(galloper_project_id,
-                                                    report_id,
-                                                    minio_bucket_name,
-                                                    cmd_results,
-                                                    thresholds)
+            send_report_locators(galloper_project_id, previous_report_id, locators)
+
+        previous_report_id = notify_on_command_end(galloper_project_id,
+                                                   report_id,
+                                                   minio_bucket_name,
+                                                   cmd_results,
+                                                   thresholds, locators)
         # add 8 metrics
         # html
         # passed and failed trashholds for this page
@@ -144,14 +145,19 @@ def notify_on_command_start(project_id: int, report_id: int, command):
     return res.json()["id"]
 
 
-def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds):
+def send_report_locators(project_id: int, report_id: int, locators):
+    requests.put(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=locators, auth=('user', 'user'))
+
+
+def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators):
     result = GalloperExporter(metrics).export()
 
     data = {
         "metrics": result,
         "bucket_name": bucket_name,
         "thresholds_total": thresholds["total"],
-        "thresholds_failed": thresholds["failed"]
+        "thresholds_failed": thresholds["failed"],
+        "locators": locators
     }
 
     res = requests.post(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=data, auth=('user', 'user'))
