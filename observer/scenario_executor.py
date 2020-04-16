@@ -162,10 +162,13 @@ def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics,
         "locators": locators
     }
 
+    res = requests.post(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=data, auth=('user', 'user'))
+
     file = {'file': open(report_path, 'rb')}
 
-    res = requests.post(f"{galloper_api_url}/artifacts/{project_id}/{bucket_name}/demo.html", files=file,
-                        auth=('user', 'user'))
+    requests.post(f"{galloper_api_url}/artifacts/{project_id}/{bucket_name}/demo.html", files=file,
+                  auth=('user', 'user'))
+
     return res.json()["id"]
 
 
