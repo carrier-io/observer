@@ -13,7 +13,7 @@ from selenium.common.exceptions import WebDriverException
 from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type
 from observer.constants import listener_address
-from observer.exporter import export
+from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
 from observer.processors.test_data_processor import get_test_data_processor
 from observer.reporter import complete_report
@@ -24,6 +24,7 @@ load_event_end = 0
 galloper_api_url = os.getenv("GALLOPER_API_URL", "http://localhost:80/api/v1")
 galloper_project_id = int(os.getenv("GALLOPER_PROJECT_ID", "1"))
 env = os.getenv("ENV", "")
+minio_bucket_name = os.getenv("MINIO_BUCKET_NAME", "")
 
 
 def execute_scenario(scenario, args):
@@ -86,8 +87,14 @@ def _execute_test(base_url, browser_name, test, args):
 
         # send locators for previous step if exists
         # call api for prevoius report
-
-        previous_results_id = notify_on_command_end(galloper_project_id, report_id)
+        if previous_results_id:
+            # send locators for previous results
+            pass
+        previous_results_id = notify_on_command_end(galloper_project_id,
+                                                    report_id,
+                                                    minio_bucket_name,
+                                                    cmd_results,
+                                                    thresholds)
         # add 8 metrics
         # html
         # passed and failed trashholds for this page
@@ -137,13 +144,18 @@ def notify_on_command_start(project_id: int, report_id: int, command):
     return res.json()["id"]
 
 
-def notify_on_command_end(project_id: int, report_id: int):
-    data = {
+def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds):
+    result = GalloperExporter(metrics).export()
 
+    data = {
+        "metrics": result,
+        "bucket_name": bucket_name,
+        "thresholds_total": thresholds["total"],
+        "thresholds_failed": thresholds["failed"]
     }
 
-    res = requests.put(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=data, auth=('user', 'user'))
-    return res.json()
+    res = requests.post(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=data, auth=('user', 'user'))
+    return res.json()["id"]
 
 
 def is_video_enabled(args):
