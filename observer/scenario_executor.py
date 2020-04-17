@@ -45,13 +45,6 @@ def _execute_test(base_url, browser_name, test, args):
     print(f"\nExecuting test: {test_name}")
 
     test_data_processor = get_test_data_processor(test_name, args.data)
-    #  report_id <- post to galloper
-    # browser
-    # test_name
-    # project_id
-    # start_time
-    # env //dev, qa
-    # base_url
 
     report_id = notify_on_test_start(galloper_project_id, test_name, browser_name, env, base_url)
 
@@ -82,30 +75,17 @@ def _execute_test(base_url, browser_name, test, args):
         thresholds = complete_report(report, args)
         total_thresholds["total"] += thresholds["total"]
         total_thresholds["failed"] += thresholds["failed"]
-        # with project_id, report_id send step metrics
-        # send report with locators
 
-        # send locators for previous step if exists
-        # call api for prevoius report
         if previous_report_id:
-            # send locators for previous results
             send_report_locators(galloper_project_id, previous_report_id, locators)
 
-        report_path = f"/tmp/reports/{report.title}_0.html"
+        file_name = f"{report.title}_0.html"
+        report_path = f"/tmp/reports/{file_name}"
         previous_report_id = notify_on_command_end(galloper_project_id,
                                                    report_id,
                                                    minio_bucket_name,
                                                    cmd_results,
-                                                   thresholds, locators, report_path)
-        # add 8 metrics
-        # html
-        # passed and failed trashholds for this page
-        # minio_bucket_name
-
-    # put to galloper to info about test end
-    # end_time
-    # visited_pages
-    # trash holds passed / failed
+                                                   thresholds, locators, report_path, file_name)
 
     notify_on_test_end(galloper_project_id, report_id, visited_pages, total_thresholds)
 
@@ -136,27 +116,18 @@ def notify_on_test_end(project_id: int, report_id: int, visited_pages, total_thr
     return res.json()
 
 
-def notify_on_command_start(project_id: int, report_id: int, command):
-    data = {
-        "command": command["command"],
-        "target": command["target"],
-        "value": command["value"]
-    }
-
-    res = requests.post(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=data, auth=('user', 'user'))
-    return res.json()["id"]
-
-
 def send_report_locators(project_id: int, report_id: int, locators):
     requests.put(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=locators, auth=('user', 'user'))
 
 
-def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators, report_path):
+def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators, report_path,
+                          file_name):
     result = GalloperExporter(metrics).export()
 
     data = {
         "metrics": result,
         "bucket_name": bucket_name,
+        "file_name": file_name,
         "thresholds_total": thresholds["total"],
         "thresholds_failed": thresholds["failed"],
         "locators": locators
@@ -166,7 +137,7 @@ def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics,
 
     file = {'file': open(report_path, 'rb')}
 
-    requests.post(f"{galloper_api_url}/artifacts/{project_id}/{bucket_name}/demo.html", files=file,
+    requests.post(f"{galloper_api_url}/artifacts/{project_id}/{bucket_name}/{file_name}", files=file,
                   auth=('user', 'user'))
 
     return res.json()["id"]
