@@ -79,13 +79,11 @@ def _execute_test(base_url, browser_name, test, args):
         if previous_report_id:
             send_report_locators(galloper_project_id, previous_report_id, locators)
 
-        file_name = f"{report.title}_0.html"
-        report_path = f"/tmp/reports/{file_name}"
         previous_report_id = notify_on_command_end(galloper_project_id,
                                                    report_id,
                                                    minio_bucket_name,
                                                    cmd_results,
-                                                   thresholds, locators, report_path, file_name)
+                                                   thresholds, locators, report.title)
 
     notify_on_test_end(galloper_project_id, report_id, visited_pages, total_thresholds)
 
@@ -120,14 +118,19 @@ def send_report_locators(project_id: int, report_id: int, locators):
     requests.put(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=locators, auth=('user', 'user'))
 
 
-def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators, report_path,
-                          file_name):
+def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators, name):
     result = GalloperExporter(metrics).export()
 
+    file_name = f"{name}_0.html"
+    report_path = f"/tmp/reports/{file_name}"
+
     data = {
+        "name": name,
         "metrics": result,
         "bucket_name": bucket_name,
         "file_name": file_name,
+        "resolution": metrics['info']['windowSize'],
+        "browser_version": metrics['info']['browser'],
         "thresholds_total": thresholds["total"],
         "thresholds_failed": thresholds["failed"],
         "locators": locators
