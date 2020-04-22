@@ -8,7 +8,6 @@ from time import time
 import requests
 from requests import get
 from selene.support.shared import browser, SharedConfig
-from selenium.common.exceptions import WebDriverException
 
 from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type
@@ -49,7 +48,9 @@ def _execute_test(base_url, browser_name, test, args):
     if args.galloper:
         report_id = notify_on_test_start(galloper_project_id, test_name, browser_name, env, base_url)
 
+    previous_report_id = None
     locators = []
+    exception = None
     visited_pages = 0
     total_thresholds = {
         "total": 0,
@@ -61,8 +62,12 @@ def _execute_test(base_url, browser_name, test, args):
 
         locators.append(current_command)
 
-        report, cmd_results = _execute_command(current_command, next_command, test_data_processor,
-                                               is_video_enabled(args))
+        report, cmd_results, ex = _execute_command(current_command, next_command, test_data_processor,
+                                                   is_video_enabled(args))
+
+        if ex:
+            exception = ex
+            break
 
         if not report:
             continue
@@ -84,7 +89,7 @@ def _execute_test(base_url, browser_name, test, args):
                                   thresholds, locators, report.title)
 
     if args.galloper:
-        notify_on_test_end(galloper_project_id, report_id, visited_pages, total_thresholds)
+        notify_on_test_end(galloper_project_id, report_id, visited_pages, total_thresholds, exception)
 
 
 def notify_on_test_start(project_id: int, test_name, browser_name, env, base_url):
@@ -100,21 +105,22 @@ def notify_on_test_start(project_id: int, test_name, browser_name, env, base_url
     return res.json()['id']
 
 
-def notify_on_test_end(project_id: int, report_id: int, visited_pages, total_thresholds):
+def notify_on_test_end(project_id: int, report_id: int, visited_pages, total_thresholds, exception):
     data = {
         "report_id": report_id,
         "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         "visited_pages": visited_pages,
         "thresholds_total": total_thresholds["total"],
-        "thresholds_failed": total_thresholds["failed"]
+        "thresholds_failed": total_thresholds["failed"],
+        "exception": str(exception)
     }
 
     res = requests.put(f"{galloper_api_url}/observer/{project_id}", json=data, auth=('user', 'user'))
     return res.json()
 
 
-def send_report_locators(project_id: int, report_id: int, locators):
-    requests.put(f"{galloper_api_url}/observer/{project_id}/{report_id}", json={"locators": locators},
+def send_report_locators(project_id: int, report_id: int, exception):
+    requests.put(f"{galloper_api_url}/observer/{project_id}/{report_id}", json={"exception": exception, "status": ""},
                  auth=('user', 'user'))
 
 
@@ -153,6 +159,7 @@ def is_video_enabled(args):
 def _execute_command(current_command, next_command, test_data_processor, enable_video=True):
     global load_event_end
     results = None
+    report = None
 
     current_cmd = current_command['command']
     current_target = current_command['target']
@@ -179,26 +186,25 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
             load_event_end = get_performance_timing()['loadEventEnd']
             results = get_performance_metrics()
             results['info']['testStart'] = int(current_time)
-    except WebDriverException as e:
+    except Exception as e:
         print(e)
-        return None, None
+        return None, None, e
     finally:
         if not next_is_actionable:
-            return None, None
+            return None, None, None
 
         video_folder = None
         video_path = None
         if enable_video and next_is_actionable:
             video_folder, video_path = stop_recording()
 
-    report = None
     if results and video_folder:
         report = resultsProcessor(video_path, results, video_folder, True, True)
 
     if video_folder:
         rmtree(video_folder)
 
-    return report, results
+    return report, results, None
 
 
 def start_recording():
