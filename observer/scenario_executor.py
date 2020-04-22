@@ -46,10 +46,10 @@ def _execute_test(base_url, browser_name, test, args):
 
     test_data_processor = get_test_data_processor(test_name, args.data)
 
-    report_id = notify_on_test_start(galloper_project_id, test_name, browser_name, env, base_url)
+    if args.galloper:
+        report_id = notify_on_test_start(galloper_project_id, test_name, browser_name, env, base_url)
 
     locators = []
-    previous_report_id = None
     visited_pages = 0
     total_thresholds = {
         "total": 0,
@@ -76,16 +76,15 @@ def _execute_test(base_url, browser_name, test, args):
         total_thresholds["total"] += thresholds["total"]
         total_thresholds["failed"] += thresholds["failed"]
 
-        if previous_report_id:
-            send_report_locators(galloper_project_id, previous_report_id, locators)
+        if args.galloper:
+            notify_on_command_end(galloper_project_id,
+                                  report_id,
+                                  minio_bucket_name,
+                                  cmd_results,
+                                  thresholds, locators, report.title)
 
-        previous_report_id = notify_on_command_end(galloper_project_id,
-                                                   report_id,
-                                                   minio_bucket_name,
-                                                   cmd_results,
-                                                   thresholds, locators, report.title)
-
-    notify_on_test_end(galloper_project_id, report_id, visited_pages, total_thresholds)
+    if args.galloper:
+        notify_on_test_end(galloper_project_id, report_id, visited_pages, total_thresholds)
 
 
 def notify_on_test_start(project_id: int, test_name, browser_name, env, base_url):
@@ -115,7 +114,8 @@ def notify_on_test_end(project_id: int, report_id: int, visited_pages, total_thr
 
 
 def send_report_locators(project_id: int, report_id: int, locators):
-    requests.put(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=locators, auth=('user', 'user'))
+    requests.put(f"{galloper_api_url}/observer/{project_id}/{report_id}", json={"locators": locators},
+                 auth=('user', 'user'))
 
 
 def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators, name):

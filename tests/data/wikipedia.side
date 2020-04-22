@@ -1,0 +1,69 @@
+{
+  "id": "ef6a5f61-7f8e-4684-acfd-69e2181a8cc0",
+  "version": "2.0",
+  "name": "wikipedia",
+  "url": "https://en.wikipedia.org",
+  "tests": [{
+    "id": "5897aa33-0065-4878-ad00-ee11d604bb8e",
+    "name": "Wikipedia",
+    "commands": [{
+      "id": "d3a3ae86-6445-440a-8575-8ea899454c3f",
+      "comment": "",
+      "command": "open",
+      "target": "/wiki/Main_Page",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "d93d9514-839d-414c-886c-6e01891c34d6",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Coronavirus pandemic",
+      "targets": [
+        ["linkText=Coronavirus pandemic", "linkText"],
+        ["css=div:nth-child(1) > b > a", "css:finder"],
+        ["xpath=//a[contains(text(),'Coronavirus pandemic')]", "xpath:link"],
+        ["xpath=//div[@id='mp-itn']/div/b/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/wiki/2019%E2%80%9320_coronavirus_pandemic')]", "xpath:href"],
+        ["xpath=//div/b/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Coronavirus pandemic')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "4bd893cc-5d2f-423b-bd68-d89afea05ce5",
+      "comment": "",
+      "command": "assertText",
+      "target": "id=firstHeading",
+      "targets": [
+        ["id=firstHeading", "id"],
+        ["css=#firstHeading", "css:finder"],
+        ["xpath=//h1[@id='firstHeading']", "xpath:attributes"],
+        ["xpath=//div[@id='content']/h1", "xpath:idRelative"],
+        ["xpath=//h1", "xpath:position"],
+        ["xpath=//h1[contains(.,'2019–20 coronavirus pandemic')]", "xpath:innerText"]
+      ],
+      "value": "2019–20 coronavirus pandemic"
+    }, {
+      "id": "a0dacf9c-6e24-4f61-82a8-8a90df1ccdf9",
+      "comment": "",
+      "command": "click",
+      "target": "css=.mw-wiki-logo",
+      "targets": [
+        ["css=.mw-wiki-logo", "css:finder"],
+        ["xpath=//div[@id='p-logo']/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/wiki/Main_Page')]", "xpath:href"],
+        ["xpath=//div[5]/div[2]/div/a", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "d141a2c2-be2b-4135-8db7-cc1a364d3061",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["5897aa33-0065-4878-ad00-ee11d604bb8e"]
+  }],
+  "urls": ["https://en.wikipedia.org/"],
+  "plugins": []
+}

@@ -19,6 +19,7 @@ def create_parser():
     parser.add_argument("-v", '--video', type=bool, default=True)
     parser.add_argument("-r", '--report', action="append", type=str, default=['xml'])
     parser.add_argument("-e", '--export', action="append", type=str, default=[])
+    parser.add_argument("-g", '--galloper', type=bool, default=True)
     return parser
 
 
