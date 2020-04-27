@@ -14,7 +14,7 @@ def test_main():
 def test_main_with_data_params():
     args = create_parser().parse_args(
         [
-            "-f", f"{ROOT_DIR}/data/reverb.side",
+            "-f", f"{ROOT_DIR}/data/amazon.side",
             "-d", f"{ROOT_DIR}/data/data.json",
             # "-e", "influx",
             "-fp", "100",

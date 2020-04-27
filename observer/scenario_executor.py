@@ -48,7 +48,6 @@ def _execute_test(base_url, browser_name, test, args):
     if args.galloper:
         report_id = notify_on_test_start(galloper_project_id, test_name, browser_name, env, base_url)
 
-    previous_report_id = None
     locators = []
     exception = None
     visited_pages = 0
@@ -111,9 +110,11 @@ def notify_on_test_end(project_id: int, report_id: int, visited_pages, total_thr
         "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         "visited_pages": visited_pages,
         "thresholds_total": total_thresholds["total"],
-        "thresholds_failed": total_thresholds["failed"],
-        "exception": str(exception)
+        "thresholds_failed": total_thresholds["failed"]
     }
+
+    if exception:
+        data["exception"] = str(exception)
 
     res = requests.put(f"{galloper_api_url}/observer/{project_id}", json=data, auth=('user', 'user'))
     return res.json()
