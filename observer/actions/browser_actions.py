@@ -1,9 +1,14 @@
 from time import sleep
 
+from observer.constants import check_ui_performance
 from selene import have, by, be
 from selenium.webdriver.common.keys import Keys
 
 from observer.driver_manager import get_driver
+
+
+def command(func, actionable=True):
+    return func, actionable
 
 
 def get_locator_strategy(locator):
@@ -21,7 +26,7 @@ def process_text(text):
     return text
 
 
-def open(url, value):
+def open_url(url, value):
     driver = get_driver()
     driver.open(url)
     for _ in range(1200):
@@ -58,3 +63,21 @@ def assert_text(locator, text):
 
 def wait_for_visibility(locator):
     get_driver().element(locator).wait_until(be.visible)
+
+
+def get_performance_timing():
+    return get_driver().execute_script("return performance.timing")
+
+
+def get_performance_metrics():
+    return get_driver().driver.execute_script(check_ui_performance)
+
+
+command_type = {
+    "open": command(open_url),
+    "setWindowSize": command(setWindowSize, actionable=False),
+    "click": command(click),
+    "type": command(type),
+    "sendKeys": command(sendKeys),
+    "assertText": command(assert_text)
+}

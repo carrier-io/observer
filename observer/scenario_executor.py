@@ -1,49 +1,72 @@
+import os
 import tempfile
+from datetime import datetime
 from os import path
 from shutil import rmtree
 from time import time
 
-from junit_xml import TestSuite, TestCase
+import requests
 from requests import get
 from selene.support.shared import browser, SharedConfig
-from selenium.common.exceptions import WebDriverException
 
 from observer.actions import browser_actions
-from observer.constants import check_ui_performance, listener_address
-from observer.driver_manager import get_driver
+from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type
+from observer.constants import listener_address
+from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
 from observer.processors.test_data_processor import get_test_data_processor
-from observer.exporter import export
+from observer.reporter import complete_report
 from observer.runner import close_driver, terminate_runner
 from observer.util import _pairwise
 
 load_event_end = 0
+galloper_api_url = os.getenv("GALLOPER_API_URL", "http://localhost:80/api/v1")
+galloper_project_id = int(os.getenv("GALLOPER_PROJECT_ID", "1"))
+env = os.getenv("ENV", "")
+minio_bucket_name = os.getenv("MINIO_BUCKET_NAME", "reports")
 
 
 def execute_scenario(scenario, args):
-    url = scenario['url']
+    base_url = scenario['url']
     config = SharedConfig()
-    config.base_url = url
+    config.base_url = base_url
     browser._config = config
     for test in scenario['tests']:
-        _execute_test(test, args)
+        _execute_test(base_url, config.browser_name, test, args)
 
     close_driver()
     if not args.video:
         terminate_runner()
 
 
-def _execute_test(test, args):
+def _execute_test(base_url, browser_name, test, args):
     test_name = test['name']
     print(f"\nExecuting test: {test_name}")
 
     test_data_processor = get_test_data_processor(test_name, args.data)
 
+    if args.galloper:
+        report_id = notify_on_test_start(galloper_project_id, test_name, browser_name, env, base_url)
+
+    locators = []
+    exception = None
+    visited_pages = 0
+    total_thresholds = {
+        "total": 0,
+        "failed": 0
+    }
+
     for current_command, next_command in _pairwise(test['commands']):
         print(current_command)
 
-        report, cmd_results = _execute_command(current_command, next_command, test_data_processor,
-                                               is_video_enabled(args))
+        locators.append(current_command)
+
+        report, cmd_results, ex = _execute_command(current_command, next_command, test_data_processor,
+                                                   is_video_enabled(args))
+
+        if ex:
+            exception = ex
+            break
 
         if not report:
             continue
@@ -51,33 +74,83 @@ def _execute_test(test, args):
         if args.export:
             export(cmd_results, args)
 
-        results = []
+        visited_pages += 1
 
-        if 'html' in args.report:
-            results.append({'html_report': report.get_report(), 'title': report.title})
-        if args.firstPaint > 0:
-            message = ''
-            if args.firstPaint < report.timing['firstPaint']:
-                message = f"First paint exceeded threshold of {args.firstPaint}ms by " \
-                          f"{report.timing['firstPaint'] - args.firstPaint} ms"
-            results.append({"name": f"First Paint {report.title}",
-                            "actual": report.timing['firstPaint'], "expected": args.firstPaint, "message": message})
-        if args.speedIndex > 0:
-            message = ''
-            if args.speedIndex < report.timing['speedIndex']:
-                message = f"Speed index exceeded threshold of {args.speedIndex}ms by " \
-                          f"{report.timing['speedIndex'] - args.speedIndex} ms"
-            results.append({"name": f"Speed Index {report.title}", "actual": report.timing['speedIndex'],
-                            "expected": args.speedIndex, "message": message})
-        if args.totalLoad > 0:
-            totalLoad = report.performance_timing['loadEventEnd'] - report.performance_timing['navigationStart']
-            message = ''
-            if args.totalLoad < totalLoad:
-                message = f"Total Load exceeded threshold of {args.totalLoad}ms by " \
-                          f"{totalLoad - args.speedIndex} ms"
-            results.append({"name": f"Total Load {report.title}", "actual": totalLoad,
-                            "expected": args.totalLoad, "message": message})
-        process_report(results, args.report)
+        thresholds = complete_report(report, args)
+        total_thresholds["total"] += thresholds["total"]
+        total_thresholds["failed"] += thresholds["failed"]
+
+        if args.galloper:
+            notify_on_command_end(galloper_project_id,
+                                  report_id,
+                                  minio_bucket_name,
+                                  cmd_results,
+                                  thresholds, locators, report.title)
+
+    if args.galloper:
+        notify_on_test_end(galloper_project_id, report_id, visited_pages, total_thresholds, exception)
+
+
+def notify_on_test_start(project_id: int, test_name, browser_name, env, base_url):
+    data = {
+        "test_name": test_name,
+        "base_url": base_url,
+        "browser_name": browser_name,
+        "env": env,
+        "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+
+    res = requests.post(f"{galloper_api_url}/observer/{project_id}", json=data, auth=('user', 'user'))
+    return res.json()['id']
+
+
+def notify_on_test_end(project_id: int, report_id: int, visited_pages, total_thresholds, exception):
+    data = {
+        "report_id": report_id,
+        "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        "visited_pages": visited_pages,
+        "thresholds_total": total_thresholds["total"],
+        "thresholds_failed": total_thresholds["failed"]
+    }
+
+    if exception:
+        data["exception"] = str(exception)
+
+    res = requests.put(f"{galloper_api_url}/observer/{project_id}", json=data, auth=('user', 'user'))
+    return res.json()
+
+
+def send_report_locators(project_id: int, report_id: int, exception):
+    requests.put(f"{galloper_api_url}/observer/{project_id}/{report_id}", json={"exception": exception, "status": ""},
+                 auth=('user', 'user'))
+
+
+def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators, name):
+    result = GalloperExporter(metrics).export()
+
+    file_name = f"{name}_0.html"
+    report_path = f"/tmp/reports/{file_name}"
+
+    data = {
+        "name": name,
+        "metrics": result,
+        "bucket_name": bucket_name,
+        "file_name": file_name,
+        "resolution": metrics['info']['windowSize'],
+        "browser_version": metrics['info']['browser'],
+        "thresholds_total": thresholds["total"],
+        "thresholds_failed": thresholds["failed"],
+        "locators": locators
+    }
+
+    res = requests.post(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=data, auth=('user', 'user'))
+
+    file = {'file': open(report_path, 'rb')}
+
+    requests.post(f"{galloper_api_url}/artifacts/{project_id}/{bucket_name}/{file_name}", files=file,
+                  auth=('user', 'user'))
+
+    return res.json()["id"]
 
 
 def is_video_enabled(args):
@@ -87,6 +160,7 @@ def is_video_enabled(args):
 def _execute_command(current_command, next_command, test_data_processor, enable_video=True):
     global load_event_end
     results = None
+    report = None
 
     current_cmd = current_command['command']
     current_target = current_command['target']
@@ -113,26 +187,25 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
             load_event_end = get_performance_timing()['loadEventEnd']
             results = get_performance_metrics()
             results['info']['testStart'] = int(current_time)
-    except WebDriverException as e:
+    except Exception as e:
         print(e)
-        return None, None
+        return None, None, e
     finally:
         if not next_is_actionable:
-            return None, None
+            return None, None, None
 
         video_folder = None
         video_path = None
         if enable_video and next_is_actionable:
             video_folder, video_path = stop_recording()
 
-    report = None
     if results and video_folder:
         report = resultsProcessor(video_path, results, video_folder, True, True)
 
     if video_folder:
         rmtree(video_folder)
 
-    return report, results
+    return report, results, None
 
 
 def start_recording():
@@ -155,44 +228,3 @@ def is_navigation_happened():
         return True
 
     return False
-
-
-def get_performance_timing():
-    return get_driver().execute_script("return performance.timing")
-
-
-def get_performance_metrics():
-    return get_driver().driver.execute_script(check_ui_performance)
-
-
-def command(func, actionable=True):
-    return func, actionable
-
-
-command_type = {
-    "open": command(browser_actions.open),
-    "setWindowSize": command(browser_actions.setWindowSize, actionable=False),
-    "click": command(browser_actions.click),
-    "type": command(browser_actions.type),
-    "sendKeys": command(browser_actions.sendKeys),
-    "assertText": command(browser_actions.assert_text)
-}
-
-
-def process_report(report, config):
-    test_cases = []
-    html_report = 0
-    for record in report:
-        if 'xml' in config and 'html_report' not in record.keys():
-            test_cases.append(TestCase(record['name'], record.get('class_name', 'observer'),
-                                       record['actual'], '', ''))
-            if record['message']:
-                test_cases[-1].add_failure_info(record['message'])
-        elif 'html' in config and 'html_report' in record.keys():
-            with open(f'/tmp/reports/{record["title"]}_{html_report}.html', 'w') as f:
-                f.write(record['html_report'])
-            html_report += 1
-
-    ts = TestSuite("Observer UI Benchmarking Test ", test_cases)
-    with open("/tmp/reports/report.xml", 'w') as f:
-        TestSuite.to_file(f, [ts], prettyprint=True)

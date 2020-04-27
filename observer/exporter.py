@@ -109,6 +109,24 @@ class InfluxExporter(Exporter):
         self.client.write_points(json_body)
 
 
+class GalloperExporter(Exporter):
+
+    def __init__(self, raw_data):
+        super().__init__(raw_data)
+
+    def export(self):
+        return {
+            "requests": len(self.requests),
+            "domains": len(self.domains),
+            "total": self.total_load_time,
+            "speed_index": self.speed_index,
+            "time_to_first_byte": self.time_to_first_byte,
+            "time_to_first_paint": self.time_to_first_paint,
+            "dom_content_loading": self.dom_content_loading,
+            "dom_processing": self.dom_processing
+        }
+
+
 def export(data, args):
     if "json" in args.export:
         TelegraphJsonExporter(data).export()

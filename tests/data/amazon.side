@@ -1,0 +1,88 @@
+{
+  "id": "b199e2fd-ac8f-42ee-b02a-62c1111973da",
+  "version": "2.0",
+  "name": "amazon",
+  "url": "https://www.amazon.com",
+  "tests": [{
+    "id": "3d257130-16b8-498a-88b2-514244f0de14",
+    "name": "amazon",
+    "commands": [{
+      "id": "7a7fad0a-d7bd-41a3-8d2d-57a6773c83a4",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "0e722193-0492-4e0a-9bb4-853b205a80ba",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1920x1080",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "9e22aeb4-3bbd-414f-a133-491bbff38f22",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Customer Service",
+      "targets": [
+        ["linkText=Customer Service", "linkText"],
+        ["css=#nav-xshop > .nav-a:nth-child(3)", "css:finder"],
+        ["xpath=//a[contains(text(),'Customer Service')]", "xpath:link"],
+        ["xpath=//div[@id='nav-xshop']/a[2]", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/gp/help/customer/display.html?nodeId=508510&ref_=nav_cs_customerservice')]", "xpath:href"],
+        ["xpath=//div[3]/div[2]/div/a[2]", "xpath:position"],
+        ["xpath=//a[contains(.,'Customer Service')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "d18380d5-c43d-4353-84e3-a07c1e30b753",
+      "comment": "",
+      "command": "assertText",
+      "target": "css=.a-section > h1",
+      "targets": [
+        ["css=.a-section > h1", "css:finder"],
+        ["xpath=//h1", "xpath:position"],
+        ["xpath=//h1[contains(.,'Hello. What can we help you with?')]", "xpath:innerText"]
+      ],
+      "value": "Hello. What can we help you with?"
+    }, {
+      "id": "89aeee9f-73fa-454d-bd44-5f0803d58056",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Gift Cards",
+      "targets": [
+        ["linkText=Gift Cards", "linkText"],
+        ["css=.nav-a:nth-child(5)", "css:finder"],
+        ["xpath=//a[contains(text(),'Gift Cards')]", "xpath:link"],
+        ["xpath=//div[@id='nav-xshop']/a[4]", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/gift-cards/b/?ie=UTF8&node=2238192011&ref_=nav_cs_gc')]", "xpath:href"],
+        ["xpath=//div[3]/div[2]/div/a[4]", "xpath:position"],
+        ["xpath=//a[contains(.,'Gift Cards')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "997b7618-71d4-40c5-832e-53f68efc9dfc",
+      "comment": "",
+      "command": "assertText",
+      "target": "css=.nav-b > .nav-a-content",
+      "targets": [
+        ["css=.nav-b > .nav-a-content", "css:finder"],
+        ["xpath=//div[@id='nav-subnav']/a/span", "xpath:idRelative"],
+        ["xpath=//div[4]/a/span", "xpath:position"],
+        ["xpath=//span[contains(.,'Gift Cards')]", "xpath:innerText"]
+      ],
+      "value": "Gift Cards"
+    }]
+  }],
+  "suites": [{
+    "id": "4d531470-33a4-46c0-8a35-d46c7a82356e",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["3d257130-16b8-498a-88b2-514244f0de14"]
+  }],
+  "urls": ["https://www.amazon.com/"],
+  "plugins": []
+}

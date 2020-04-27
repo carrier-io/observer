@@ -1,0 +1,79 @@
+{
+  "id": "03f2f9bd-6354-45ee-a69a-23fe2a1b7a19",
+  "version": "2.0",
+  "name": "reverb",
+  "url": "https://reverb.com",
+  "tests": [{
+    "id": "d46f4a8b-24b8-4d09-9865-f4ecd750b3c7",
+    "name": "reverb",
+    "commands": [{
+      "id": "e26cde6f-1e77-4bea-b03e-0795356fce77",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "a668b720-56dc-4225-b0bc-94b089c3df1d",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1277x927",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "aca1981e-3db8-4526-904a-3ebd497341de",
+      "comment": "",
+      "command": "click",
+      "target": "css=.tiles__tile:nth-child(3) > .category-item",
+      "targets": [
+        ["css=.tiles__tile:nth-child(3) > .category-item", "css:finder"],
+        ["xpath=//a[contains(text(),'Bass Guitars')]", "xpath:link"],
+        ["xpath=(//a[contains(@href, 'https://reverb.com/c/bass-guitars')])[2]", "xpath:href"],
+        ["xpath=//section/div/div/div/div/ul/li[3]/a", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "7f37d862-05d7-4c6d-9c58-91b567fa3f36",
+      "comment": "",
+      "command": "assertText",
+      "target": "css=.cms-page-head__title",
+      "targets": [
+        ["css=.cms-page-head__title", "css:finder"],
+        ["xpath=//h1", "xpath:position"],
+        ["xpath=//h1[contains(.,'Bass Guitars')]", "xpath:innerText"]
+      ],
+      "value": "Bass Guitars"
+    }, {
+      "id": "cef404c1-138c-46bc-a6b2-eaf2e5b2c38e",
+      "comment": "",
+      "command": "click",
+      "target": "css=.dynamic-page__sidebar__bottom .cms-facet__option:nth-child(1) .cms-facet__link__text",
+      "targets": [
+        ["css=.dynamic-page__sidebar__bottom .cms-facet__option:nth-child(1) .cms-facet__link__text", "css:finder"],
+        ["xpath=//div/div[2]/ul/li/a/div[2]", "xpath:position"]
+      ],
+      "value": ""
+    },  {
+      "id": "e6022726-8c88-424f-a215-e69e438d8316",
+      "comment": "",
+      "command": "assertText",
+      "target": "css=.cms-page-head__title",
+      "targets": [
+        ["css=.cms-page-head__title", "css:finder"],
+        ["xpath=//h1", "xpath:position"],
+        ["xpath=//h1[contains(.,'4-String Bass Guitars')]", "xpath:innerText"]
+      ],
+      "value": "4-String Bass Guitars"
+    }]
+  }],
+  "suites": [{
+    "id": "d5ca5576-f6ec-4994-89c1-c31ddc1c7324",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["d46f4a8b-24b8-4d09-9865-f4ecd750b3c7"]
+  }],
+  "urls": ["https://reverb.com/"],
+  "plugins": []
+}
