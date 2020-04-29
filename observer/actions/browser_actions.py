@@ -77,6 +77,10 @@ def get_performance_entities():
     return get_driver().driver.execute_script("return performance.getEntriesByType('resource')")
 
 
+def get_dom():
+    return get_driver().driver.page_source
+
+
 command_type = {
     "open": command(open_url),
     "setWindowSize": command(setWindowSize, actionable=False),

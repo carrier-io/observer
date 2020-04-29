@@ -12,7 +12,7 @@ from selene.support.shared import browser, SharedConfig
 
 from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
-    get_performance_entities
+    get_performance_entities, get_dom
 from observer.constants import listener_address
 from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
@@ -28,6 +28,7 @@ env = os.getenv("ENV", "")
 minio_bucket_name = os.getenv("MINIO_BUCKET_NAME", "reports")
 
 perf_entities = []
+dom = None
 
 
 def execute_scenario(scenario, args):
@@ -164,6 +165,7 @@ def is_video_enabled(args):
 def _execute_command(current_command, next_command, test_data_processor, enable_video=True):
     global load_event_end
     global perf_entities
+    global dom
 
     results = None
     report = None
@@ -196,6 +198,11 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
             perf_entities = get_performance_entities()
             print(perf_entities)
 
+            dom = get_dom()
+
+            dom_changed = is_dom_changed(dom, dom)
+            print(dom_changed)
+
         if not is_navigation:
             latest_pef_entries = get_performance_entities()
 
@@ -203,6 +210,8 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
             print(latest_pef_entries)
             is_entities_changed = is_performance_entities_changed(perf_entities, latest_pef_entries)
             print(is_entities_changed)
+            dom_changed = is_dom_changed(dom)
+            print(dom_changed)
 
     except Exception as e:
         print(e)
@@ -257,5 +266,5 @@ def is_performance_entities_changed(old_entities, latest_entries):
     return False
 
 
-def is_dom_changed():
-    pass
+def is_dom_changed(old_dom, latest_dom):
+    return False
