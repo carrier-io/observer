@@ -21,6 +21,6 @@ def test_main_with_data_params():
             "-si", "400",
             "-tl", "500",
             "-r", "html",
-            # "-g", False
+            "-g", False
         ])
     execute(args)

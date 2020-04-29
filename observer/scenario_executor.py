@@ -6,11 +6,13 @@ from shutil import rmtree
 from time import time
 
 import requests
+from deepdiff import DeepDiff
 from requests import get
 from selene.support.shared import browser, SharedConfig
 
 from observer.actions import browser_actions
-from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type
+from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
+    get_performance_entities
 from observer.constants import listener_address
 from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
@@ -24,6 +26,8 @@ galloper_api_url = os.getenv("GALLOPER_API_URL", "http://localhost:80/api/v1")
 galloper_project_id = int(os.getenv("GALLOPER_PROJECT_ID", "1"))
 env = os.getenv("ENV", "")
 minio_bucket_name = os.getenv("MINIO_BUCKET_NAME", "reports")
+
+perf_entities = []
 
 
 def execute_scenario(scenario, args):
@@ -159,6 +163,8 @@ def is_video_enabled(args):
 
 def _execute_command(current_command, next_command, test_data_processor, enable_video=True):
     global load_event_end
+    global perf_entities
+
     results = None
     report = None
 
@@ -178,15 +184,26 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
 
         current_cmd(current_target, current_value)
 
-        if next_is_actionable:
-            pass
+        is_navigation = is_navigation_happened()
 
-        if is_navigation_happened() and next_is_actionable:
+        if is_navigation and next_is_actionable:
             browser_actions.wait_for_visibility(next_command['target'])
 
             load_event_end = get_performance_timing()['loadEventEnd']
             results = get_performance_metrics()
             results['info']['testStart'] = int(current_time)
+
+            perf_entities = get_performance_entities()
+            print(perf_entities)
+
+        if not is_navigation:
+            latest_pef_entries = get_performance_entities()
+
+            print(perf_entities)
+            print(latest_pef_entries)
+            is_entities_changed = is_performance_entities_changed(perf_entities, latest_pef_entries)
+            print(is_entities_changed)
+
     except Exception as e:
         print(e)
         return None, None, e
@@ -228,3 +245,17 @@ def is_navigation_happened():
         return True
 
     return False
+
+
+def is_performance_entities_changed(old_entities, latest_entries):
+    print(old_entities)
+    ddiff = DeepDiff(old_entities, latest_entries, ignore_order=True)
+    print(ddiff)
+    if ddiff['iterable_item_added'] or ddiff['iterable_item_removed']:
+        return True
+
+    return False
+
+
+def is_dom_changed():
+    pass

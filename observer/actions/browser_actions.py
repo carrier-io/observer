@@ -73,6 +73,10 @@ def get_performance_metrics():
     return get_driver().driver.execute_script(check_ui_performance)
 
 
+def get_performance_entities():
+    return get_driver().driver.execute_script("return performance.getEntriesByType('resource')")
+
+
 command_type = {
     "open": command(open_url),
     "setWindowSize": command(setWindowSize, actionable=False),
