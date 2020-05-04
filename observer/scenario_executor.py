@@ -29,6 +29,7 @@ minio_bucket_name = os.getenv("MINIO_BUCKET_NAME", "reports")
 
 perf_entities = []
 dom = None
+results = None
 
 
 def execute_scenario(scenario, args):
@@ -81,7 +82,7 @@ def _execute_test(base_url, browser_name, test, args):
 
         visited_pages += 1
 
-        thresholds = complete_report(report, args)
+        report_uuid, thresholds = complete_report(report, args)
         total_thresholds["total"] += thresholds["total"]
         total_thresholds["failed"] += thresholds["failed"]
 
@@ -90,7 +91,7 @@ def _execute_test(base_url, browser_name, test, args):
                                   report_id,
                                   minio_bucket_name,
                                   cmd_results,
-                                  thresholds, locators, report.title)
+                                  thresholds, locators, report_uuid, report.title)
 
     if args.galloper:
         notify_on_test_end(galloper_project_id, report_id, visited_pages, total_thresholds, exception)
@@ -130,10 +131,11 @@ def send_report_locators(project_id: int, report_id: int, exception):
                  auth=('user', 'user'))
 
 
-def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators, name):
+def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators, report_uuid,
+                          name):
     result = GalloperExporter(metrics).export()
 
-    file_name = f"{name}_0.html"
+    file_name = f"{name}_{report_uuid}.html"
     report_path = f"/tmp/reports/{file_name}"
 
     data = {
@@ -166,9 +168,10 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
     global load_event_end
     global perf_entities
     global dom
+    global results
 
-    results = None
     report = None
+    generate_report = False
 
     current_cmd = current_command['command']
     current_target = current_command['target']
@@ -194,24 +197,19 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
             load_event_end = get_performance_timing()['loadEventEnd']
             results = get_performance_metrics()
             results['info']['testStart'] = int(current_time)
-
-            perf_entities = get_performance_entities()
-            print(perf_entities)
-
-            dom = get_dom()
-
-            dom_changed = is_dom_changed(dom, dom)
-            print(dom_changed)
-
-        if not is_navigation:
+            generate_report = True
+        elif not is_navigation:
             latest_pef_entries = get_performance_entities()
 
-            print(perf_entities)
-            print(latest_pef_entries)
             is_entities_changed = is_performance_entities_changed(perf_entities, latest_pef_entries)
-            print(is_entities_changed)
-            dom_changed = is_dom_changed(dom)
-            print(dom_changed)
+
+            if is_entities_changed and is_dom_changed(dom, dom):
+                perf_entities = latest_pef_entries
+
+                latest_results = get_performance_metrics()
+                compare_performance_results(results, latest_results)
+                results = latest_results
+                generate_report = True
 
     except Exception as e:
         print(e)
@@ -225,7 +223,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
         if enable_video and next_is_actionable:
             video_folder, video_path = stop_recording()
 
-    if results and video_folder:
+    if generate_report and results and video_folder:
         report = resultsProcessor(video_path, results, video_folder, True, True)
 
     if video_folder:
@@ -267,4 +265,9 @@ def is_performance_entities_changed(old_entities, latest_entries):
 
 
 def is_dom_changed(old_dom, latest_dom):
-    return False
+    return True
+
+
+def compare_performance_results(old, new):
+    ddiff = DeepDiff(old, new, ignore_order=True)
+    print(ddiff)

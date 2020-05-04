@@ -18,6 +18,10 @@ def get_locator_strategy(locator):
         return locator.replace("id=", "#")
     elif "linkText=" in locator:
         return by.link_text(locator.replace("linkText=", ""))
+    elif "xpath=" in locator:
+        return by.xpath(locator.replace("xpath=", ""))
+    else:
+        raise NotImplementedError(f"Wrong locator format {locator}")
 
 
 def process_text(text):

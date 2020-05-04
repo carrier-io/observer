@@ -1,0 +1,95 @@
+{
+  "id": "32bd33ad-84dd-479d-85f3-70c9ea939ef8",
+  "version": "2.0",
+  "name": "webmail",
+  "url": "https://ej2.syncfusion.com",
+  "tests": [{
+    "id": "53729ebc-8a68-46a4-af70-56a88139aa09",
+    "name": "webmail",
+    "commands": [{
+      "id": "f1fd02b9-20fd-4092-80e0-6bfa253d1be9",
+      "comment": "",
+      "command": "open",
+      "target": "/showcase/typescript/webmail/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "8ae65661-0aa3-45b4-a1d6-eeb9fe0f6db3",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1853x1053",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "1f58bcbf-ec87-4a30-bb0f-2608ab49d3fd",
+      "comment": "",
+      "command": "click",
+      "target": "xpath=//span[contains(.,'Trash')]",
+      "targets": [
+        ["css=#tree_active .e-list-text", "css:finder"],
+        ["xpath=//li[@id='tree_active']/div[2]/span", "xpath:idRelative"],
+        ["xpath=//li[12]/div[2]/span", "xpath:position"],
+        ["xpath=//span[contains(.,'Trash')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "35cd8bc3-5582-4129-881a-9ceb64cb93a7",
+      "comment": "",
+      "command": "click",
+      "target": "css=#listview-grp > div > ul > li:nth-child(1)",
+      "targets": [
+        ["css=.e-hover > .template-container", "css:finder"],
+        ["xpath=//div[@id='listview-grp']/div/ul/li/div", "xpath:idRelative"],
+        ["xpath=//div[2]/div/div[2]/div/ul/li/div", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "9b94dfde-5c30-4d5f-9fca-a704e60b2c63",
+      "comment": "",
+      "command": "assertText",
+      "target": "id=sub",
+      "targets": [
+        ["id=sub", "id"],
+        ["css=#sub", "css:finder"],
+        ["xpath=//div[@id='sub']", "xpath:attributes"],
+        ["xpath=//div[@id='accodianContent']/div/div[2]/div", "xpath:idRelative"],
+        ["xpath=//div[2]/div/div[2]/div/div/div/div[2]/div", "xpath:position"]
+      ],
+      "value": "Fletcher Beck"
+    }, {
+      "id": "0769ceed-3cce-4cdf-b83f-a03e1bcc1267",
+      "comment": "",
+      "command": "click",
+      "target": "xpath=//div[2]/div/div[2]/div/ul/li[2]/div",
+      "targets": [
+        ["css=.e-hover > .template-container", "css:finder"],
+        ["xpath=//div[@id='listview-grp']/div/ul/li[2]/div", "xpath:idRelative"],
+        ["xpath=//div[2]/div/div[2]/div/ul/li[2]/div", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "6d35bd84-0eab-4f0c-999e-858cb32d704f",
+      "comment": "",
+      "command": "assertText",
+      "target": "id=sub",
+      "targets": [
+        ["id=sub", "id"],
+        ["css=#sub", "css:finder"],
+        ["xpath=//div[@id='sub']", "xpath:attributes"],
+        ["xpath=//div[@id='accodianContent']/div/div[2]/div", "xpath:idRelative"],
+        ["xpath=//div[2]/div/div[2]/div/div/div/div[2]/div", "xpath:position"]
+      ],
+      "value": "Oscar Mcconnell"
+    }]
+  }],
+  "suites": [{
+    "id": "c6f96c30-ebfa-443e-8f82-2aca375e2349",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["53729ebc-8a68-46a4-af70-56a88139aa09"]
+  }],
+  "urls": ["https://ej2.syncfusion.com/"],
+  "plugins": []
+}
