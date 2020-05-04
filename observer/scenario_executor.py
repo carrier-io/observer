@@ -205,9 +205,8 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
 
             if is_entities_changed and is_dom_changed(dom, dom):
                 perf_entities = latest_pef_entries
-
                 latest_results = get_performance_metrics()
-                compare_performance_results(results, latest_results)
+                latest_results['info']['testStart'] = int(current_time)
                 results = latest_results
                 generate_report = True
 
@@ -255,9 +254,7 @@ def is_navigation_happened():
 
 
 def is_performance_entities_changed(old_entities, latest_entries):
-    print(old_entities)
     ddiff = DeepDiff(old_entities, latest_entries, ignore_order=True)
-    print(ddiff)
     if ddiff['iterable_item_added'] or ddiff['iterable_item_removed']:
         return True
 
@@ -266,8 +263,3 @@ def is_performance_entities_changed(old_entities, latest_entries):
 
 def is_dom_changed(old_dom, latest_dom):
     return True
-
-
-def compare_performance_results(old, new):
-    ddiff = DeepDiff(old, new, ignore_order=True)
-    print(ddiff)
