@@ -4,7 +4,7 @@ from datetime import datetime
 from os import path
 from shutil import rmtree
 from time import time
-
+import copy
 import requests
 from deepdiff import DeepDiff
 from requests import get
@@ -172,6 +172,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
 
     report = None
     generate_report = False
+    latest_results = None
 
     current_cmd = current_command['command']
     current_target = current_command['target']
@@ -207,7 +208,9 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
                 perf_entities = latest_pef_entries
                 latest_results = get_performance_metrics()
                 latest_results['info']['testStart'] = int(current_time)
-                results = latest_results
+
+                results = compare_results(results, latest_results)
+
                 generate_report = True
 
     except Exception as e:
@@ -224,6 +227,9 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
 
     if generate_report and results and video_folder:
         report = resultsProcessor(video_path, results, video_folder, True, True)
+
+    if latest_results:
+        results = latest_results
 
     if video_folder:
         rmtree(video_folder)
@@ -263,3 +269,18 @@ def is_performance_entities_changed(old_entities, latest_entries):
 
 def is_dom_changed(old_dom, latest_dom):
     return True
+
+# createTile("Total", l.perfTiming.loadEventEnd - l.perfTiming.navigationStart, 3e3, 5e3, "ms"),
+                    # createTile("Speed Index", i, 1e3, 3e3, "")
+# createTile("DOM Content Loading", l.perfTiming.domContentLoadedEventStart - l.perfTiming.domLoading, 1e3, 3e3, "ms"),
+                    # createTile("DOM Processing", l.perfTiming.domComplete - l.perfTiming.domLoading, 2500, 4500, "ms")
+def compare_results(old, new):
+    result = copy.deepcopy(new)
+
+    diff = DeepDiff(old["performanceResources"], new["performanceResources"], ignore_order=True)
+    items_added = list(diff['iterable_item_added'].values())
+    result["performanceResources"] = items_added
+    result['performancetiming']['navigationStart'] = new['performancetiming']['responseStart']
+    result['timing']['firstPaint'] = new['timing']['firstPaint'] - old['timing']['firstPaint']
+    result['timing']['speedIndex'] = new['timing']['speedIndex'] - old['timing']['speedIndex']
+    return result
