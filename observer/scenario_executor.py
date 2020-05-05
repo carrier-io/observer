@@ -5,6 +5,8 @@ from os import path
 from shutil import rmtree
 from time import time
 import copy
+from uuid import uuid4
+
 import requests
 from deepdiff import DeepDiff
 from requests import get
@@ -12,7 +14,7 @@ from selene.support.shared import browser, SharedConfig
 
 from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
-    get_performance_entities, get_dom
+    get_performance_entities, get_dom, take_full_screenshot
 from observer.constants import listener_address
 from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
@@ -173,6 +175,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
     report = None
     generate_report = False
     latest_results = None
+    screenshot_path = None
 
     current_cmd = current_command['command']
     current_target = current_command['target']
@@ -210,7 +213,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
                 latest_results['info']['testStart'] = int(current_time)
 
                 results = compare_results(results, latest_results)
-
+                screenshot_path = take_full_screenshot(f"/tmp/{uuid4()}.png")
                 generate_report = True
 
     except Exception as e:
@@ -226,7 +229,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
             video_folder, video_path = stop_recording()
 
     if generate_report and results and video_folder:
-        report = resultsProcessor(video_path, results, video_folder, True, True)
+        report = resultsProcessor(video_path, results, video_folder, screenshot_path, True, True)
 
     if latest_results:
         results = latest_results
