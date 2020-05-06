@@ -274,15 +274,35 @@ def is_performance_entities_changed(old_entities, latest_entries):
 def is_dom_changed(old_dom, latest_dom):
     return True
 
-# createTile("Total", l.perfTiming.loadEventEnd - l.perfTiming.navigationStart, 3e3, 5e3, "ms"),
-                    # createTile("Speed Index", i, 1e3, 3e3, "")
-# createTile("DOM Content Loading", l.perfTiming.domContentLoadedEventStart - l.perfTiming.domLoading, 1e3, 3e3, "ms"),
-                    # createTile("DOM Processing", l.perfTiming.domComplete - l.perfTiming.domLoading, 2500, 4500, "ms")
+
 def compare_results(old, new):
     result = copy.deepcopy(new)
 
     diff = DeepDiff(old["performanceResources"], new["performanceResources"], ignore_order=True)
     items_added = list(diff['iterable_item_added'].values())
+    sorted_items = sorted(items_added, key=lambda k: k['startTime'])
+
+    fields = [
+        'connectEnd',
+        'connectStart',
+        'domainLookupEnd',
+        'domainLookupStart',
+        'fetchStart',
+        'requestStart',
+        'responseEnd',
+        'responseStart',
+        'secureConnectionStart',
+        'startTime'
+    ]
+
+    first_point = sorted_items[0]['startTime']
+    for item in sorted_items:
+        for field in fields:
+            curr_value = item[field]
+            if curr_value == 0:
+                continue
+            item[field] = curr_value - first_point
+
     result["performanceResources"] = items_added
     result['performancetiming']['navigationStart'] = new['performancetiming']['responseStart']
     result['timing']['firstPaint'] = new['timing']['firstPaint'] - old['timing']['firstPaint']
