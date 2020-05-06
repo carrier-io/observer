@@ -472,7 +472,13 @@
       function showImage(e){
           function closeModal(){
             var modal = document.getElementById("img-modal");
+            var modalImg = document.getElementById("modalImg");
             modal.style.display = "none";
+
+            if(hasW60){
+               modalImg.classList.remove("w-60")
+            }
+
             window.addEventListener("keydown", closeModalOnEscape)
           }
 
@@ -490,7 +496,8 @@
 
              modal.style.display = "block";
              modalImg.src = img.src;
-             if(img.classList.contains("w-60")){
+             hasW60 = img.classList.contains("w-60")
+             if(hasW60){
                modalImg.classList.add("w-60")
              }
              captionText.innerHTML = img.alt;
