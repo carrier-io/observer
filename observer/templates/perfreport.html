@@ -89,6 +89,38 @@
       width: 60%;
     }
 
+    .slider__control {
+      position: fixed;
+      top: 50%;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      color: #fff;
+      text-align: center;
+      opacity: 0.5;
+      height: 50px;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, .5);
+      border: 0px;
+    }
+
+    .next-slide {
+      left: 18%
+    }
+
+    .prev-slide {
+      right: 18%
+    }
+
+    .slider__control:hover,
+    .slider__control:focus {
+      color: #fff;
+      text-decoration: none;
+      outline: 0;
+      opacity: .9;
+      cursor: pointer;
+    }
+
     @media only screen and (max-width: 700px){
       .modal-content {
         width: 100%;
@@ -141,7 +173,7 @@
         <div class="divFrame">
           <img class="frameImg w-60"
                src="data:image/jpg;base64,{{ screenshot }}"
-               alt="load frame {{ loop.index }}" id="frame_{{ loop.index }}"/>
+               alt="load frame {{ loop.index }}" id="frame_{{ loop.index }}" data-index="{{ loop.index }}"/>
         </div>
         {% endfor %}
       </div>
@@ -436,6 +468,8 @@
         <span class="close" id="close-modal">&times;</span>
         <img class="modal-content" id="modalImg">
         <div id="caption"></div>
+        <button class="next-slide slider__control" id="prevSlide">&#10094;</button>
+        <button class="prev-slide slider__control" id="nextSlide">&#10095;</button>
   </div>
 </div>
 
@@ -469,6 +503,8 @@
 </script>
 <script>
   window.onload = function(){
+      var slideIndex = 1;
+
       function showImage(e){
           function closeModal(){
             var modal = document.getElementById("img-modal");
@@ -512,11 +548,38 @@
           var isFrameImg = img.classList.contains("frameImg");
           if (img && isFrameImg) {
             showModal(img)
+            slideIndex = parseInt(img.dataset.index)
+            showDivs(slideIndex);
           }
       }
 
       document.getElementById("fp-screenshot").addEventListener("click", showImage);
       document.getElementById("frames_container").addEventListener("click", showImage);
+
+      function showDivs(n) {
+        var i;
+        var x = document.querySelectorAll("#frames_container > .divFrame > .frameImg");
+        if (n > x.length) {slideIndex = 1}
+        if (n < 1) {slideIndex = x.length} ;
+
+        var img = x[slideIndex-1];
+        var modalImg = document.getElementById("modalImg");
+        var captionText = document.getElementById("caption");
+
+        modalImg.src = img.src
+        captionText.innerHTML = img.alt;
+      }
+
+      document.getElementById("nextSlide").onclick = () => {
+          slideIndex += 1
+          showDivs(slideIndex);
+      }
+
+      document.getElementById("prevSlide").onclick = () => {
+          slideIndex -= 1
+          showDivs(slideIndex);
+      }
+
   }
 </script>
 </body>
