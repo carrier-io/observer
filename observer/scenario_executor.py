@@ -201,6 +201,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
             load_event_end = get_performance_timing()['loadEventEnd']
             results = get_performance_metrics()
             results['info']['testStart'] = int(current_time)
+            screenshot_path = take_full_screenshot(f"/tmp/{uuid4()}.png")
             generate_report = True
         elif not is_navigation:
             latest_pef_entries = get_performance_entities()
