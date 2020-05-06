@@ -470,6 +470,19 @@
 <script>
   window.onload = function(){
       function showImage(e){
+          function closeModal(){
+            var modal = document.getElementById("img-modal");
+            modal.style.display = "none";
+            window.addEventListener("keydown", closeModalOnEscape)
+          }
+
+          function closeModalOnEscape(e){
+              switch (e.keyCode) {
+                  case 27:
+                    closeModal()
+              }
+          }
+
           function showModal(img){
              var modal = document.getElementById("img-modal");
              var modalImg = document.getElementById("modalImg");
@@ -483,9 +496,9 @@
              captionText.innerHTML = img.alt;
 
              var closeModalBtn = document.getElementById("close-modal");
-             closeModalBtn.onclick = function() {
-               modal.style.display = "none";
-             }
+             closeModalBtn.onclick = closeModal
+
+             window.addEventListener("keydown", closeModalOnEscape)
           }
 
           var img = e.target
