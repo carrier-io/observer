@@ -465,11 +465,11 @@
     </div>
   </div>
   <div id="img-modal" class="modal">
+     <div class="modal_wrapper">
         <span class="close" id="close-modal">&times;</span>
         <img class="modal-content" id="modalImg">
         <div id="caption"></div>
-        <button class="next-slide slider__control" id="prevSlide">&#10094;</button>
-        <button class="prev-slide slider__control" id="nextSlide">&#10095;</button>
+     </div>
   </div>
 </div>
 
@@ -579,7 +579,6 @@
           slideIndex -= 1
           showDivs(slideIndex);
       }
-
   }
 </script>
 </body>
