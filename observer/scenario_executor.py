@@ -303,8 +303,18 @@ def compare_results(old, new):
                 continue
             item[field] = curr_value - first_point
 
+    sorted_items = sorted(items_added, key=lambda k: k['responseEnd'])
+
+    total_diff = round(
+        result['performancetiming']['loadEventEnd'] - result['performancetiming']['navigationStart'] - sorted_items[-1][
+            'responseEnd'])
+
+
     result["performanceResources"] = items_added
-    result['performancetiming']['navigationStart'] = new['performancetiming']['responseStart']
+    result['performancetiming']['responseStart'] = result['performancetiming']['navigationStart']
+    result['performancetiming']['loadEventEnd'] = result['performancetiming']['loadEventEnd'] - total_diff
+    result['performancetiming']['domComplete'] = result['performancetiming']['domComplete'] - total_diff
+
     result['timing']['firstPaint'] = new['timing']['firstPaint'] - old['timing']['firstPaint']
     result['timing']['speedIndex'] = new['timing']['speedIndex'] - old['timing']['speedIndex']
     return result
