@@ -14,7 +14,7 @@ from selene.support.shared import browser, SharedConfig
 
 from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
-    get_performance_entities, get_dom, take_full_screenshot
+    get_performance_entities, get_dom, take_full_screenshot, get_dom_size
 from observer.constants import listener_address
 from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
@@ -201,6 +201,8 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
             load_event_end = get_performance_timing()['loadEventEnd']
             results = get_performance_metrics()
             results['info']['testStart'] = int(current_time)
+            dom = get_dom_size()
+
             screenshot_path = take_full_screenshot(f"/tmp/{uuid4()}.png")
             generate_report = True
         elif not is_navigation:
@@ -208,7 +210,8 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
 
             is_entities_changed = is_performance_entities_changed(perf_entities, latest_pef_entries)
 
-            if is_entities_changed and is_dom_changed(dom, dom):
+            if is_entities_changed and is_dom_changed(dom):
+                dom = get_dom_size()
                 perf_entities = latest_pef_entries
                 latest_results = get_performance_metrics()
                 latest_results['info']['testStart'] = int(current_time)
@@ -271,8 +274,9 @@ def is_performance_entities_changed(old_entities, latest_entries):
     return False
 
 
-def is_dom_changed(old_dom, latest_dom):
-    return True
+def is_dom_changed(old_dom):
+    new_dom = get_dom_size()
+    return old_dom != new_dom
 
 
 def compare_results(old, new):

@@ -86,6 +86,10 @@ def get_dom():
     return get_driver().driver.page_source
 
 
+def get_dom_size():
+    return get_driver().driver.execute_script("return document.getElementsByTagName('*').length")
+
+
 def take_full_screenshot(save_path):
     driver = get_driver()
     # initiate value
@@ -95,16 +99,16 @@ def take_full_screenshot(save_path):
 
     # js to get height
     height = driver.driver.execute_script('return Math.max('
-                                   'document.documentElement.clientHeight, window.innerHeight);')
+                                          'document.documentElement.clientHeight, window.innerHeight);')
 
     # js to get the maximum scroll height
     # Ref--> https://stackoverflow.com/questions/17688595/finding-the-maximum-scroll-position-of-a-page
     max_window_height = driver.driver.execute_script('return Math.max('
-                                              'document.body.scrollHeight, '
-                                              'document.body.offsetHeight, '
-                                              'document.documentElement.clientHeight, '
-                                              'document.documentElement.scrollHeight, '
-                                              'document.documentElement.offsetHeight);')
+                                                     'document.body.scrollHeight, '
+                                                     'document.body.offsetHeight, '
+                                                     'document.documentElement.clientHeight, '
+                                                     'document.documentElement.scrollHeight, '
+                                                     'document.documentElement.offsetHeight);')
 
     # looping from top to bottom, append to img list
     # Ref--> https://gist.github.com/fabtho/13e4a2e7cfbfde671b8fa81bbe9359fb
