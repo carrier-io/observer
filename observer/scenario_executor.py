@@ -309,7 +309,6 @@ def compare_results(old, new):
         result['performancetiming']['loadEventEnd'] - result['performancetiming']['navigationStart'] - sorted_items[-1][
             'responseEnd'])
 
-
     result["performanceResources"] = items_added
     result['performancetiming']['responseStart'] = result['performancetiming']['navigationStart']
     result['performancetiming']['loadEventEnd'] = result['performancetiming']['loadEventEnd'] - total_diff
