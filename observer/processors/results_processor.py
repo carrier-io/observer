@@ -4,7 +4,6 @@ from os import path, mkdir, environ
 from subprocess import Popen, PIPE
 from multiprocessing import Pool
 
-
 ffmpeg_path = environ.get("ffmpeg_path", "ffmpeg")
 report_path = '/tmp'
 
@@ -28,7 +27,8 @@ def trim_screenshot(kwargs):
 
 
 class resultsProcessor(object):
-    def __init__(self, video_path, request_params, processing_path, return_report=True, generate_html=True):
+    def __init__(self, video_path, request_params, processing_path, screenshot_path, return_report=True,
+                 generate_html=True, ):
         self.processing_path = processing_path
         self.return_report = return_report
         self.title = request_params['info']['title']
@@ -40,12 +40,17 @@ class resultsProcessor(object):
         self.priv_score, self.priv_data = self.privacy_audit(request_params['privacy'])
         self.test_result = 'fail'
         self.total_score = (
-                                       self.acc_score * 30 + self.priv_score * 50 + self.bp_score * 22 + self.perf_score * 44) / 146
+                                   self.acc_score * 30 + self.priv_score * 50 + self.bp_score * 22 + self.perf_score * 44) / 146
         if self.total_score > 90 and request_params['timing']['speedIndex'] < 1000:
             self.test_result = 'pass'
         elif self.total_score > 75 and request_params['timing']['speedIndex'] < 3000:
             self.test_result = 'warning'
         if generate_html:
+            base64_encoded_string = ""
+            if screenshot_path:
+                with open(screenshot_path, 'rb') as image_file:
+                    base64_encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+
             self.report = self.generate_html(page_name=request_params['info']['title'],
                                              video_path=video_path,
                                              test_status=self.test_result,
@@ -63,7 +68,8 @@ class resultsProcessor(object):
                                              measures=request_params['measures'],
                                              navigation_timing=request_params['performancetiming'],
                                              info=request_params['info'],
-                                             timing=request_params['timing'])
+                                             timing=request_params['timing'],
+                                             base64_full_page_screen=base64_encoded_string)
 
     @staticmethod
     def privacy_audit(privacy_data):
@@ -545,7 +551,8 @@ class resultsProcessor(object):
 
     def generate_html(self, page_name, video_path, test_status, start_time, perf_score,
                       priv_score, acc_score, bp_score, acc_findings, perf_findings, bp_findings,
-                      priv_findings, resource_timing, marks, measures, navigation_timing, info, timing):
+                      priv_findings, resource_timing, marks, measures, navigation_timing, info, timing,
+                      base64_full_page_screen):
         from jinja2 import Environment, PackageLoader, select_autoescape
         env = Environment(
             loader=PackageLoader('observer', 'templates'),
@@ -570,7 +577,9 @@ class resultsProcessor(object):
         template = env.get_template('perfreport.html')
         res = template.render(page_name=page_name, str_test_status=str_test_status, test_status=test_status,
                               perf_score=perf_score, priv_score=priv_score, acc_score=acc_score, bp_score=bp_score,
-                              screenshots=screenshots, acc_findings=acc_findings, perf_findings=perf_findings,
+                              screenshots=screenshots, full_page_screen=base64_full_page_screen,
+                              acc_findings=acc_findings,
+                              perf_findings=perf_findings,
                               bp_findings=bp_findings, priv_findings=priv_findings, resource_timing=resource_timing,
                               marks=marks, measures=measures, navigation_timing=navigation_timing,
                               info=info, timing=timing)

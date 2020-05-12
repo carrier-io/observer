@@ -1,5 +1,5 @@
 import os
-
+from uuid import uuid4
 from junit_xml import TestCase, TestSuite
 
 
@@ -46,14 +46,14 @@ def complete_report(report, args):
                       f"{totalLoad - args.speedIndex} ms"
         results.append({"name": f"Total Load {report.title}", "actual": totalLoad,
                         "expected": args.totalLoad, "message": message})
-    __process_report(results, args.report)
+    uuid = __process_report(results, args.report)
 
-    return thresholds
+    return uuid, thresholds
 
 
 def __process_report(report, config):
     test_cases = []
-    html_report = 0
+    report_uuid = uuid4()
     os.makedirs('/tmp/reports', exist_ok=True)
 
     for record in report:
@@ -63,10 +63,11 @@ def __process_report(report, config):
             if record['message']:
                 test_cases[-1].add_failure_info(record['message'])
         elif 'html' in config and 'html_report' in record.keys():
-            with open(f'/tmp/reports/{record["title"]}_{html_report}.html', 'w') as f:
+            with open(f'/tmp/reports/{record["title"]}_{report_uuid}.html', 'w') as f:
                 f.write(record['html_report'])
-            html_report += 1
 
     ts = TestSuite("Observer UI Benchmarking Test ", test_cases)
-    with open("/tmp/reports/report.xml", 'w') as f:
+    with open(f"/tmp/reports/report_{report_uuid}.xml", 'w') as f:
         TestSuite.to_file(f, [ts], prettyprint=True)
+
+    return report_uuid

@@ -1,16 +1,21 @@
+import copy
 import os
 import tempfile
 from datetime import datetime
 from os import path
 from shutil import rmtree
 from time import time
+from uuid import uuid4
 
 import requests
+from deepdiff import DeepDiff
 from requests import get
 from selene.support.shared import browser, SharedConfig
 
 from observer.actions import browser_actions
-from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type
+from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
+    get_performance_entities, take_full_screenshot, get_dom_size
+from observer.command_result import CommandExecutionResult
 from observer.constants import listener_address
 from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
@@ -24,6 +29,10 @@ galloper_api_url = os.getenv("GALLOPER_API_URL", "http://localhost:80/api/v1")
 galloper_project_id = int(os.getenv("GALLOPER_PROJECT_ID", "1"))
 env = os.getenv("ENV", "")
 minio_bucket_name = os.getenv("MINIO_BUCKET_NAME", "reports")
+
+perf_entities = []
+dom = None
+results = None
 
 
 def execute_scenario(scenario, args):
@@ -40,6 +49,8 @@ def execute_scenario(scenario, args):
 
 
 def _execute_test(base_url, browser_name, test, args):
+    global results
+
     test_name = test['name']
     print(f"\nExecuting test: {test_name}")
 
@@ -61,22 +72,22 @@ def _execute_test(base_url, browser_name, test, args):
 
         locators.append(current_command)
 
-        report, cmd_results, ex = _execute_command(current_command, next_command, test_data_processor,
-                                                   is_video_enabled(args))
+        execution_result = _execute_command(current_command, next_command, test_data_processor,
+                                            is_video_enabled(args))
 
-        if ex:
-            exception = ex
+        if execution_result.ex:
+            exception = execution_result.ex
             break
 
-        if not report:
+        if not execution_result.report:
             continue
 
         if args.export:
-            export(cmd_results, args)
+            export(execution_result.computed_results, args)
 
         visited_pages += 1
 
-        thresholds = complete_report(report, args)
+        report_uuid, thresholds = complete_report(execution_result.report, args)
         total_thresholds["total"] += thresholds["total"]
         total_thresholds["failed"] += thresholds["failed"]
 
@@ -84,8 +95,11 @@ def _execute_test(base_url, browser_name, test, args):
             notify_on_command_end(galloper_project_id,
                                   report_id,
                                   minio_bucket_name,
-                                  cmd_results,
-                                  thresholds, locators, report.title)
+                                  execution_result.computed_results,
+                                  thresholds, locators, report_uuid, execution_result.report.title)
+
+        if execution_result.raw_results:
+            results = execution_result.raw_results
 
     if args.galloper:
         notify_on_test_end(galloper_project_id, report_id, visited_pages, total_thresholds, exception)
@@ -125,10 +139,11 @@ def send_report_locators(project_id: int, report_id: int, exception):
                  auth=('user', 'user'))
 
 
-def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators, name):
+def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators, report_uuid,
+                          name):
     result = GalloperExporter(metrics).export()
 
-    file_name = f"{name}_0.html"
+    file_name = f"{name}_{report_uuid}.html"
     report_path = f"/tmp/reports/{file_name}"
 
     data = {
@@ -159,8 +174,14 @@ def is_video_enabled(args):
 
 def _execute_command(current_command, next_command, test_data_processor, enable_video=True):
     global load_event_end
-    results = None
+    global perf_entities
+    global dom
+    global results
+
     report = None
+    generate_report = False
+    screenshot_path = None
+    latest_results = None
 
     current_cmd = current_command['command']
     current_target = current_command['target']
@@ -178,34 +199,51 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
 
         current_cmd(current_target, current_value)
 
-        if next_is_actionable:
-            pass
+        is_navigation = is_navigation_happened()
 
-        if is_navigation_happened() and next_is_actionable:
+        if is_navigation and next_is_actionable:
             browser_actions.wait_for_visibility(next_command['target'])
 
             load_event_end = get_performance_timing()['loadEventEnd']
             results = get_performance_metrics()
             results['info']['testStart'] = int(current_time)
+            dom = get_dom_size()
+
+            screenshot_path = take_full_screenshot(f"/tmp/{uuid4()}.png")
+            generate_report = True
+        elif not is_navigation:
+            latest_pef_entries = get_performance_entities()
+
+            is_entities_changed = is_performance_entities_changed(perf_entities, latest_pef_entries)
+
+            if is_entities_changed and is_dom_changed(dom):
+                dom = get_dom_size()
+                perf_entities = latest_pef_entries
+                latest_results = get_performance_metrics()
+                latest_results['info']['testStart'] = int(current_time)
+                results = compute_results_for_spa(results, latest_results, current_command)
+                screenshot_path = take_full_screenshot(f"/tmp/{uuid4()}.png")
+                generate_report = True
+
     except Exception as e:
         print(e)
-        return None, None, e
+        return CommandExecutionResult(err=e)
     finally:
         if not next_is_actionable:
-            return None, None, None
+            return CommandExecutionResult()
 
         video_folder = None
         video_path = None
         if enable_video and next_is_actionable:
             video_folder, video_path = stop_recording()
 
-    if results and video_folder:
-        report = resultsProcessor(video_path, results, video_folder, True, True)
+    if generate_report and results and video_folder:
+        report = resultsProcessor(video_path, results, video_folder, screenshot_path, True, True)
 
     if video_folder:
         rmtree(video_folder)
 
-    return report, results, None
+    return CommandExecutionResult(report, latest_results, results, None)
 
 
 def start_recording():
@@ -228,3 +266,69 @@ def is_navigation_happened():
         return True
 
     return False
+
+
+def is_performance_entities_changed(old_entities, latest_entries):
+    ddiff = DeepDiff(old_entities, latest_entries, ignore_order=True)
+    if ddiff['iterable_item_added'] or ddiff['iterable_item_removed']:
+        return True
+
+    return False
+
+
+def is_dom_changed(old_dom):
+    new_dom = get_dom_size()
+    return old_dom != new_dom
+
+
+def compute_results_for_spa(old, new, current_command):
+    result = copy.deepcopy(new)
+
+    diff = DeepDiff(old["performanceResources"], new["performanceResources"], ignore_order=True)
+    items_added = list(diff['iterable_item_added'].values())
+    sorted_items = sorted(items_added, key=lambda k: k['startTime'])
+
+    fields = [
+        'connectEnd',
+        'connectStart',
+        'domainLookupEnd',
+        'domainLookupStart',
+        'fetchStart',
+        'requestStart',
+        'responseEnd',
+        'responseStart',
+        'secureConnectionStart',
+        'startTime'
+    ]
+
+    first_point = sorted_items[0]['startTime']
+    for item in sorted_items:
+        for field in fields:
+            curr_value = item[field]
+            if curr_value == 0:
+                continue
+            item[field] = curr_value - first_point
+
+    sorted_items = sorted(items_added, key=lambda k: k['responseEnd'])
+
+    total_diff = round(
+        new['performancetiming']['loadEventEnd'] - new['performancetiming']['navigationStart'] - sorted_items[-1][
+            'responseEnd'])
+
+    result["performanceResources"] = items_added
+    result['performancetiming']['responseStart'] = result['performancetiming']['navigationStart']
+    result['performancetiming']['loadEventEnd'] = result['performancetiming']['loadEventEnd'] - total_diff
+    result['performancetiming']['domComplete'] = result['performancetiming']['domComplete'] - total_diff
+
+    result['timing']['firstPaint'] = new['timing']['firstPaint'] - old['timing']['firstPaint']
+
+    if old['info']['title'] == new['info']['title']:
+        title = new['info']['title']
+        comment = current_command['comment']
+        if comment:
+            title = comment
+
+        result['info']['title'] = title
+
+    return result
+
