@@ -1,10 +1,10 @@
+import copy
 import os
 import tempfile
 from datetime import datetime
 from os import path
 from shutil import rmtree
 from time import time
-import copy
 from uuid import uuid4
 
 import requests
@@ -14,7 +14,8 @@ from selene.support.shared import browser, SharedConfig
 
 from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
-    get_performance_entities, get_dom, take_full_screenshot, get_dom_size
+    get_performance_entities, take_full_screenshot, get_dom_size
+from observer.command_result import CommandExecutionResult
 from observer.constants import listener_address
 from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
@@ -48,6 +49,8 @@ def execute_scenario(scenario, args):
 
 
 def _execute_test(base_url, browser_name, test, args):
+    global results
+
     test_name = test['name']
     print(f"\nExecuting test: {test_name}")
 
@@ -69,22 +72,22 @@ def _execute_test(base_url, browser_name, test, args):
 
         locators.append(current_command)
 
-        report, cmd_results, ex = _execute_command(current_command, next_command, test_data_processor,
-                                                   is_video_enabled(args))
+        execution_result = _execute_command(current_command, next_command, test_data_processor,
+                                            is_video_enabled(args))
 
-        if ex:
-            exception = ex
+        if execution_result.ex:
+            exception = execution_result.ex
             break
 
-        if not report:
+        if not execution_result.report:
             continue
 
         if args.export:
-            export(cmd_results, args)
+            export(execution_result.computed_results, args)
 
         visited_pages += 1
 
-        report_uuid, thresholds = complete_report(report, args)
+        report_uuid, thresholds = complete_report(execution_result.report, args)
         total_thresholds["total"] += thresholds["total"]
         total_thresholds["failed"] += thresholds["failed"]
 
@@ -92,8 +95,11 @@ def _execute_test(base_url, browser_name, test, args):
             notify_on_command_end(galloper_project_id,
                                   report_id,
                                   minio_bucket_name,
-                                  cmd_results,
-                                  thresholds, locators, report_uuid, report.title)
+                                  execution_result.computed_results,
+                                  thresholds, locators, report_uuid, execution_result.report.title)
+
+        if execution_result.raw_results:
+            results = execution_result.raw_results
 
     if args.galloper:
         notify_on_test_end(galloper_project_id, report_id, visited_pages, total_thresholds, exception)
@@ -174,8 +180,8 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
 
     report = None
     generate_report = False
-    latest_results = None
     screenshot_path = None
+    latest_results = None
 
     current_cmd = current_command['command']
     current_target = current_command['target']
@@ -222,10 +228,10 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
 
     except Exception as e:
         print(e)
-        return None, None, e
+        return CommandExecutionResult(err=e)
     finally:
         if not next_is_actionable:
-            return None, None, None
+            return CommandExecutionResult()
 
         video_folder = None
         video_path = None
@@ -235,13 +241,10 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
     if generate_report and results and video_folder:
         report = resultsProcessor(video_path, results, video_folder, screenshot_path, True, True)
 
-    if latest_results:
-        results = latest_results
-
     if video_folder:
         rmtree(video_folder)
 
-    return report, results, None
+    return CommandExecutionResult(report, latest_results, results, None)
 
 
 def start_recording():
