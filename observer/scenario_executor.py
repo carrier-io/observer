@@ -322,5 +322,4 @@ def compare_results(old, new):
     result['performancetiming']['domComplete'] = result['performancetiming']['domComplete'] - total_diff
 
     result['timing']['firstPaint'] = new['timing']['firstPaint'] - old['timing']['firstPaint']
-    result['timing']['speedIndex'] = new['timing']['speedIndex'] - old['timing']['speedIndex']
     return result
