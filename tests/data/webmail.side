@@ -22,7 +22,7 @@
       "value": ""
     }, {
       "id": "1f58bcbf-ec87-4a30-bb0f-2608ab49d3fd",
-      "comment": "",
+      "comment": "Click on Trash icon",
       "command": "click",
       "target": "xpath=//span[contains(.,'Trash')]",
       "targets": [
@@ -34,7 +34,7 @@
       "value": ""
     }, {
       "id": "35cd8bc3-5582-4129-881a-9ceb64cb93a7",
-      "comment": "",
+      "comment": "Click on Fletcher email",
       "command": "click",
       "target": "css=#listview-grp > div > ul > li:nth-child(1)",
       "targets": [

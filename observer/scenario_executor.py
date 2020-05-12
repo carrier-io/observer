@@ -221,8 +221,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
                 perf_entities = latest_pef_entries
                 latest_results = get_performance_metrics()
                 latest_results['info']['testStart'] = int(current_time)
-
-                results = compare_results(results, latest_results)
+                results = compute_results_for_spa(results, latest_results, current_command)
                 screenshot_path = take_full_screenshot(f"/tmp/{uuid4()}.png")
                 generate_report = True
 
@@ -282,7 +281,7 @@ def is_dom_changed(old_dom):
     return old_dom != new_dom
 
 
-def compare_results(old, new):
+def compute_results_for_spa(old, new, current_command):
     result = copy.deepcopy(new)
 
     diff = DeepDiff(old["performanceResources"], new["performanceResources"], ignore_order=True)
@@ -313,7 +312,7 @@ def compare_results(old, new):
     sorted_items = sorted(items_added, key=lambda k: k['responseEnd'])
 
     total_diff = round(
-        result['performancetiming']['loadEventEnd'] - result['performancetiming']['navigationStart'] - sorted_items[-1][
+        new['performancetiming']['loadEventEnd'] - new['performancetiming']['navigationStart'] - sorted_items[-1][
             'responseEnd'])
 
     result["performanceResources"] = items_added
@@ -322,4 +321,14 @@ def compare_results(old, new):
     result['performancetiming']['domComplete'] = result['performancetiming']['domComplete'] - total_diff
 
     result['timing']['firstPaint'] = new['timing']['firstPaint'] - old['timing']['firstPaint']
+
+    if old['info']['title'] == new['info']['title']:
+        title = new['info']['title']
+        comment = current_command['comment']
+        if comment:
+            title = comment
+
+        result['info']['title'] = title
+
     return result
+
