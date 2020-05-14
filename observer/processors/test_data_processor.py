@@ -12,7 +12,7 @@ class TestDataProcessor(object):
 
     @abc.abstractmethod
     def process(self, value):
-        pass
+        return value
 
     @abc.abstractmethod
     def _read_test_data(self):

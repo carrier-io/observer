@@ -16,3 +16,7 @@ def str2json(v):
         return json.loads(v)
     except:
         raise argparse.ArgumentTypeError('Json is not properly formatted.')
+
+
+def str2bool(v):
+    return v.lower() in ("yes", "true", "t", "1")

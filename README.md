@@ -14,5 +14,7 @@ docker run --name chrome getcarrier/observer-chrome:latest
 ```
 
 ```bash
-docker run -it -e remote=chrome:4444 -e listener=chrome:9999 -v /tmp/reports:/tmp/reports getcarrier/observer:latest -f /home/sergey/SynologyDrive/Github/observer/tests/data/webmail.side -f html -fp 100 -si 400 -tl 500 -g False
+docker run -it -e remote=chrome:4444 -e listener=chrome:9999 -v /tmp/reports:/tmp/reports -v /home/sergey/SynologyDrive/Github/observer/tests/data:/data --link=chrome  getcarrier/observer:latest  -f /data/webmail.side -r html -fp 100 -si 400 -tl 500
 ```
+
+if you want to run it locally without integration with galloper add -g 'False' flag
