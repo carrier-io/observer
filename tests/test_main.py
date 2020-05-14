@@ -15,7 +15,7 @@ def test_main_with_data_params():
     args = create_parser().parse_args(
         [
             "-f", f"{ROOT_DIR}/data/webmail.side",
-            "-d", f"{ROOT_DIR}/data/data.json",
+            #"-d", f"{ROOT_DIR}/data/data.json",
             # "-e", "influx",
             "-fp", "100",
             "-si", "400",
