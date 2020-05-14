@@ -7,12 +7,12 @@ Work in progress
 support only "url" as step, opens page and creates report
 Validate against 3 possible thresholds: First paint, Total Load, Speed Index
 
+Start chrome and wait until it is ready
+
 ```bash
-docker run -it -v /tmp/reports:/tmp/reports \
-       -e remote=10.23.8.210:4444 
-       -e listener=10.23.8.210:9999 \
-       getcarrier/observer:latest \
-           -s "{\"url\": \"https://www.google.com\", \"el\": \"//img[@tag=\\\"Google\\\"]\"}" \
-           -s "{\"url\": \"https://www.youtube.com\"}" \
-           -fp 100 -si 400 -tl 500 -r xml -r html
+docker run --name chrome getcarrier/observer-chrome:latest
+```
+
+```bash
+docker run -it -e remote=chrome:4444 -e listener=chrome:9999 -v /tmp/reports:/tmp/reports getcarrier/observer:latest -f /home/sergey/SynologyDrive/Github/observer/tests/data/webmail.side -f html -fp 100 -si 400 -tl 500 -g False
 ```
