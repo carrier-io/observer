@@ -270,6 +270,9 @@ def is_navigation_happened():
 
 def is_performance_entities_changed(old_entities, latest_entries):
     ddiff = DeepDiff(old_entities, latest_entries, ignore_order=True)
+    if not ddiff:
+        return False
+
     if ddiff['iterable_item_added'] or ddiff['iterable_item_removed']:
         return True
 

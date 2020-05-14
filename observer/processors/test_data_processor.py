@@ -12,7 +12,7 @@ class TestDataProcessor(object):
 
     @abc.abstractmethod
     def process(self, value):
-        pass
+        return value
 
     @abc.abstractmethod
     def _read_test_data(self):
@@ -69,6 +69,9 @@ class JsonFileDataProcessor(TestDataProcessor):
 
 
 def get_test_data_processor(test_name, data_file_path):
+    if not data_file_path:
+        return TestDataProcessor(test_name, data_file_path)
+
     if data_file_path.endswith(".json"):
         return JsonFileDataProcessor(test_name, data_file_path)
 

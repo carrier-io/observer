@@ -5,7 +5,7 @@ from junit_xml import TestSuite, TestCase
 
 from observer.runner import wait_for_agent
 from observer.scenario_executor import execute_scenario
-from observer.util import parse_json_file
+from observer.util import parse_json_file, str2bool
 
 
 def create_parser():
@@ -19,7 +19,7 @@ def create_parser():
     parser.add_argument("-v", '--video', type=bool, default=True)
     parser.add_argument("-r", '--report', action="append", type=str, default=['xml'])
     parser.add_argument("-e", '--export', action="append", type=str, default=[])
-    parser.add_argument("-g", '--galloper', type=bool, default=True)
+    parser.add_argument("-g", '--galloper', type=str2bool, default=True)
     return parser
 
 
@@ -53,6 +53,7 @@ def main():
 
 
 def execute(args):
+    print(f"Start with args {args}")
     if not args.video:
         wait_for_agent()
     if args.file and os.path.exists(args.file):
