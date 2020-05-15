@@ -16,7 +16,7 @@ from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
     get_performance_entities, take_full_screenshot, get_dom_size
 from observer.command_result import CommandExecutionResult
-from observer.constants import listener_address
+from observer.constants import listener_address, headers
 from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
 from observer.processors.test_data_processor import get_test_data_processor
@@ -114,7 +114,8 @@ def notify_on_test_start(project_id: int, test_name, browser_name, env, base_url
         "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
-    res = requests.post(f"{galloper_api_url}/observer/{project_id}", json=data, auth=('user', 'user'))
+    res = requests.post(f"{galloper_api_url}/observer/{project_id}", json=data,
+                        headers=headers)
     return res.json()['id']
 
 
@@ -130,13 +131,14 @@ def notify_on_test_end(project_id: int, report_id: int, visited_pages, total_thr
     if exception:
         data["exception"] = str(exception)
 
-    res = requests.put(f"{galloper_api_url}/observer/{project_id}", json=data, auth=('user', 'user'))
+    res = requests.put(f"{galloper_api_url}/observer/{project_id}", json=data,
+                       headers=headers)
     return res.json()
 
 
 def send_report_locators(project_id: int, report_id: int, exception):
     requests.put(f"{galloper_api_url}/observer/{project_id}/{report_id}", json={"exception": exception, "status": ""},
-                 auth=('user', 'user'))
+                 headers=headers)
 
 
 def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators, report_uuid,
@@ -158,12 +160,12 @@ def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics,
         "locators": locators
     }
 
-    res = requests.post(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=data, auth=('user', 'user'))
+    res = requests.post(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=data, headers=headers)
 
     file = {'file': open(report_path, 'rb')}
 
     requests.post(f"{galloper_api_url}/artifacts/{project_id}/{bucket_name}/{file_name}", files=file,
-                  auth=('user', 'user'))
+                  headers=headers)
 
     return res.json()["id"]
 
@@ -334,4 +336,3 @@ def compute_results_for_spa(old, new, current_command):
         result['info']['title'] = title
 
     return result
-
