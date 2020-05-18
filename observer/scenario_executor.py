@@ -15,7 +15,7 @@ from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
     get_performance_entities, take_full_screenshot, get_dom_size
 from observer.command_result import CommandExecutionResult
-from observer.constants import LISTENER_ADDRESS, GALLOPER_PROJECT_ID, BUCKET_NAME, GALLOPER_API_URL, ENV, \
+from observer.constants import LISTENER_ADDRESS, GALLOPER_PROJECT_ID, REPORTS_BUCKET_NAME, GALLOPER_API_URL, ENV, \
     TOKEN, get_headers
 from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
@@ -90,7 +90,7 @@ def _execute_test(base_url, browser_name, test, args):
         if args.galloper:
             notify_on_command_end(GALLOPER_PROJECT_ID,
                                   report_id,
-                                  BUCKET_NAME,
+                                  REPORTS_BUCKET_NAME,
                                   execution_result.computed_results,
                                   thresholds, locators, report_uuid, execution_result.report.title)
 
@@ -116,6 +116,8 @@ def notify_on_test_start(project_id: int, test_name, browser_name, environment, 
 
 
 def notify_on_test_end(project_id: int, report_id: int, visited_pages, total_thresholds, exception):
+    logger.info(f"About to notify on test end for report {report_id}")
+
     data = {
         "report_id": report_id,
         "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -139,6 +141,7 @@ def send_report_locators(project_id: int, report_id: int, exception):
 
 def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators, report_uuid,
                           name):
+    logger.info(f"About to notify on command end for report {report_id}")
     result = GalloperExporter(metrics).export()
 
     file_name = f"{name}_{report_uuid}.html"
