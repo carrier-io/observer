@@ -8,7 +8,7 @@ GALLOPER_API_URL = environ.get("GALLOPER_API_URL", "http://localhost/api/v1")
 GALLOPER_PROJECT_ID = int(environ.get("GALLOPER_PROJECT_ID", "1"))
 ENV = environ.get("ENV", "")
 REPORTS_BUCKET_NAME = environ.get("BUCKET_NAME", "reports")
-SCENARIOS_BUCKET_NAME = environ.get("SCENARIO_BUCKET_NAME", "scenarios")
+TESTS_BUCKET_NAME = environ.get("TESTS_BUCKET_NAME", "tests")
 
 
 def get_headers():
