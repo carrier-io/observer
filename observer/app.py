@@ -1,14 +1,10 @@
 import argparse
-import os
-from pathlib import Path
 
-import requests
 from junit_xml import TestSuite, TestCase
 
-from observer.constants import GALLOPER_API_URL, GALLOPER_PROJECT_ID, BUCKET_NAME, get_headers
 from observer.runner import wait_for_agent
 from observer.scenario_executor import execute_scenario
-from observer.util import parse_json_file, str2bool, logger
+from observer.util import parse_json_file, str2bool, logger, download_file, unzip
 
 
 def create_parser():
@@ -17,6 +13,7 @@ def create_parser():
     parser.add_argument("-si", '--speedIndex', type=int, default=0)
     parser.add_argument("-y", "--yaml", type=str, default="")
     parser.add_argument("-f", "--file", type=str, default="")
+    parser.add_argument("-s", "--scenario", type=str, default="")
     parser.add_argument("-d", "--data", type=str, default="")
     parser.add_argument("-tl", '--totalLoad', type=int, default=0)
     parser.add_argument("-v", '--video', type=bool, default=True)
@@ -58,27 +55,17 @@ def main():
 
 def execute(args):
     logger.info(f"Start with args {args}")
-    scenario = None
     if not args.video:
         wait_for_agent()
-    if args.file and os.path.exists(args.file):
-        scenario = parse_json_file(args.file)
-    elif args.file:
-        logger.info(f"Downloading scenario {args.file}")
-        file_name = Path(args.file).name
-        file_path = download_scenario(file_name)
-        scenario = parse_json_file(file_path)
+
+    if args.file:
+
+        file_path = download_file(args.file)
+        if file_path.endswith(".zip"):
+            unzip(file_path, "/tmp/data")
+
+    scenario = parse_json_file(args.scenario)
     execute_scenario(scenario, args)
-
-
-def download_scenario(file_name):
-    res = requests.get(f"{GALLOPER_API_URL}/artifacts/{GALLOPER_PROJECT_ID}/{BUCKET_NAME}/{file_name}",
-                       headers=get_headers())
-    if res.status_code != 200:
-        raise Exception(f"Unable to download file {file_name}. Reason {res.reason}")
-    file_path = f"/tmp/data/{file_name}"
-    open(file_path, 'wb').write(res.content)
-    return file_path
 
 
 if __name__ == "__main__":
