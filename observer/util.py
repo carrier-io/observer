@@ -1,5 +1,14 @@
 import argparse
 import json
+import logging
+
+logger = logging.getLogger('Observer')
+
+handler = logging.StreamHandler()
+formatter = logging.Formatter('[%(name)s] - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 
 def parse_json_file(path):

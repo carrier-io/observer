@@ -1,10 +1,20 @@
 from os import environ
 
-listener_address = environ.get("listener", "127.0.0.1:9999")
-exporters_path = environ.get("exporters_path", "/tmp/reports")
-remote_driver_address = environ.get("remote", "127.0.0.1:4444")
-TOKEN = environ.get('TOKEN')
-headers = {'Authorization': f"bearer {TOKEN}"}
+LISTENER_ADDRESS = environ.get("listener", "127.0.0.1:9999")
+EXPORTERS_PATH = environ.get("exporters_path", "/tmp/reports")
+REMOTE_DRIVER_ADDRESS = environ.get("remote", "127.0.0.1:4444")
+TOKEN = environ.get('TOKEN', "eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIxNjQ5ODY1Ny04OTYyLTRiZmUtYjY2OS0yZDQyYjEyMzQ0ODQifQ.eyJqdGkiOiIwZDJhNTg0Ni1lMGJjLTRlMjEtODA3Zi03NjZjNjE4OGNiMmMiLCJleHAiOjAsIm5iZiI6MCwiaWF0IjoxNTg5Nzg4NjM2LCJpc3MiOiJodHRwOi8vMTkyLjE2OC4wLjEwNy9hdXRoL3JlYWxtcy9jYXJyaWVyIiwiYXVkIjoiaHR0cDovLzE5Mi4xNjguMC4xMDcvYXV0aC9yZWFsbXMvY2FycmllciIsInN1YiI6IjhhOWEzY2VjLTVlMTMtNDJjZC04NzM2LWEwZTk3NTk4ZDg2ZSIsInR5cCI6Ik9mZmxpbmUiLCJhenAiOiJjYXJyaWVyLW9pZGMiLCJub25jZSI6IlNGMzh1SXZhYURwbkRVcDEiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiI5OTJiZTY5Ny05YjFhLTRiYjUtODk0ZC0yYjljNWExY2Y2MGIiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIG9mZmxpbmVfYWNjZXNzIGVtYWlsIHByb2ZpbGUifQ.zFRGzUSqHtaOv73aEAxdGk-rb5cg1rxqEt63f9kWh-A")
+GALLOPER_API_URL = environ.get("GALLOPER_API_URL", "http://192.168.0.107/api/v1")
+GALLOPER_PROJECT_ID = int(environ.get("GALLOPER_PROJECT_ID", "1"))
+ENV = environ.get("ENV", "")
+BUCKET_NAME = environ.get("BUCKET_NAME", "reports")
+
+
+def get_headers():
+    if TOKEN:
+        return {'Authorization': f"Bearer {TOKEN}"}
+    return None
+
 
 check_ui_performance = '''return (function() {
 var metas=Array.prototype.slice.call(document.querySelectorAll('meta[name][content]'));

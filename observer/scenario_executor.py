@@ -1,5 +1,4 @@
 import copy
-import os
 import tempfile
 from datetime import datetime
 from os import path
@@ -16,20 +15,16 @@ from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
     get_performance_entities, take_full_screenshot, get_dom_size
 from observer.command_result import CommandExecutionResult
-from observer.constants import listener_address, headers
+from observer.constants import LISTENER_ADDRESS, GALLOPER_PROJECT_ID, BUCKET_NAME, GALLOPER_API_URL, ENV, \
+    TOKEN, get_headers
 from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
 from observer.processors.test_data_processor import get_test_data_processor
 from observer.reporter import complete_report
 from observer.runner import close_driver, terminate_runner
-from observer.util import _pairwise
+from observer.util import _pairwise, logger
 
 load_event_end = 0
-galloper_api_url = os.getenv("GALLOPER_API_URL", "http://localhost:80/api/v1")
-galloper_project_id = int(os.getenv("GALLOPER_PROJECT_ID", "1"))
-env = os.getenv("ENV", "")
-minio_bucket_name = os.getenv("MINIO_BUCKET_NAME", "reports")
-
 perf_entities = []
 dom = None
 results = None
@@ -50,14 +45,15 @@ def execute_scenario(scenario, args):
 
 def _execute_test(base_url, browser_name, test, args):
     global results
+    report_id = None
 
     test_name = test['name']
-    print(f"\nExecuting test: {test_name}")
+    logger.info(f"Executing test: {test_name}")
 
     test_data_processor = get_test_data_processor(test_name, args.data)
 
     if args.galloper:
-        report_id = notify_on_test_start(galloper_project_id, test_name, browser_name, env, base_url)
+        report_id = notify_on_test_start(GALLOPER_PROJECT_ID, test_name, browser_name, ENV, base_url)
 
     locators = []
     exception = None
@@ -68,7 +64,7 @@ def _execute_test(base_url, browser_name, test, args):
     }
 
     for current_command, next_command in _pairwise(test['commands']):
-        print(current_command)
+        logger.info(current_command)
 
         locators.append(current_command)
 
@@ -92,9 +88,9 @@ def _execute_test(base_url, browser_name, test, args):
         total_thresholds["failed"] += thresholds["failed"]
 
         if args.galloper:
-            notify_on_command_end(galloper_project_id,
+            notify_on_command_end(GALLOPER_PROJECT_ID,
                                   report_id,
-                                  minio_bucket_name,
+                                  BUCKET_NAME,
                                   execution_result.computed_results,
                                   thresholds, locators, report_uuid, execution_result.report.title)
 
@@ -102,20 +98,20 @@ def _execute_test(base_url, browser_name, test, args):
             results = execution_result.raw_results
 
     if args.galloper:
-        notify_on_test_end(galloper_project_id, report_id, visited_pages, total_thresholds, exception)
+        notify_on_test_end(GALLOPER_PROJECT_ID, report_id, visited_pages, total_thresholds, exception)
 
 
-def notify_on_test_start(project_id: int, test_name, browser_name, env, base_url):
+def notify_on_test_start(project_id: int, test_name, browser_name, environment, base_url):
     data = {
         "test_name": test_name,
         "base_url": base_url,
         "browser_name": browser_name,
-        "env": env,
+        "env": environment,
         "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
-    res = requests.post(f"{galloper_api_url}/observer/{project_id}", json=data,
-                        headers=headers)
+    res = requests.post(f"{GALLOPER_API_URL}/observer/{project_id}", json=data,
+                        headers=get_headers())
     return res.json()['id']
 
 
@@ -131,14 +127,14 @@ def notify_on_test_end(project_id: int, report_id: int, visited_pages, total_thr
     if exception:
         data["exception"] = str(exception)
 
-    res = requests.put(f"{galloper_api_url}/observer/{project_id}", json=data,
-                       headers=headers)
+    res = requests.put(f"{GALLOPER_API_URL}/observer/{project_id}", json=data,
+                       headers=get_headers())
     return res.json()
 
 
 def send_report_locators(project_id: int, report_id: int, exception):
-    requests.put(f"{galloper_api_url}/observer/{project_id}/{report_id}", json={"exception": exception, "status": ""},
-                 headers=headers)
+    requests.put(f"{GALLOPER_API_URL}/observer/{project_id}/{report_id}", json={"exception": exception, "status": ""},
+                 headers=get_headers())
 
 
 def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics, thresholds, locators, report_uuid,
@@ -160,12 +156,12 @@ def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics,
         "locators": locators
     }
 
-    res = requests.post(f"{galloper_api_url}/observer/{project_id}/{report_id}", json=data, headers=headers)
+    res = requests.post(f"{GALLOPER_API_URL}/observer/{project_id}/{report_id}", json=data, headers=get_headers())
 
     file = {'file': open(report_path, 'rb')}
 
-    requests.post(f"{galloper_api_url}/artifacts/{project_id}/{bucket_name}/{file_name}", files=file,
-                  headers=headers)
+    requests.post(f"{GALLOPER_API_URL}/artifacts/{project_id}/{bucket_name}/{file_name}", files=file,
+                  headers=get_headers())
 
     return res.json()["id"]
 
@@ -228,7 +224,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
                 generate_report = True
 
     except Exception as e:
-        print(e)
+        logger.error(e)
         return CommandExecutionResult(err=e)
     finally:
         if not next_is_actionable:
@@ -249,11 +245,11 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
 
 
 def start_recording():
-    get(f'http://{listener_address}/record/start')
+    get(f'http://{LISTENER_ADDRESS}/record/start')
 
 
 def stop_recording():
-    video_results = get(f'http://{listener_address}/record/stop').content
+    video_results = get(f'http://{LISTENER_ADDRESS}/record/stop').content
     video_folder = tempfile.mkdtemp()
     video_path = path.join(video_folder, "Video.mp4")
     with open(video_path, 'w+b') as f:

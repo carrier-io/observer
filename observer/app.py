@@ -1,11 +1,14 @@
 import argparse
 import os
+from pathlib import Path
 
+import requests
 from junit_xml import TestSuite, TestCase
 
+from observer.constants import GALLOPER_API_URL, GALLOPER_PROJECT_ID, BUCKET_NAME, get_headers
 from observer.runner import wait_for_agent
 from observer.scenario_executor import execute_scenario
-from observer.util import parse_json_file, str2bool
+from observer.util import parse_json_file, str2bool, logger
 
 
 def create_parser():
@@ -48,19 +51,35 @@ def process_report(report, config):
 
 
 def main():
+    logger.info("Starting analysis...")
     args = parse_args()
     execute(args)
 
 
 def execute(args):
-    print(f"Start with args {args}")
+    logger.info(f"Start with args {args}")
+    scenario = None
     if not args.video:
         wait_for_agent()
     if args.file and os.path.exists(args.file):
         scenario = parse_json_file(args.file)
-        execute_scenario(scenario, args)
+    elif args.file:
+        logger.info(f"Downloading scenario {args.file}")
+        file_name = Path(args.file).name
+        file_path = download_scenario(file_name)
+        scenario = parse_json_file(file_path)
+    execute_scenario(scenario, args)
+
+
+def download_scenario(file_name):
+    res = requests.get(f"{GALLOPER_API_URL}/artifacts/{GALLOPER_PROJECT_ID}/{BUCKET_NAME}/{file_name}",
+                       headers=get_headers())
+    if res.status_code != 200:
+        raise Exception(f"Unable to download file {file_name}. Reason {res.reason}")
+    file_path = f"/tmp/data/{file_name}"
+    open(file_path, 'wb').write(res.content)
+    return file_path
 
 
 if __name__ == "__main__":
-    print("Starting analysis...")
     main()

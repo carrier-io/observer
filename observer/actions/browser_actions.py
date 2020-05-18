@@ -41,7 +41,6 @@ def open_url(url, value):
 
 
 def setWindowSize(size, value):
-    print(size)
     s = size.split("x")
     get_driver().driver.set_window_size(s[0], s[1])
 
