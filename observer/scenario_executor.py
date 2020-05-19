@@ -15,7 +15,7 @@ from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
     get_performance_entities, take_full_screenshot, get_dom_size
 from observer.command_result import CommandExecutionResult
-from observer.constants import LISTENER_ADDRESS, GALLOPER_PROJECT_ID, REPORTS_BUCKET_NAME, GALLOPER_URL, ENV, \
+from observer.constants import LISTENER_ADDRESS, GALLOPER_PROJECT_ID, REPORTS_BUCKET, GALLOPER_URL, ENV, \
     TOKEN, get_headers
 from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
@@ -90,7 +90,7 @@ def _execute_test(base_url, browser_name, test, args):
         if args.galloper:
             notify_on_command_end(GALLOPER_PROJECT_ID,
                                   report_id,
-                                  REPORTS_BUCKET_NAME,
+                                  REPORTS_BUCKET,
                                   execution_result.computed_results,
                                   thresholds, locators, report_uuid, execution_result.report.title)
 
