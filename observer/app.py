@@ -1,11 +1,10 @@
 import argparse
-import os
 
 from junit_xml import TestSuite, TestCase
 
 from observer.runner import wait_for_agent
 from observer.scenario_executor import execute_scenario
-from observer.util import parse_json_file, str2bool
+from observer.util import parse_json_file, str2bool, logger, download_file, unzip
 
 
 def create_parser():
@@ -14,6 +13,7 @@ def create_parser():
     parser.add_argument("-si", '--speedIndex', type=int, default=0)
     parser.add_argument("-y", "--yaml", type=str, default="")
     parser.add_argument("-f", "--file", type=str, default="")
+    parser.add_argument("-s", "--scenario", type=str, default="")
     parser.add_argument("-d", "--data", type=str, default="")
     parser.add_argument("-tl", '--totalLoad', type=int, default=0)
     parser.add_argument("-v", '--video', type=bool, default=True)
@@ -48,19 +48,25 @@ def process_report(report, config):
 
 
 def main():
+    logger.info("Starting analysis...")
     args = parse_args()
     execute(args)
 
 
 def execute(args):
-    print(f"Start with args {args}")
+    logger.info(f"Start with args {args}")
     if not args.video:
         wait_for_agent()
-    if args.file and os.path.exists(args.file):
-        scenario = parse_json_file(args.file)
-        execute_scenario(scenario, args)
+
+    if args.file:
+
+        file_path = download_file(args.file)
+        if file_path.endswith(".zip"):
+            unzip(file_path, "/tmp/data")
+
+    scenario = parse_json_file(args.scenario)
+    execute_scenario(scenario, args)
 
 
 if __name__ == "__main__":
-    print("Starting analysis...")
     main()

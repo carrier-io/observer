@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 from influxdb import InfluxDBClient
 
-from observer.constants import exporters_path
+from observer.constants import EXPORTERS_PATH
 import uuid
 
 
@@ -70,8 +70,8 @@ class TelegraphJsonExporter(Exporter):
             "tags": {},
             "timestamp": time.time()
         }
-        os.makedirs(exporters_path, exist_ok=True)
-        with open(os.path.join(exporters_path, f'{uuid.uuid1()}.json'), 'w') as outfile:
+        os.makedirs(EXPORTERS_PATH, exist_ok=True)
+        with open(os.path.join(EXPORTERS_PATH, f'{uuid.uuid1()}.json'), 'w') as outfile:
             json.dump(result, outfile, indent=4)
         return json.dumps(result)
 

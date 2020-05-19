@@ -1,8 +1,24 @@
 from os import environ
 
-listener_address = environ.get("listener", "127.0.0.1:9999")
-exporters_path = environ.get("exporters_path", "/tmp/reports")
-remote_driver_address = environ.get("remote", "127.0.0.1:4444")
+from observer.util import logger
+
+LISTENER_ADDRESS = environ.get("LISTENER_URL", "127.0.0.1:9999")
+EXPORTERS_PATH = environ.get("EXPORTERS_PATH", "/tmp/reports")
+REMOTE_DRIVER_ADDRESS = environ.get("REMOTE_URL", "127.0.0.1:4444")
+TOKEN = environ.get('token', "")
+GALLOPER_URL = environ.get("GALLOPER_URL", "http://localhost/api/v1")
+GALLOPER_PROJECT_ID = int(environ.get("GALLOPER_PROJECT_ID", "1"))
+ENV = environ.get("ENV", "")
+REPORTS_BUCKET = environ.get("REPORTS_BUCKET", "reports")
+TESTS_BUCKET = environ.get("TESTS_BUCKET", "tests")
+
+
+def get_headers():
+    if TOKEN:
+        logger.info("TOKEN will be used to auth")
+        return {'Authorization': f"Bearer {TOKEN}"}
+    return None
+
 
 check_ui_performance = '''return (function() {
 var metas=Array.prototype.slice.call(document.querySelectorAll('meta[name][content]'));

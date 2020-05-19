@@ -1,4 +1,5 @@
 import abc
+import os
 import re
 
 from observer.util import parse_json_file
@@ -71,6 +72,9 @@ class JsonFileDataProcessor(TestDataProcessor):
 def get_test_data_processor(test_name, data_file_path):
     if not data_file_path:
         return TestDataProcessor(test_name, data_file_path)
+
+    if not os.path.exists(data_file_path):
+        raise Exception(f"There is no such file {data_file_path}")
 
     if data_file_path.endswith(".json"):
         return JsonFileDataProcessor(test_name, data_file_path)

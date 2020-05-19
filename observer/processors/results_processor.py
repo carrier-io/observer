@@ -4,6 +4,8 @@ from os import path, mkdir, environ
 from subprocess import Popen, PIPE
 from multiprocessing import Pool
 
+from observer.util import logger
+
 ffmpeg_path = environ.get("ffmpeg_path", "ffmpeg")
 report_path = '/tmp'
 
@@ -22,7 +24,7 @@ def trim_screenshot(kwargs):
             return {kwargs["ms"]: base64.b64encode(image_file.read()).decode("utf-8")}
     except FileNotFoundError:
         from traceback import format_exc
-        print(format_exc())
+        logger.error(format_exc())
         return {}
 
 

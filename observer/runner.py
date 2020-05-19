@@ -6,7 +6,7 @@ from time import time
 from selene.support.shared import browser
 from selene import by
 from requests import get
-from observer.constants import check_ui_performance, listener_address
+from observer.constants import check_ui_performance, LISTENER_ADDRESS
 from shutil import rmtree
 from observer.processors.results_processor import resultsProcessor
 
@@ -47,7 +47,7 @@ def step(step_definition):
     videofolder = None
     video_path = None
     if step_definition.get('html'):
-        get(f'http://{listener_address}/record/start')
+        get(f'http://{LISTENER_ADDRESS}/record/start')
     current_time = time() - start_time
     try:
         execute_step(step_definition)
@@ -56,7 +56,7 @@ def step(step_definition):
         return None
     results['info']['testStart'] = int(current_time)
     if step_definition.get('html'):
-        video_results = get(f'http://{listener_address}/record/stop').content
+        video_results = get(f'http://{LISTENER_ADDRESS}/record/stop').content
         videofolder = tempfile.mkdtemp()
         video_path = path.join(videofolder, "Video.mp4")
         with open(video_path, 'w+b') as f:
@@ -68,7 +68,7 @@ def step(step_definition):
 
 
 def terminate_runner():
-    return get(f'http://{listener_address}/terminate').content
+    return get(f'http://{LISTENER_ADDRESS}/terminate').content
 
 
 def wait_for_agent():
@@ -76,7 +76,7 @@ def wait_for_agent():
     for _ in range(120):
         sleep(1)
         try:
-            if get(f'http://{listener_address}', timeout=1).content == b'OK':
+            if get(f'http://{LISTENER_ADDRESS}', timeout=1).content == b'OK':
                 break
         except:
             pass
