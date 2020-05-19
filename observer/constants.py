@@ -1,5 +1,7 @@
 from os import environ
 
+from observer.util import logger
+
 LISTENER_ADDRESS = environ.get("listener", "127.0.0.1:9999")
 EXPORTERS_PATH = environ.get("exporters_path", "/tmp/reports")
 REMOTE_DRIVER_ADDRESS = environ.get("remote", "127.0.0.1:4444")
@@ -13,6 +15,7 @@ TESTS_BUCKET_NAME = environ.get("TESTS_BUCKET_NAME", "tests")
 
 def get_headers():
     if TOKEN:
+        logger.info("TOKEN will be used to auth")
         return {'Authorization': f"Bearer {TOKEN}"}
     return None
 
