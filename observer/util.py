@@ -7,7 +7,7 @@ from pathlib import Path
 
 import requests
 
-from observer.constants import GALLOPER_API_URL, get_headers, GALLOPER_PROJECT_ID, TESTS_BUCKET_NAME
+from observer.constants import GALLOPER_URL, get_headers, GALLOPER_PROJECT_ID, TESTS_BUCKET_NAME
 
 logger = logging.getLogger('Observer')
 
@@ -29,7 +29,7 @@ def download_file(file_path):
     logger.info(f"Downloading data {file_path} from {TESTS_BUCKET_NAME} bucket")
 
     file_name = Path(file_path).name
-    res = requests.get(f"{GALLOPER_API_URL}/artifacts/{GALLOPER_PROJECT_ID}/{TESTS_BUCKET_NAME}/{file_name}",
+    res = requests.get(f"{GALLOPER_URL}/artifacts/{GALLOPER_PROJECT_ID}/{TESTS_BUCKET_NAME}/{file_name}",
                        headers=get_headers())
     if res.status_code != 200:
         raise Exception(f"Unable to download file {file_name}. Reason {res.reason}")

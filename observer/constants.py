@@ -2,11 +2,11 @@ from os import environ
 
 from observer.util import logger
 
-LISTENER_ADDRESS = environ.get("listener", "127.0.0.1:9999")
-EXPORTERS_PATH = environ.get("exporters_path", "/tmp/reports")
-REMOTE_DRIVER_ADDRESS = environ.get("remote", "127.0.0.1:4444")
-TOKEN = environ.get('TOKEN', "")
-GALLOPER_API_URL = environ.get("GALLOPER_API_URL", "http://localhost/api/v1")
+LISTENER_ADDRESS = environ.get("LISTENER_URL", "127.0.0.1:9999")
+EXPORTERS_PATH = environ.get("EXPORTERS_PATH", "/tmp/reports")
+REMOTE_DRIVER_ADDRESS = environ.get("REMOTE_URL", "127.0.0.1:4444")
+TOKEN = environ.get('token', "")
+GALLOPER_URL = environ.get("GALLOPER_URL", "http://localhost/api/v1")
 GALLOPER_PROJECT_ID = int(environ.get("GALLOPER_PROJECT_ID", "1"))
 ENV = environ.get("ENV", "")
 REPORTS_BUCKET_NAME = environ.get("BUCKET_NAME", "reports")

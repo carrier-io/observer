@@ -15,7 +15,7 @@ from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
     get_performance_entities, take_full_screenshot, get_dom_size
 from observer.command_result import CommandExecutionResult
-from observer.constants import LISTENER_ADDRESS, GALLOPER_PROJECT_ID, REPORTS_BUCKET_NAME, GALLOPER_API_URL, ENV, \
+from observer.constants import LISTENER_ADDRESS, GALLOPER_PROJECT_ID, REPORTS_BUCKET_NAME, GALLOPER_URL, ENV, \
     TOKEN, get_headers
 from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
@@ -110,7 +110,7 @@ def notify_on_test_start(project_id: int, test_name, browser_name, environment, 
         "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
-    res = requests.post(f"{GALLOPER_API_URL}/observer/{project_id}", json=data,
+    res = requests.post(f"{GALLOPER_URL}/observer/{project_id}", json=data,
                         headers=get_headers())
     return res.json()['id']
 
@@ -129,13 +129,13 @@ def notify_on_test_end(project_id: int, report_id: int, visited_pages, total_thr
     if exception:
         data["exception"] = str(exception)
 
-    res = requests.put(f"{GALLOPER_API_URL}/observer/{project_id}", json=data,
+    res = requests.put(f"{GALLOPER_URL}/observer/{project_id}", json=data,
                        headers=get_headers())
     return res.json()
 
 
 def send_report_locators(project_id: int, report_id: int, exception):
-    requests.put(f"{GALLOPER_API_URL}/observer/{project_id}/{report_id}", json={"exception": exception, "status": ""},
+    requests.put(f"{GALLOPER_URL}/observer/{project_id}/{report_id}", json={"exception": exception, "status": ""},
                  headers=get_headers())
 
 
@@ -159,11 +159,11 @@ def notify_on_command_end(project_id: int, report_id: int, bucket_name, metrics,
         "locators": locators
     }
 
-    res = requests.post(f"{GALLOPER_API_URL}/observer/{project_id}/{report_id}", json=data, headers=get_headers())
+    res = requests.post(f"{GALLOPER_URL}/observer/{project_id}/{report_id}", json=data, headers=get_headers())
 
     file = {'file': open(report_path, 'rb')}
 
-    requests.post(f"{GALLOPER_API_URL}/artifacts/{project_id}/{bucket_name}/{file_name}", files=file,
+    requests.post(f"{GALLOPER_URL}/artifacts/{project_id}/{bucket_name}/{file_name}", files=file,
                   headers=get_headers())
 
     return res.json()["id"]
