@@ -1,10 +1,12 @@
 from io import BytesIO
 from time import sleep
+
 from PIL import Image
-from observer.constants import check_ui_performance
 from selene import have, by, be
+from selene.support.shared import browser
 from selenium.webdriver.common.keys import Keys
 
+from observer.constants import check_ui_performance
 from observer.driver_manager import get_driver
 
 
@@ -38,6 +40,10 @@ def open_url(url, value):
         if driver.execute_script('return document.readyState === "complete" && performance.timing.loadEventEnd > 0'):
             break
         sleep(0.1)
+
+
+def close_driver():
+    browser.quit()
 
 
 def setWindowSize(size, value):

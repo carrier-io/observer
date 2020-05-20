@@ -2,9 +2,8 @@ import argparse
 
 from junit_xml import TestSuite, TestCase
 
-from observer.runner import wait_for_agent
 from observer.scenario_executor import execute_scenario
-from observer.util import parse_json_file, str2bool, logger, download_file, unzip
+from observer.util import parse_json_file, str2bool, logger, download_file, unzip, wait_for_agent
 
 
 def create_parser():
@@ -13,7 +12,7 @@ def create_parser():
     parser.add_argument("-si", '--speedIndex', type=int, default=0)
     parser.add_argument("-y", "--yaml", type=str, default="")
     parser.add_argument("-f", "--file", type=str, default="")
-    parser.add_argument("-s", "--scenario", type=str, default="")
+    parser.add_argument("-sc", "--scenario", type=str, default="")
     parser.add_argument("-d", "--data", type=str, default="")
     parser.add_argument("-tl", '--totalLoad', type=int, default=0)
     parser.add_argument("-v", '--video', type=bool, default=True)
