@@ -13,7 +13,6 @@ TESTS_BUCKET = environ.get("TESTS_BUCKET", "tests")
 
 def get_headers():
     if TOKEN:
-
         return {'Authorization': f"Bearer {TOKEN}"}
     return None
 

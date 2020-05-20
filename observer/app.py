@@ -2,9 +2,8 @@ import argparse
 
 from junit_xml import TestSuite, TestCase
 
-from observer.runner import wait_for_agent
 from observer.scenario_executor import execute_scenario
-from observer.util import parse_json_file, str2bool, logger, download_file, unzip
+from observer.util import parse_json_file, str2bool, logger, download_file, unzip, wait_for_agent
 
 
 def create_parser():

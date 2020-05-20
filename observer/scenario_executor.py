@@ -13,7 +13,7 @@ from selene.support.shared import browser, SharedConfig
 
 from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
-    get_performance_entities, take_full_screenshot, get_dom_size
+    get_performance_entities, take_full_screenshot, get_dom_size, close_driver
 from observer.command_result import CommandExecutionResult
 from observer.constants import LISTENER_ADDRESS, GALLOPER_PROJECT_ID, REPORTS_BUCKET, GALLOPER_URL, ENV, \
     TOKEN, get_headers
@@ -21,8 +21,7 @@ from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
 from observer.processors.test_data_processor import get_test_data_processor
 from observer.reporter import complete_report
-from observer.runner import close_driver, terminate_runner
-from observer.util import _pairwise, logger
+from observer.util import _pairwise, logger, terminate_runner
 
 load_event_end = 0
 perf_entities = []

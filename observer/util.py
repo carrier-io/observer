@@ -4,10 +4,10 @@ import logging
 import os
 import zipfile
 from pathlib import Path
-
+from time import sleep
 import requests
 
-from observer.constants import GALLOPER_URL, GALLOPER_PROJECT_ID, TESTS_BUCKET, get_headers
+from observer.constants import GALLOPER_URL, GALLOPER_PROJECT_ID, TESTS_BUCKET, get_headers, LISTENER_ADDRESS
 
 logger = logging.getLogger('Observer')
 
@@ -37,6 +37,21 @@ def download_file(file_path):
     os.makedirs("/tmp/data", exist_ok=True)
     open(file_path, 'wb').write(res.content)
     return file_path
+
+
+def terminate_runner():
+    return requests.get(f'http://{LISTENER_ADDRESS}/terminate').content
+
+
+def wait_for_agent():
+    sleep(5)
+    for _ in range(120):
+        sleep(1)
+        try:
+            if requests.get(f'http://{LISTENER_ADDRESS}', timeout=1).content == b'OK':
+                break
+        except:
+            pass
 
 
 def _pairwise(iterable):
