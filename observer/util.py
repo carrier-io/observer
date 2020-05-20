@@ -7,7 +7,7 @@ from pathlib import Path
 
 import requests
 
-from observer.constants import GALLOPER_URL, get_headers, GALLOPER_PROJECT_ID, TESTS_BUCKET
+from observer.constants import GALLOPER_URL, GALLOPER_PROJECT_ID, TESTS_BUCKET, get_headers
 
 logger = logging.getLogger('Observer')
 

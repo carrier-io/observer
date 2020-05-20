@@ -13,7 +13,7 @@ def create_parser():
     parser.add_argument("-si", '--speedIndex', type=int, default=0)
     parser.add_argument("-y", "--yaml", type=str, default="")
     parser.add_argument("-f", "--file", type=str, default="")
-    parser.add_argument("-s", "--scenario", type=str, default="")
+    parser.add_argument("-sc", "--scenario", type=str, default="")
     parser.add_argument("-d", "--data", type=str, default="")
     parser.add_argument("-tl", '--totalLoad', type=int, default=0)
     parser.add_argument("-v", '--video', type=bool, default=True)
