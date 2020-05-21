@@ -64,7 +64,7 @@ def _execute_test(base_url, browser_name, test, args):
     }
 
     for current_command, next_command in _pairwise(test['commands']):
-        logger.info(current_command)
+        logger.info(f"{current_command['comment']} [ {current_command['command']}({current_command['target']}) ] {current_command['value']}".strip())
 
         locators.append(current_command)
 

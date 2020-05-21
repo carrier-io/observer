@@ -2,6 +2,8 @@ import os
 from uuid import uuid4
 from junit_xml import TestCase, TestSuite
 
+from observer.util import logger
+
 
 class Threshold(object):
 
@@ -10,16 +12,20 @@ class Threshold(object):
         self.gate = gate
         self.actual = actual
         self.expected = self.gate['metric']
+        self.comparison = gate['comparison']
 
-    def is_violated(self):
-        if self.gate['comparison'] == 'gte':
+    def is_passed(self):
+        if self.comparison == 'gte':
             return self.actual >= self.expected
 
         return True
 
     def get_result(self, title):
         message = ""
-        if self.is_violated():
+        if not self.is_passed():
+            logger.info(
+                f"Threshold: [{self.name}] value {self.actual} violates {self.comparison} {self.expected}! [FAILED]")
+
             message = f"{self.name} exceeded threshold of {self.expected}ms by " \
                       f"{self.actual - self.expected} ms"
 
