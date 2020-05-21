@@ -3,44 +3,43 @@ from uuid import uuid4
 from junit_xml import TestCase, TestSuite
 
 
-def complete_report(report, args):
+def complete_report(report, global_thresholds, args):
     results = []
-    thresholds = {
-        "total": 0,
-        "failed": 0
-    }
+    threshold_results = {"total": len(global_thresholds), "failed": 0}
+
+    time_to_first_paint = _find_threshold_for('time_to_first_paint', global_thresholds)
 
     if 'html' in args.report:
         results.append({'html_report': report.get_report(), 'title': report.title})
-    if args.firstPaint > 0:
-        thresholds["total"] += 1
+    if time_to_first_paint:
+
+        threshold_results["total"] += 1
 
         message = ''
-        if args.firstPaint < report.timing['firstPaint']:
-            thresholds["failed"] += 1
+        if _is_threshold_violated(time_to_first_paint, report.timing['firstPaint']):
+            threshold_results["failed"] += 1
 
             message = f"First paint exceeded threshold of {args.firstPaint}ms by " \
                       f"{report.timing['firstPaint'] - args.firstPaint} ms"
         results.append({"name": f"First Paint {report.title}",
                         "actual": report.timing['firstPaint'], "expected": args.firstPaint, "message": message})
     if args.speedIndex > 0:
-        thresholds["total"] += 1
 
         message = ''
         if args.speedIndex < report.timing['speedIndex']:
-            thresholds["failed"] += 1
+            threshold_results["failed"] += 1
 
             message = f"Speed index exceeded threshold of {args.speedIndex}ms by " \
                       f"{report.timing['speedIndex'] - args.speedIndex} ms"
         results.append({"name": f"Speed Index {report.title}", "actual": report.timing['speedIndex'],
                         "expected": args.speedIndex, "message": message})
     if args.totalLoad > 0:
-        thresholds["total"] += 1
+        threshold_results["total"] += 1
 
         totalLoad = report.performance_timing['loadEventEnd'] - report.performance_timing['navigationStart']
         message = ''
         if args.totalLoad < totalLoad:
-            thresholds["failed"] += 1
+            threshold_results["failed"] += 1
 
             message = f"Total Load exceeded threshold of {args.totalLoad}ms by " \
                       f"{totalLoad - args.speedIndex} ms"
@@ -48,7 +47,7 @@ def complete_report(report, args):
                         "expected": args.totalLoad, "message": message})
     uuid = __process_report(results, args.report)
 
-    return uuid, thresholds
+    return uuid, threshold_results
 
 
 def __process_report(report, config):
@@ -71,3 +70,15 @@ def __process_report(report, config):
         TestSuite.to_file(f, [ts], prettyprint=True)
 
     return report_uuid
+
+
+def _is_threshold_violated(gate, value):
+    expected = gate['metric']
+    if gate['comparison'] == 'gte':
+        return value >= expected
+
+    return True
+
+
+def _find_threshold_for(name, arr):
+    return [x for x in arr if x['target'] == name][0]

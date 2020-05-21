@@ -7,7 +7,7 @@ from pathlib import Path
 from time import sleep
 import requests
 
-from observer.constants import GALLOPER_URL, GALLOPER_PROJECT_ID, TESTS_BUCKET, get_headers, LISTENER_ADDRESS
+from observer.constants import GALLOPER_URL, GALLOPER_PROJECT_ID, TESTS_BUCKET, get_headers, LISTENER_ADDRESS, ENV
 
 logger = logging.getLogger('Observer')
 
@@ -41,6 +41,18 @@ def download_file(file_path):
 
 def terminate_runner():
     return requests.get(f'http://{LISTENER_ADDRESS}/terminate').content
+
+
+def get_thresholds(test_name):
+    logger.info(f"Get thresholds for: {test_name} {ENV}")
+    res = requests.get(
+        f"{GALLOPER_URL}/thresholds/{GALLOPER_PROJECT_ID}/ui?name={test_name}&environment={ENV}&order=asc",
+        headers=get_headers())
+
+    if res.status_code != 200:
+        raise Exception(f"Can not get thresholds, Reasons {res.reason}")
+
+    return res.json()
 
 
 def wait_for_agent():
