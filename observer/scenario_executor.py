@@ -48,7 +48,7 @@ def _execute_test(base_url, browser_name, test, args):
 
     test_name = test['name']
     logger.info(f"Executing test: {test_name}")
-    expected_thresholds = get_thresholds(test_name)
+    global_thresholds = get_thresholds(test_name)
 
     test_data_processor = get_test_data_processor(test_name, args.data)
 
@@ -83,7 +83,7 @@ def _execute_test(base_url, browser_name, test, args):
 
         visited_pages += 1
 
-        report_uuid, threshold_results = complete_report(execution_result.report, expected_thresholds, args)
+        report_uuid, threshold_results = complete_report(execution_result.report, global_thresholds, args)
         total_thresholds["total"] += threshold_results["total"]
         total_thresholds["failed"] += threshold_results["failed"]
 
