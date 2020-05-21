@@ -8,13 +8,12 @@ def complete_report(report, global_thresholds, args):
     threshold_results = {"total": len(global_thresholds), "failed": 0}
 
     time_to_first_paint = _find_threshold_for('time_to_first_paint', global_thresholds)
+    speed_index = _find_threshold_for('speed_index', global_thresholds)
+    total = _find_threshold_for('total', global_thresholds)
 
     if 'html' in args.report:
         results.append({'html_report': report.get_report(), 'title': report.title})
     if time_to_first_paint:
-
-        threshold_results["total"] += 1
-
         message = ''
         if _is_threshold_violated(time_to_first_paint, report.timing['firstPaint']):
             threshold_results["failed"] += 1
@@ -23,22 +22,19 @@ def complete_report(report, global_thresholds, args):
                       f"{report.timing['firstPaint'] - args.firstPaint} ms"
         results.append({"name": f"First Paint {report.title}",
                         "actual": report.timing['firstPaint'], "expected": args.firstPaint, "message": message})
-    if args.speedIndex > 0:
-
+    if speed_index:
         message = ''
-        if args.speedIndex < report.timing['speedIndex']:
+        if _is_threshold_violated(speed_index, report.timing['speedIndex']):
             threshold_results["failed"] += 1
 
             message = f"Speed index exceeded threshold of {args.speedIndex}ms by " \
                       f"{report.timing['speedIndex'] - args.speedIndex} ms"
         results.append({"name": f"Speed Index {report.title}", "actual": report.timing['speedIndex'],
                         "expected": args.speedIndex, "message": message})
-    if args.totalLoad > 0:
-        threshold_results["total"] += 1
-
+    if total:
         totalLoad = report.performance_timing['loadEventEnd'] - report.performance_timing['navigationStart']
         message = ''
-        if args.totalLoad < totalLoad:
+        if _is_threshold_violated(total, totalLoad):
             threshold_results["failed"] += 1
 
             message = f"Total Load exceeded threshold of {args.totalLoad}ms by " \
