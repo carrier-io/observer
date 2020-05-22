@@ -8,8 +8,8 @@ from observer.util import logger
 
 class Threshold(object):
 
-    def __init__(self, name, gate, actual):
-        self.name = name
+    def __init__(self, gate, actual):
+        self.name = gate['target'].replace("_", " ").capitalize()
         self.gate = gate
         self.actual = actual
         self.expected = self.gate['metric']
@@ -26,7 +26,7 @@ class Threshold(object):
             return self.actual < self.expected
         elif self.comparison == 'eq':
             return self.actual == self.expected
-        return True
+        return False
 
     def get_result(self, title):
         message = ""
@@ -44,51 +44,20 @@ class Threshold(object):
 
 def complete_report(execution_results, global_thresholds, args):
     results = []
-
     report_title = execution_results.report.title
     threshold_results = {"total": len(global_thresholds), "failed": 0}
-
-    expected_time_to_first_paint = _find_threshold_for('time_to_first_paint', global_thresholds)
-    expected_time_to_first_byte = _find_threshold_for('time_to_first_byte', global_thresholds)
-    expected_speed_index = _find_threshold_for('speed_index', global_thresholds)
-    expected_total = _find_threshold_for('total', global_thresholds)
-    expected_dom_content_loading = _find_threshold_for('dom_content_loading', global_thresholds)
-    expected_dom_processing = _find_threshold_for('dom_processing', global_thresholds)
-
     perf_results = JsonExporter(execution_results.computed_results).export()['fields']
 
     if 'html' in args.report:
         results.append({'html_report': execution_results.report.get_report(), 'title': report_title})
-    if expected_time_to_first_paint:
-        threshold_results['failed'] += 1
-        results.append(
-            Threshold('First paint', expected_time_to_first_paint, perf_results['time_to_first_paint']).get_result(
-                report_title))
-    if expected_speed_index:
-        threshold_results['failed'] += 1
-        results.append(
-            Threshold('Speed index', expected_speed_index, perf_results['speed_index']).get_result(report_title))
-    if expected_total:
-        threshold_results['failed'] += 1
-        results.append(
-            Threshold('Total Load', expected_total, perf_results['total']).get_result(report_title))
-    if expected_time_to_first_byte:
-        threshold_results['failed'] += 1
-        results.append(
-            Threshold('First byte', expected_time_to_first_byte, perf_results['time_to_first_byte']).get_result(
-                report_title))
 
-    if expected_dom_content_loading:
-        threshold_results['failed'] += 1
-        results.append(
-            Threshold('DOM loading', expected_dom_content_loading, perf_results['dom_content_loading']).get_result(
-                report_title))
+    for gate in global_thresholds:
+        target_metric_name = gate["target"]
+        threshold = Threshold(gate, perf_results[target_metric_name])
+        if not threshold.is_passed():
+            threshold_results['failed'] += 1
 
-    if expected_dom_processing:
-        threshold_results['failed'] += 1
-        results.append(
-            Threshold('DOM processing', expected_dom_processing, perf_results['dom_processing']).get_result(
-                report_title))
+        results.append(threshold.get_result(report_title))
 
     uuid = __process_report(results, args.report)
 
