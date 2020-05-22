@@ -85,3 +85,9 @@ def unzip(path_to_zip_file, target_dir):
     logger.info(f"Unzip {path_to_zip_file} to {target_dir}")
     with zipfile.ZipFile(path_to_zip_file, 'r') as zip_ref:
         zip_ref.extractall(target_dir)
+
+
+def filter_thresholds_for(name, arr):
+    result = [x for x in arr if x['scope'] == name or x['scope'] == 'every']
+    if result:
+        return result

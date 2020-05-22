@@ -21,7 +21,7 @@ from observer.exporter import export, GalloperExporter
 from observer.processors.results_processor import resultsProcessor
 from observer.processors.test_data_processor import get_test_data_processor
 from observer.reporter import complete_report
-from observer.util import _pairwise, logger, terminate_runner, get_thresholds
+from observer.util import _pairwise, logger, terminate_runner, get_thresholds, filter_thresholds_for
 
 load_event_end = 0
 perf_entities = []
@@ -64,7 +64,8 @@ def _execute_test(base_url, browser_name, test, args):
     }
 
     for current_command, next_command in _pairwise(test['commands']):
-        logger.info(f"{current_command['comment']} [ {current_command['command']}({current_command['target']}) ] {current_command['value']}".strip())
+        logger.info(
+            f"{current_command['comment']} [ {current_command['command']}({current_command['target']}) ] {current_command['value']}".strip())
 
         locators.append(current_command)
 
@@ -83,7 +84,9 @@ def _execute_test(base_url, browser_name, test, args):
 
         visited_pages += 1
 
-        report_uuid, threshold_results = complete_report(execution_result, global_thresholds, args)
+        scoped_thresholds = filter_thresholds_for(execution_result.report.title, global_thresholds)
+
+        report_uuid, threshold_results = complete_report(execution_result, scoped_thresholds, args)
         total_thresholds["total"] += threshold_results["total"]
         total_thresholds["failed"] += threshold_results["failed"]
 

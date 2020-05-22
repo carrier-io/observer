@@ -45,24 +45,24 @@ class Threshold(object):
                 "message": message}
 
 
-def complete_report(execution_results, global_thresholds, args):
+def complete_report(execution_results, thresholds, args):
     results = []
     report_title = execution_results.report.title
-    threshold_results = {"total": len(global_thresholds), "failed": 0}
+    threshold_results = {"total": len(thresholds), "failed": 0}
     perf_results = JsonExporter(execution_results.computed_results).export()['fields']
 
     if 'html' in args.report:
         results.append({'html_report': execution_results.report.get_report(), 'title': report_title})
 
-    logger.info("===== Assert thresholds =====")
-    for gate in global_thresholds:
+    logger.info(f"=====> Assert thresholds for {report_title}")
+    for gate in thresholds:
         target_metric_name = gate["target"]
         threshold = Threshold(gate, perf_results[target_metric_name])
         if not threshold.is_passed():
             threshold_results['failed'] += 1
 
         results.append(threshold.get_result(report_title))
-    logger.info("="*28)
+    logger.info("=====>")
 
     uuid = __process_report(results, args.report)
 
@@ -89,9 +89,3 @@ def __process_report(results, config):
         TestSuite.to_file(f, [ts], prettyprint=True)
 
     return report_uuid
-
-
-def _find_threshold_for(name, arr):
-    result = [x for x in arr if x['target'] == name]
-    if result:
-        return result[0]
