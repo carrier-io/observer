@@ -32,10 +32,13 @@ class Threshold(object):
         message = ""
         if not self.is_passed():
             logger.info(
-                f"Threshold: [{self.name}] value {self.actual} violates {self.comparison} {self.expected}! [FAILED]")
+                f"Threshold: [{self.name}] value {self.actual} violates rule {self.comparison} {self.expected}! [FAILED]")
 
-            message = f"{self.name} exceeded threshold of {self.expected}ms by " \
+            message = f"{self.name} violated threshold of {self.expected}ms by " \
                       f"{self.actual - self.expected} ms"
+        else:
+            logger.info(
+                f"Threshold: [{self.name}] value {self.actual} comply with rule {self.comparison} {self.expected}! [PASSED]")
 
         return {"name": f"{self.name} {title}",
                 "actual": self.actual, "expected": self.expected,
@@ -51,6 +54,7 @@ def complete_report(execution_results, global_thresholds, args):
     if 'html' in args.report:
         results.append({'html_report': execution_results.report.get_report(), 'title': report_title})
 
+    logger.info("===== Assert thresholds =====")
     for gate in global_thresholds:
         target_metric_name = gate["target"]
         threshold = Threshold(gate, perf_results[target_metric_name])
@@ -58,6 +62,7 @@ def complete_report(execution_results, global_thresholds, args):
             threshold_results['failed'] += 1
 
         results.append(threshold.get_result(report_title))
+    logger.info("="*28)
 
     uuid = __process_report(results, args.report)
 
