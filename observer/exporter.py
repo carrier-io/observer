@@ -127,8 +127,30 @@ class GalloperExporter(Exporter):
         }
 
 
+class JsonExporter(Exporter):
+
+    def __init__(self, raw_data):
+        super().__init__(raw_data)
+
+    def export(self):
+        return {
+            "measurement": "ui_performance",
+            "time": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+            "fields": {
+                "requests": len(self.requests),
+                "domains": len(self.domains),
+                "total": self.total_load_time,
+                "speed_index": self.speed_index,
+                "time_to_first_byte": self.time_to_first_byte,
+                "time_to_first_paint": self.time_to_first_paint,
+                "dom_content_loading": self.dom_content_loading,
+                "dom_processing": self.dom_processing
+            }
+        }
+
+
 def export(data, args):
-    if "json" in args.export:
+    if "telegraph" in args.export:
         TelegraphJsonExporter(data).export()
     if "influx" in args.export:
         InfluxExporter(data).export()

@@ -2,6 +2,7 @@ import os
 from uuid import uuid4
 from junit_xml import TestCase, TestSuite
 
+from observer.exporter import JsonExporter
 from observer.util import logger
 
 
@@ -17,7 +18,14 @@ class Threshold(object):
     def is_passed(self):
         if self.comparison == 'gte':
             return self.actual >= self.expected
-
+        elif self.comparison == 'lte':
+            return self.actual <= self.expected
+        elif self.comparison == 'gt':
+            return self.actual > self.expected
+        elif self.comparison == 'lt':
+            return self.actual < self.expected
+        elif self.comparison == 'eq':
+            return self.actual == self.expected
         return True
 
     def get_result(self, title):
@@ -34,54 +42,54 @@ class Threshold(object):
                 "message": message}
 
 
-def complete_report(report, global_thresholds, args):
+def complete_report(execution_results, global_thresholds, args):
     results = []
+
+    report_title = execution_results.report.title
     threshold_results = {"total": len(global_thresholds), "failed": 0}
 
     expected_time_to_first_paint = _find_threshold_for('time_to_first_paint', global_thresholds)
+    expected_time_to_first_byte = _find_threshold_for('time_to_first_byte', global_thresholds)
     expected_speed_index = _find_threshold_for('speed_index', global_thresholds)
     expected_total = _find_threshold_for('total', global_thresholds)
+    expected_dom_content_loading = _find_threshold_for('dom_content_loading', global_thresholds)
+    expected_dom_processing = _find_threshold_for('dom_processing', global_thresholds)
+
+    perf_results = JsonExporter(execution_results.computed_results).export()['fields']
 
     if 'html' in args.report:
-        results.append({'html_report': report.get_report(), 'title': report.title})
+        results.append({'html_report': execution_results.report.get_report(), 'title': report_title})
     if expected_time_to_first_paint:
-        # message = ''
+        threshold_results['failed'] += 1
         results.append(
-            Threshold('First paint', expected_time_to_first_paint, report.timing['firstPaint']).get_result(
-                report.title))
-
-        # if _is_threshold_violated(expected_time_to_first_paint, report.timing['firstPaint']):
-        #     threshold_results["failed"] += 1
-        #
-        #     message = f"First paint exceeded threshold of {expected_time_to_first_paint}ms by " \
-        #               f"{report.timing['firstPaint'] - expected_time_to_first_paint} ms"
-        # results.append({"name": f"First Paint {report.title}",
-        #                 "actual": report.timing['firstPaint'], "expected": expected_time_to_first_paint,
-        #                 "message": message})
+            Threshold('First paint', expected_time_to_first_paint, perf_results['time_to_first_paint']).get_result(
+                report_title))
     if expected_speed_index:
+        threshold_results['failed'] += 1
         results.append(
-            Threshold('Speed index', expected_speed_index, report.timing['speedIndex']).get_result(report.title))
-        # message = ''
-        # if _is_threshold_violated(expected_speed_index, report.timing['speedIndex']):
-        #     threshold_results["failed"] += 1
-        #
-        #     message = f"Speed index exceeded threshold of {expected_speed_index}ms by " \
-        #               f"{report.timing['speedIndex'] - expected_speed_index} ms"
-        # results.append({"name": f"Speed Index {report.title}", "actual": report.timing['speedIndex'],
-        #                 "expected": expected_speed_index, "message": message})
+            Threshold('Speed index', expected_speed_index, perf_results['speed_index']).get_result(report_title))
     if expected_total:
-        total_load = report.performance_timing['loadEventEnd'] - report.performance_timing['navigationStart']
+        threshold_results['failed'] += 1
         results.append(
-            Threshold('Total Load', expected_total, total_load).get_result(report.title))
+            Threshold('Total Load', expected_total, perf_results['total']).get_result(report_title))
+    if expected_time_to_first_byte:
+        threshold_results['failed'] += 1
+        results.append(
+            Threshold('First byte', expected_time_to_first_byte, perf_results['time_to_first_byte']).get_result(
+                report_title))
 
-        # message = ''
-        # if _is_threshold_violated(expected_total, total_load):
-        #     threshold_results["failed"] += 1
-        #
-        #     message = f"Total Load exceeded threshold of {expected_total}ms by " \
-        #               f"{total_load - expected_total} ms"
-        # results.append({"name": f"Total Load {report.title}", "actual": total_load,
-        #                 "expected": expected_total, "message": message})
+    if expected_dom_content_loading:
+        threshold_results['failed'] += 1
+        results.append(
+            Threshold('DOM loading', expected_dom_content_loading, perf_results['dom_content_loading']).get_result(
+                report_title))
+
+    if expected_dom_processing:
+        threshold_results['failed'] += 1
+        results.append(
+            Threshold('DOM processing', expected_dom_processing, perf_results['dom_processing']).get_result(
+                report_title))
+
     uuid = __process_report(results, args.report)
 
     return uuid, threshold_results
@@ -110,4 +118,6 @@ def __process_report(results, config):
 
 
 def _find_threshold_for(name, arr):
-    return [x for x in arr if x['target'] == name][0]
+    result = [x for x in arr if x['target'] == name]
+    if result:
+        return result[0]

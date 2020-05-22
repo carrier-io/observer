@@ -83,7 +83,7 @@ def _execute_test(base_url, browser_name, test, args):
 
         visited_pages += 1
 
-        report_uuid, threshold_results = complete_report(execution_result.report, global_thresholds, args)
+        report_uuid, threshold_results = complete_report(execution_result, global_thresholds, args)
         total_thresholds["total"] += threshold_results["total"]
         total_thresholds["failed"] += threshold_results["failed"]
 
