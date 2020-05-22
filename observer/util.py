@@ -88,6 +88,6 @@ def unzip(path_to_zip_file, target_dir):
 
 
 def filter_thresholds_for(name, arr):
-    result = [x for x in arr if x['scope'] == name or x['scope'] == 'every']
-    if result:
-        return result
+    test_scope = [x for x in arr if x['scope'] == name]
+    every_scope = [x for x in arr if x['scope'] == 'every']
+    return list({x['target']: x for x in every_scope + test_scope}.values())
