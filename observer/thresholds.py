@@ -35,7 +35,7 @@ class Threshold(object):
             logger.info(
                 f"Threshold: [{self.name}] value {self.actual} comply with rule {self.comparison} {self.expected}! [PASSED]")
 
-        return {"name": f"{self.name} {title}",
+        return {"name": f"{self.name}",
                 "actual": self.actual, "expected": self.expected,
                 "message": message}
 
@@ -59,6 +59,6 @@ class AggregatedThreshold(Threshold):
             logger.info(
                 f"Threshold: [{self.name}] {self.aggregation} value {self.actual} comply with rule {self.comparison} {self.expected}! [PASSED]")
 
-        return {"name": f"{self.name} {title}",
+        return {"name": f"{self.name}",
                 "actual": self.actual, "expected": self.expected,
                 "message": message}

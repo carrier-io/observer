@@ -1,5 +1,7 @@
 import os
 
+from junit_xml import TestSuite, TestCase
+
 from observer.app import create_parser, execute
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -38,3 +40,16 @@ def test_list():
     test_scope.append(every_scope)
 
     print(test_scope)
+
+
+def test_can_generate_junit_report():
+    failed_case = TestCase("threshold", "observer", 1244, '', '')
+    failed_case.add_failure_info("threshold failed")
+    test_cases = [
+        TestCase("threshold", "observer", 1234, '', ''),
+        failed_case
+    ]
+
+    ts = TestSuite("Observer UI Benchmarking Test ", test_cases)
+    with open(f"report_{1}.xml", 'w') as f:
+        TestSuite.to_file(f, [ts], prettyprint=True)

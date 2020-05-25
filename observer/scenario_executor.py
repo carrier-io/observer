@@ -8,6 +8,7 @@ from uuid import uuid4
 
 import requests
 from deepdiff import DeepDiff
+from junit_xml import TestSuite, TestCase
 from requests import get
 from selene.support.shared import browser, SharedConfig
 
@@ -61,7 +62,8 @@ def _execute_test(base_url, browser_name, test, args):
     visited_pages = 0
     total_thresholds = {
         "total": 0,
-        "failed": 0
+        "failed": 0,
+        "details": []
     }
     execution_results = []
 
@@ -111,23 +113,41 @@ def _execute_test(base_url, browser_name, test, args):
         threshold_results = assert_all_scope_thresholds(test_name, all_scope_thresholds, execution_results)
         total_thresholds["total"] += threshold_results["total"]
         total_thresholds["failed"] += threshold_results["failed"]
-
+        total_thresholds['details'] = threshold_results["details"]
     if args.galloper:
         notify_on_test_end(GALLOPER_PROJECT_ID, report_id, visited_pages, total_thresholds, exception)
 
+    generate_junit_report(test_name, total_thresholds)
+
 
 def assert_all_scope_thresholds(test_name, all_scope_thresholds, execution_results):
-    threshold_results = {"total": len(all_scope_thresholds), "failed": 0}
+    threshold_results = {"total": len(all_scope_thresholds), "failed": 0, "details": []}
 
     logger.info(f"=====> Assert aggregated thresholds for {test_name}")
     for gate in all_scope_thresholds:
         threshold = AggregatedThreshold(gate, execution_results)
         if not threshold.is_passed():
             threshold_results['failed'] += 1
-        threshold.get_result(test_name)
+        threshold_results["details"].append(threshold.get_result(test_name))
     logger.info("=====>")
 
     return threshold_results
+
+
+def generate_junit_report(test_name, total_thresholds):
+    test_cases = []
+
+    for item in total_thresholds["details"]:
+        message = item['message']
+        test_case = TestCase(item['name'], status="PASSED")
+        if message:
+            test_case.status = "FAILED"
+            test_case.add_failure_info(message)
+        test_cases.append(test_case)
+
+    ts = TestSuite(test_name, test_cases)
+    with open(f"/tmp/reports/{test_name}_report.xml", 'w') as f:
+        TestSuite.to_file(f, [ts], prettyprint=True)
 
 
 def notify_on_test_start(project_id: int, test_name, browser_name, environment, base_url):
