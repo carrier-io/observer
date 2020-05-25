@@ -16,11 +16,12 @@ from observer.actions.browser_actions import get_performance_timing, get_perform
     get_performance_entities, take_full_screenshot, get_dom_size, close_driver
 from observer.command_result import CommandExecutionResult
 from observer.constants import LISTENER_ADDRESS, GALLOPER_PROJECT_ID, REPORTS_BUCKET, GALLOPER_URL, ENV, \
-    TOKEN, get_headers
-from observer.exporter import export, GalloperExporter
+    get_headers
+from observer.exporter import export, GalloperExporter, JsonExporter
 from observer.processors.results_processor import resultsProcessor
 from observer.processors.test_data_processor import get_test_data_processor
 from observer.reporter import complete_report
+from observer.thresholds import AggregatedThreshold
 from observer.util import _pairwise, logger, terminate_runner, get_thresholds, filter_thresholds_for
 
 load_event_end = 0
@@ -62,6 +63,7 @@ def _execute_test(base_url, browser_name, test, args):
         "total": 0,
         "failed": 0
     }
+    execution_results = []
 
     for current_command, next_command in _pairwise(test['commands']):
         logger.info(
@@ -100,8 +102,32 @@ def _execute_test(base_url, browser_name, test, args):
         if execution_result.raw_results:
             results = execution_result.raw_results
 
+        perf_results = JsonExporter(execution_result.computed_results).export()['fields']
+        execution_results.append(perf_results)
+
+    # compute global thresholds
+    all_scope_thresholds = [x for x in global_thresholds if x['scope'] == 'all']
+    if all_scope_thresholds:
+        threshold_results = assert_all_scope_thresholds(test_name, all_scope_thresholds, execution_results)
+        total_thresholds["total"] += threshold_results["total"]
+        total_thresholds["failed"] += threshold_results["failed"]
+
     if args.galloper:
         notify_on_test_end(GALLOPER_PROJECT_ID, report_id, visited_pages, total_thresholds, exception)
+
+
+def assert_all_scope_thresholds(test_name, all_scope_thresholds, execution_results):
+    threshold_results = {"total": len(all_scope_thresholds), "failed": 0}
+
+    logger.info(f"=====> Assert aggregated thresholds for {test_name}")
+    for gate in all_scope_thresholds:
+        threshold = AggregatedThreshold(gate, execution_results)
+        if not threshold.is_passed():
+            threshold_results['failed'] += 1
+        threshold.get_result(test_name)
+    logger.info("=====>")
+
+    return threshold_results
 
 
 def notify_on_test_start(project_id: int, test_name, browser_name, environment, base_url):

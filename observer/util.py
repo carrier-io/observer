@@ -91,3 +91,11 @@ def filter_thresholds_for(name, arr):
     test_scope = [x for x in arr if x['scope'] == name]
     every_scope = [x for x in arr if x['scope'] == 'every']
     return list({x['target']: x for x in every_scope + test_scope}.values())
+
+
+def get_actual_aggregated_value(metric_name, values, aggregation):
+    metrics = [d[metric_name] for d in values]
+    if aggregation == 'max':
+        return max(metrics)
+
+    raise Exception(f"No such aggregation {aggregation}")

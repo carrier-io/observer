@@ -3,46 +3,8 @@ from uuid import uuid4
 from junit_xml import TestCase, TestSuite
 
 from observer.exporter import JsonExporter
+from observer.thresholds import Threshold
 from observer.util import logger
-
-
-class Threshold(object):
-
-    def __init__(self, gate, actual):
-        self.name = gate['target'].replace("_", " ").capitalize()
-        self.gate = gate
-        self.actual = actual
-        self.expected = self.gate['metric']
-        self.comparison = gate['comparison']
-
-    def is_passed(self):
-        if self.comparison == 'gte':
-            return self.actual >= self.expected
-        elif self.comparison == 'lte':
-            return self.actual <= self.expected
-        elif self.comparison == 'gt':
-            return self.actual > self.expected
-        elif self.comparison == 'lt':
-            return self.actual < self.expected
-        elif self.comparison == 'eq':
-            return self.actual == self.expected
-        return False
-
-    def get_result(self, title):
-        message = ""
-        if not self.is_passed():
-            logger.info(
-                f"Threshold: [{self.name}] value {self.actual} violates rule {self.comparison} {self.expected}! [FAILED]")
-
-            message = f"{self.name} violated threshold of {self.expected}ms by " \
-                      f"{self.actual - self.expected} ms"
-        else:
-            logger.info(
-                f"Threshold: [{self.name}] value {self.actual} comply with rule {self.comparison} {self.expected}! [PASSED]")
-
-        return {"name": f"{self.name} {title}",
-                "actual": self.actual, "expected": self.expected,
-                "message": message}
 
 
 def complete_report(execution_results, thresholds, args):
