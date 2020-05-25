@@ -16,7 +16,7 @@ def create_parser():
     parser.add_argument("-d", "--data", type=str, default="")
     parser.add_argument("-tl", '--totalLoad', type=int, default=0)
     parser.add_argument("-v", '--video', type=bool, default=True)
-    parser.add_argument("-r", '--report', action="append", type=str, default=['xml'])
+    parser.add_argument("-r", '--report', action="append", type=str, default=['html'])
     parser.add_argument("-e", '--export', action="append", type=str, default=[])
     parser.add_argument("-g", '--galloper', type=str2bool, default=True)
     return parser
