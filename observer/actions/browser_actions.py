@@ -95,6 +95,10 @@ def get_dom_size():
     return get_driver().driver.execute_script("return document.getElementsByTagName('*').length")
 
 
+def get_current_url():
+    return get_driver().driver.current_url
+
+
 def take_full_screenshot(save_path):
     driver = get_driver()
     # initiate value

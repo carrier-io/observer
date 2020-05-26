@@ -23,7 +23,7 @@ def complete_report(execution_results, thresholds, args):
         if not threshold.is_passed():
             threshold_results['failed'] += 1
 
-        results.append(threshold.get_result(report_title))
+        results.append(threshold.get_result())
     logger.info("=====>")
 
     uuid = __process_report(results, args.report)

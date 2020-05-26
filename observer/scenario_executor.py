@@ -1,9 +1,11 @@
 import copy
 import tempfile
 from datetime import datetime
+from operator import itemgetter
 from os import path
 from shutil import rmtree
 from time import time
+from urllib.parse import urlparse
 from uuid import uuid4
 
 import requests
@@ -14,7 +16,7 @@ from selene.support.shared import browser, SharedConfig
 
 from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
-    get_performance_entities, take_full_screenshot, get_dom_size, close_driver
+    get_performance_entities, take_full_screenshot, get_dom_size, close_driver, get_current_url
 from observer.command_result import CommandExecutionResult
 from observer.constants import LISTENER_ADDRESS, GALLOPER_PROJECT_ID, REPORTS_BUCKET, GALLOPER_URL, ENV, \
     get_headers
@@ -65,7 +67,7 @@ def _execute_test(base_url, browser_name, test, args):
         "failed": 0,
         "details": []
     }
-    execution_results = []
+    execution_results = {}
 
     for current_command, next_command in _pairwise(test['commands']):
         logger.info(
@@ -91,8 +93,6 @@ def _execute_test(base_url, browser_name, test, args):
         scoped_thresholds = filter_thresholds_for(execution_result.report.title, global_thresholds)
 
         report_uuid, threshold_results = complete_report(execution_result, scoped_thresholds, args)
-        total_thresholds["total"] += threshold_results["total"]
-        total_thresholds["failed"] += threshold_results["failed"]
 
         if args.galloper:
             notify_on_command_end(GALLOPER_PROJECT_ID,
@@ -105,12 +105,14 @@ def _execute_test(base_url, browser_name, test, args):
             results = execution_result.raw_results
 
         perf_results = JsonExporter(execution_result.computed_results).export()['fields']
-        execution_results.append(perf_results)
+        page_identificator = execution_result.page_identificator
+        if page_identificator in execution_results.keys():
+            execution_results[page_identificator].append(perf_results)
+        else:
+            execution_results[page_identificator] = [perf_results]
 
-    # compute global thresholds
-    all_scope_thresholds = [x for x in global_thresholds if x['scope'] == 'all']
-    if all_scope_thresholds:
-        threshold_results = assert_all_scope_thresholds(test_name, all_scope_thresholds, execution_results)
+    if global_thresholds:
+        threshold_results = assert_test_thresholds(test_name, global_thresholds, execution_results)
         total_thresholds["total"] += threshold_results["total"]
         total_thresholds["failed"] += threshold_results["failed"]
         total_thresholds['details'] = threshold_results["details"]
@@ -120,15 +122,18 @@ def _execute_test(base_url, browser_name, test, args):
     generate_junit_report(test_name, total_thresholds)
 
 
-def assert_all_scope_thresholds(test_name, all_scope_thresholds, execution_results):
+def assert_test_thresholds(test_name, all_scope_thresholds, execution_results):
     threshold_results = {"total": len(all_scope_thresholds), "failed": 0, "details": []}
 
     logger.info(f"=====> Assert aggregated thresholds for {test_name}")
+    checking_result = []
     for gate in all_scope_thresholds:
         threshold = AggregatedThreshold(gate, execution_results)
         if not threshold.is_passed():
             threshold_results['failed'] += 1
-        threshold_results["details"].append(threshold.get_result(test_name))
+        checking_result.append(threshold.get_result())
+
+    threshold_results["details"] = checking_result
     logger.info("=====>")
 
     return threshold_results
@@ -293,7 +298,18 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
     if video_folder:
         rmtree(video_folder)
 
-    return CommandExecutionResult(report, latest_results, results, None)
+    page_identificator = None
+    if report:
+        # get url, action, locator here
+        current_url = get_current_url()
+        parsed_url = urlparse(current_url)
+        title = report.title
+        comment = current_command['comment']
+        if comment:
+            title = comment
+
+        page_identificator = f"{title}:{parsed_url.path}@{current_command['command']}({current_target})"
+    return CommandExecutionResult(page_identificator, report, latest_results, results, None)
 
 
 def start_recording():

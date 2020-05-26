@@ -1,6 +1,7 @@
 import argparse
 import json
 import logging
+import math
 import os
 import zipfile
 from pathlib import Path
@@ -93,9 +94,35 @@ def filter_thresholds_for(name, arr):
     return list({x['target']: x for x in every_scope + test_scope}.values())
 
 
-def get_actual_aggregated_value(metric_name, values, aggregation):
-    metrics = [d[metric_name] for d in values]
+def percentile(data, percentile):
+    size = len(data)
+    return sorted(data)[int(math.ceil((size * percentile) / 100)) - 1]
+
+
+def is_values_match(actual, comparison, expected):
+    if comparison == 'gte':
+        return actual >= expected
+    elif comparison == 'lte':
+        return actual <= expected
+    elif comparison == 'gt':
+        return actual > expected
+    elif comparison == 'lt':
+        return actual < expected
+    elif comparison == 'eq':
+        return actual == expected
+    return False
+
+
+def get_aggregated_value(aggregation, metrics):
     if aggregation == 'max':
         return max(metrics)
-
-    raise Exception(f"No such aggregation {aggregation}")
+    elif aggregation == 'min':
+        return min(metrics)
+    elif aggregation == 'avg':
+        return round(sum(metrics) / len(metrics), 2)
+    elif aggregation == 'pct95':
+        return percentile(metrics, 95)
+    elif aggregation == 'pct50':
+        return percentile(metrics, 50)
+    else:
+        raise Exception(f"No such aggregation {aggregation}")
