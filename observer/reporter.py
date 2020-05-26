@@ -32,22 +32,12 @@ def complete_report(execution_results, thresholds, args):
 
 
 def __process_report(results, config):
-    test_cases = []
     report_uuid = uuid4()
     os.makedirs('/tmp/reports', exist_ok=True)
 
     for record in results:
-        if 'xml' in config and 'html_report' not in record.keys():
-            test_cases.append(TestCase(record['name'], record.get('class_name', 'observer'),
-                                       record['actual'], '', ''))
-            if record['message']:
-                test_cases[-1].add_failure_info(record['message'])
-        elif 'html' in config and 'html_report' in record.keys():
+        if 'html' in config and 'html_report' in record.keys():
             with open(f'/tmp/reports/{record["title"]}_{report_uuid}.html', 'w') as f:
                 f.write(record['html_report'])
-
-    ts = TestSuite("Observer UI Benchmarking Test ", test_cases)
-    with open(f"/tmp/reports/report_{report_uuid}.xml", 'w') as f:
-        TestSuite.to_file(f, [ts], prettyprint=True)
 
     return report_uuid
