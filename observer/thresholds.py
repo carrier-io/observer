@@ -70,7 +70,10 @@ class AggregatedThreshold(object):
                           f"{self.comparison} {self.expected_value}"
                 logger.info(f"{message} [FAILED]")
 
-                self.result = {"name": f"{self.name}", "rule": self.comparison,
+                self.result = {"name": f"{self.name}",
+                               "rule": self.comparison,
+                               "scope": self.scope,
+                               "aggregation": self.aggregation,
                                "actual": actual, "expected": self.expected_value,
                                "message": message}
                 return False
@@ -79,7 +82,10 @@ class AggregatedThreshold(object):
             f"Threshold: {self.scope} [{self.name}] {self.aggregation} value {actual_value} comply with rule {self.comparison} "
             f"{self.expected_value} [PASSED]")
 
-        self.result = {"name": f"{self.name}", "rule": self.comparison,
+        self.result = {"name": f"{self.name}",
+                       "rule": self.comparison,
+                       "scope": self.scope,
+                       "aggregation": self.aggregation,
                        "actual": actual_value, "expected": self.expected_value,
                        "message": ''}
 

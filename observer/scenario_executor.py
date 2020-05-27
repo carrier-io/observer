@@ -144,7 +144,9 @@ def generate_junit_report(test_name, total_thresholds):
 
     for item in total_thresholds["details"]:
         message = item['message']
-        test_case = TestCase(item['name'], status="PASSED")
+        test_case = TestCase(item['name'], classname=f"{item['scope']}",
+                             status="PASSED",
+                             stdout=f"{item['scope']} {item['name'].lower()} {item['aggregation']} {item['actual']} {item['rule']} {item['expected']}")
         if message:
             test_case.status = "FAILED"
             test_case.add_failure_info(message)
