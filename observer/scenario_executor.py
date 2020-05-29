@@ -371,7 +371,30 @@ def is_dom_changed(old_dom):
 # dom_processing = perf_timing['domComplete'] - perf_timing['domLoading']
 def compute_results_for_spa(old, new, current_command):
     result = copy.deepcopy(new)
-    perf_results = JsonExporter(new).export()['fields']
+
+    timing = {
+        'connectEnd': 0,
+        'connectStart': 0,
+        'domComplete': 0,
+        'domContentLoadedEventEnd': 0,
+        'domContentLoadedEventStart': 0,
+        'domInteractive': 0,
+        'domLoading': 0,
+        'domainLookupEnd': 0,
+        'domainLookupStart': 0,
+        'fetchStart': 0,
+        'loadEventEnd': 0,
+        'loadEventStart': 0,
+        'navigationStart': 0,
+        'redirectEnd': 0,
+        'redirectStart': 0,
+        'requestStart': 0,
+        'responseEnd': 0,
+        'responseStart': 0,
+        'secureConnectionStart': 0,
+        'unloadEventEnd': 0,
+        'unloadEventStart': 0
+    }
 
     diff = DeepDiff(old["performanceResources"], new["performanceResources"], ignore_order=True)
 
@@ -400,7 +423,8 @@ def compute_results_for_spa(old, new, current_command):
         'startTime'
     ]
 
-    first_point = sorted_items[0]['startTime']
+    first_result = sorted_items[0]
+    first_point = first_result['startTime']
     for item in sorted_items:
         for field in fields:
             curr_value = item[field]
@@ -409,19 +433,12 @@ def compute_results_for_spa(old, new, current_command):
             item[field] = curr_value - first_point
 
     sorted_items = sorted(items_added, key=lambda k: k['responseEnd'])
-    latest_response = sorted_items[-1]['responseEnd']
-
-    total_diff = round(perf_results['total'] - latest_response)
+    latest_response = round(sorted_items[-1]['responseEnd'])
 
     result["performanceResources"] = sorted_items
-
-    result['performancetiming']['loadEventEnd'] -= total_diff
-    result['performancetiming']['loadEventStart'] = result['performancetiming']['loadEventEnd']
-
-    result['performancetiming']['responseStart'] = result['performancetiming']['navigationStart']
-    result['performancetiming']['requestStart'] = result['performancetiming']['navigationStart']
-    result['performancetiming']['responseEnd'] = result['performancetiming']['navigationStart'] + 1
-
+    timing['requestStart'] = first_result['requestStart']
+    timing['loadEventEnd'] = round(latest_response)
+    result['performancetiming'] = timing
     result['timing']['firstPaint'] = new['timing']['firstPaint'] - old['timing']['firstPaint']
 
     if old['info']['title'] == new['info']['title']:
