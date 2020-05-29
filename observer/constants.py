@@ -1,4 +1,5 @@
 from os import environ
+from uuid import uuid4
 
 LISTENER_ADDRESS = environ.get("LISTENER_URL", "127.0.0.1:9999")
 EXPORTERS_PATH = environ.get("EXPORTERS_PATH", "/tmp/reports")
@@ -9,6 +10,8 @@ GALLOPER_PROJECT_ID = int(environ.get("GALLOPER_PROJECT_ID", "1"))
 ENV = environ.get("ENV", "")
 REPORTS_BUCKET = environ.get("REPORTS_BUCKET", "reports")
 TESTS_BUCKET = environ.get("TESTS_BUCKET", "tests")
+RESULTS_BUCKET = environ.get("RESULTS_BUCKET", "")
+RESULTS_REPORT_NAME = environ.get("JUNIT_REPORT_NAME", f'results_report_{uuid4()}')
 
 
 def get_headers():
