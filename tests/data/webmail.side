@@ -45,7 +45,7 @@
       "value": ""
     }, {
       "id": "9b94dfde-5c30-4d5f-9fca-a704e60b2c63",
-      "comment": "",
+      "comment": "Assert email title",
       "command": "assertText",
       "target": "id=sub",
       "targets": [
@@ -58,7 +58,7 @@
       "value": "Fletcher Beck"
     }, {
       "id": "0769ceed-3cce-4cdf-b83f-a03e1bcc1267",
-      "comment": "",
+      "comment": "Click on last email",
       "command": "click",
       "target": "xpath=//div[2]/div/div[2]/div/ul/li[2]/div",
       "targets": [

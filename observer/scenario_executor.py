@@ -48,14 +48,15 @@ def execute_scenario(scenario, args):
 def _execute_test(base_url, browser_name, test, args):
     global results
     report_id = None
+    global_thresholds = []
 
     test_name = test['name']
     logger.info(f"Executing test: {test_name}")
-    global_thresholds = get_thresholds(test_name)
 
     test_data_processor = get_test_data_processor(test_name, args.data)
 
     if args.galloper:
+        global_thresholds = get_thresholds(test_name)
         report_id = notify_on_test_start(GALLOPER_PROJECT_ID, test_name, browser_name, ENV, base_url)
 
     locators = []
@@ -363,11 +364,50 @@ def is_dom_changed(old_dom):
     return old_dom != new_dom
 
 
+# total_load_time = perf_timing['loadEventEnd'] - perf_timing['navigationStart']
+# time_to_first_byte = perf_timing['responseStart'] - perf_timing['navigationStart']
+# time_to_first_paint = timing['firstPaint']
+# dom_content_loading = perf_timing['domContentLoadedEventStart'] - perf_timing['domLoading']
+# dom_processing = perf_timing['domComplete'] - perf_timing['domLoading']
 def compute_results_for_spa(old, new, current_command):
     result = copy.deepcopy(new)
 
+    timing = {
+        'connectEnd': 0,
+        'connectStart': 0,
+        'domComplete': 0,
+        'domContentLoadedEventEnd': 0,
+        'domContentLoadedEventStart': 0,
+        'domInteractive': 0,
+        'domLoading': 0,
+        'domainLookupEnd': 0,
+        'domainLookupStart': 0,
+        'fetchStart': 0,
+        'loadEventEnd': 0,
+        'loadEventStart': 0,
+        'navigationStart': 0,
+        'redirectEnd': 0,
+        'redirectStart': 0,
+        'requestStart': 0,
+        'responseEnd': 0,
+        'responseStart': 0,
+        'secureConnectionStart': 0,
+        'unloadEventEnd': 0,
+        'unloadEventStart': 0
+    }
+
     diff = DeepDiff(old["performanceResources"], new["performanceResources"], ignore_order=True)
-    items_added = list(diff['iterable_item_added'].values())
+
+    removed = {}
+    added = diff['iterable_item_added']
+    if 'iterable_item_removed' in diff.keys():
+        removed = diff['iterable_item_removed']
+
+    items_added = []
+    for key, item in added.items():
+        if key not in removed.keys():
+            items_added.append(item)
+
     sorted_items = sorted(items_added, key=lambda k: k['startTime'])
 
     fields = [
@@ -383,7 +423,8 @@ def compute_results_for_spa(old, new, current_command):
         'startTime'
     ]
 
-    first_point = sorted_items[0]['startTime']
+    first_result = sorted_items[0]
+    first_point = first_result['startTime']
     for item in sorted_items:
         for field in fields:
             curr_value = item[field]
@@ -392,16 +433,12 @@ def compute_results_for_spa(old, new, current_command):
             item[field] = curr_value - first_point
 
     sorted_items = sorted(items_added, key=lambda k: k['responseEnd'])
+    latest_response = round(sorted_items[-1]['responseEnd'])
 
-    total_diff = round(
-        new['performancetiming']['loadEventEnd'] - new['performancetiming']['navigationStart'] - sorted_items[-1][
-            'responseEnd'])
-
-    result["performanceResources"] = items_added
-    result['performancetiming']['responseStart'] = result['performancetiming']['navigationStart']
-    result['performancetiming']['loadEventEnd'] = result['performancetiming']['loadEventEnd'] - total_diff
-    result['performancetiming']['domComplete'] = result['performancetiming']['domComplete'] - total_diff
-
+    result["performanceResources"] = sorted_items
+    timing['requestStart'] = first_result['requestStart']
+    timing['loadEventEnd'] = round(latest_response)
+    result['performancetiming'] = timing
     result['timing']['firstPaint'] = new['timing']['firstPaint'] - old['timing']['firstPaint']
 
     if old['info']['title'] == new['info']['title']:
