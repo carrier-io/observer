@@ -11,7 +11,7 @@ ENV = environ.get("ENV", "")
 REPORTS_BUCKET = environ.get("REPORTS_BUCKET", "reports")
 TESTS_BUCKET = environ.get("TESTS_BUCKET", "tests")
 RESULTS_BUCKET = environ.get("RESULTS_BUCKET", "")
-RESULTS_REPORT_NAME = environ.get("JUNIT_REPORT_NAME", f'results_report_{uuid4()}')
+RESULTS_REPORT_NAME = environ.get("RESULTS_REPORT_NAME", f'results_report_{uuid4()}')
 
 
 def get_headers():
