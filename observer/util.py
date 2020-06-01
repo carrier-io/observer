@@ -30,7 +30,7 @@ def download_file(file_path):
     logger.info(f"Downloading data {file_path} from {TESTS_BUCKET} bucket")
 
     file_name = Path(file_path).name
-    res = requests.get(f"{GALLOPER_URL}/artifacts/{GALLOPER_PROJECT_ID}/{TESTS_BUCKET}/{file_name}",
+    res = requests.get(f"{GALLOPER_URL}/api/v1/artifacts/{GALLOPER_PROJECT_ID}/{TESTS_BUCKET}/{file_name}",
                        headers=get_headers())
     if res.status_code != 200:
         raise Exception(f"Unable to download file {file_name}. Reason {res.reason}")
@@ -47,7 +47,7 @@ def terminate_runner():
 def get_thresholds(test_name):
     logger.info(f"Get thresholds for: {test_name} {ENV}")
     res = requests.get(
-        f"{GALLOPER_URL}/thresholds/{GALLOPER_PROJECT_ID}/ui?name={test_name}&environment={ENV}&order=asc",
+        f"{GALLOPER_URL}/api/v1/thresholds/{GALLOPER_PROJECT_ID}/ui?name={test_name}&environment={ENV}&order=asc",
         headers=get_headers())
 
     if res.status_code != 200:

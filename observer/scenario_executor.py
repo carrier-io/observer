@@ -143,6 +143,8 @@ def assert_test_thresholds(test_name, all_scope_thresholds, execution_results):
 
 def generate_junit_report(test_name, total_thresholds):
     test_cases = []
+    file_name = f"junit_report_{RESULTS_REPORT_NAME}.xml"
+    logger.info(f"Generate report {file_name}")
 
     for item in total_thresholds["details"]:
         message = item['message']
@@ -157,7 +159,6 @@ def generate_junit_report(test_name, total_thresholds):
 
     ts = TestSuite(test_name, test_cases)
 
-    file_name = f"{RESULTS_REPORT_NAME}.xml"
     with open(f"/tmp/reports/{file_name}", 'w') as f:
         TestSuite.to_file(f, [ts], prettyprint=True)
 
@@ -173,7 +174,7 @@ def notify_on_test_start(project_id: int, test_name, browser_name, environment, 
         "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
-    res = requests.post(f"{GALLOPER_URL}/observer/{project_id}", json=data,
+    res = requests.post(f"{GALLOPER_URL}/api/v1/observer/{project_id}", json=data,
                         headers=get_headers())
     return res.json()['id']
 
@@ -192,7 +193,7 @@ def notify_on_test_end(report_id: int, visited_pages, total_thresholds, exceptio
     if exception:
         data["exception"] = str(exception)
 
-    res = requests.put(f"{GALLOPER_URL}/observer/{GALLOPER_PROJECT_ID}", json=data,
+    res = requests.put(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}", json=data,
                        headers=get_headers())
 
     upload_artifacts(RESULTS_BUCKET, f"/tmp/reports/{junit_report_name}", junit_report_name)
@@ -200,7 +201,8 @@ def notify_on_test_end(report_id: int, visited_pages, total_thresholds, exceptio
 
 
 def send_report_locators(project_id: int, report_id: int, exception):
-    requests.put(f"{GALLOPER_URL}/observer/{project_id}/{report_id}", json={"exception": exception, "status": ""},
+    requests.put(f"{GALLOPER_URL}/api/v1/observer/{project_id}/{report_id}",
+                 json={"exception": exception, "status": ""},
                  headers=get_headers())
 
 
@@ -224,7 +226,8 @@ def notify_on_command_end(report_id: int, metrics, thresholds, locators, report_
         "locators": locators
     }
 
-    res = requests.post(f"{GALLOPER_URL}/observer/{GALLOPER_PROJECT_ID}/{report_id}", json=data, headers=get_headers())
+    res = requests.post(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}/{report_id}", json=data,
+                        headers=get_headers())
 
     upload_artifacts(REPORTS_BUCKET, report_path, file_name)
 
@@ -234,7 +237,7 @@ def notify_on_command_end(report_id: int, metrics, thresholds, locators, report_
 def upload_artifacts(bucket_name, artifact_path, file_name):
     file = {'file': open(artifact_path, 'rb')}
 
-    res = requests.post(f"{GALLOPER_URL}/artifacts/{GALLOPER_PROJECT_ID}/{bucket_name}/{file_name}", files=file,
+    res = requests.post(f"{GALLOPER_URL}/api/v1/artifacts/{GALLOPER_PROJECT_ID}/{bucket_name}/{file_name}", files=file,
                         headers=get_headers())
     return res.json()
 
