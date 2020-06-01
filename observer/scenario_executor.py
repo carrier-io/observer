@@ -18,7 +18,7 @@ from observer.actions.browser_actions import get_performance_timing, get_perform
     get_performance_entities, take_full_screenshot, get_dom_size, close_driver, get_current_url
 from observer.command_result import CommandExecutionResult
 from observer.constants import LISTENER_ADDRESS, GALLOPER_PROJECT_ID, REPORTS_BUCKET, GALLOPER_URL, ENV, \
-    get_headers
+    get_headers, RESULTS_BUCKET, RESULTS_REPORT_NAME
 from observer.exporter import export, GalloperExporter, JsonExporter
 from observer.processors.results_processor import resultsProcessor
 from observer.processors.test_data_processor import get_test_data_processor
@@ -71,7 +71,8 @@ def _execute_test(base_url, browser_name, test, args):
 
     for current_command, next_command in _pairwise(test['commands']):
         logger.info(
-            f"{current_command['comment']} [ {current_command['command']}({current_command['target']}) ] {current_command['value']}".strip())
+            f"{current_command['comment']} [ {current_command['command']}({current_command['target']}) ] "
+            f"{current_command['value']}".strip())
 
         locators.append(current_command)
 
@@ -147,7 +148,8 @@ def generate_junit_report(test_name, total_thresholds):
         message = item['message']
         test_case = TestCase(item['name'], classname=f"{item['scope']}",
                              status="PASSED",
-                             stdout=f"{item['scope']} {item['name'].lower()} {item['aggregation']} {item['actual']} {item['rule']} {item['expected']}")
+                             stdout=f"{item['scope']} {item['name'].lower()} {item['aggregation']} {item['actual']} "
+                                    f"{item['rule']} {item['expected']}")
         if message:
             test_case.status = "FAILED"
             test_case.add_failure_info(message)
@@ -155,7 +157,7 @@ def generate_junit_report(test_name, total_thresholds):
 
     ts = TestSuite(test_name, test_cases)
 
-    file_name = f"{test_name}_report_{uuid4()}.xml"
+    file_name = f"{RESULTS_REPORT_NAME}.xml"
     with open(f"/tmp/reports/{file_name}", 'w') as f:
         TestSuite.to_file(f, [ts], prettyprint=True)
 
@@ -193,7 +195,7 @@ def notify_on_test_end(report_id: int, visited_pages, total_thresholds, exceptio
     res = requests.put(f"{GALLOPER_URL}/observer/{GALLOPER_PROJECT_ID}", json=data,
                        headers=get_headers())
 
-    upload_artifacts(f"/tmp/reports/{junit_report_name}", junit_report_name)
+    upload_artifacts(RESULTS_BUCKET, f"/tmp/reports/{junit_report_name}", junit_report_name)
     return res.json()
 
 
@@ -224,15 +226,15 @@ def notify_on_command_end(report_id: int, metrics, thresholds, locators, report_
 
     res = requests.post(f"{GALLOPER_URL}/observer/{GALLOPER_PROJECT_ID}/{report_id}", json=data, headers=get_headers())
 
-    upload_artifacts(report_path, file_name)
+    upload_artifacts(REPORTS_BUCKET, report_path, file_name)
 
     return res.json()["id"]
 
 
-def upload_artifacts(artifact_path, file_name):
+def upload_artifacts(bucket_name, artifact_path, file_name):
     file = {'file': open(artifact_path, 'rb')}
 
-    res = requests.post(f"{GALLOPER_URL}/artifacts/{GALLOPER_PROJECT_ID}/{REPORTS_BUCKET}/{file_name}", files=file,
+    res = requests.post(f"{GALLOPER_URL}/artifacts/{GALLOPER_PROJECT_ID}/{bucket_name}/{file_name}", files=file,
                         headers=get_headers())
     return res.json()
 
