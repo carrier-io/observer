@@ -1,4 +1,3 @@
-import datetime
 import os
 
 from observer.app import create_parser, execute
@@ -12,7 +11,6 @@ def test_main_with_data_params():
             #"-f", f"data.zip",
             # "-d", f"{ROOT_DIR}/data/data.json",
             "-sc", "/tmp/data/webmail.side",
-            "-r", "html",
             "-g", "False"
         ])
     execute(args)

@@ -13,13 +13,6 @@ TESTS_BUCKET = environ.get("TESTS_BUCKET", "tests")
 RESULTS_BUCKET = environ.get("RESULTS_BUCKET", "")
 RESULTS_REPORT_NAME = environ.get("RESULTS_REPORT_NAME", f'results_report_{uuid4()}')
 
-
-def get_headers():
-    if TOKEN:
-        return {'Authorization': f"Bearer {TOKEN}"}
-    return None
-
-
 check_ui_performance = '''return (function() {
 var metas=Array.prototype.slice.call(document.querySelectorAll('meta[name][content]'));
 var navigation = window.performance.getEntriesByType('navigation');
