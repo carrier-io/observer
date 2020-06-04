@@ -8,7 +8,8 @@ from pathlib import Path
 from time import sleep
 import requests
 
-from observer.constants import GALLOPER_URL, GALLOPER_PROJECT_ID, TESTS_BUCKET, get_headers, LISTENER_ADDRESS, ENV
+from observer.constants import GALLOPER_URL, GALLOPER_PROJECT_ID, TESTS_BUCKET, LISTENER_ADDRESS, ENV, \
+    TOKEN
 
 logger = logging.getLogger('Observer')
 
@@ -17,6 +18,13 @@ formatter = logging.Formatter('[%(name)s] - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
+
+
+def get_headers():
+    if TOKEN:
+        return {'Authorization': f"Bearer {TOKEN}"}
+    logger.warning("Auth TOKEN is not set!")
+    return None
 
 
 def parse_json_file(path):

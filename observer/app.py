@@ -8,13 +8,9 @@ from observer.util import parse_json_file, str2bool, logger, download_file, unzi
 
 def create_parser():
     parser = argparse.ArgumentParser(description="UI performance benchmarking for CI")
-    parser.add_argument("-fp", '--firstPaint', type=int, default=0)
-    parser.add_argument("-si", '--speedIndex', type=int, default=0)
-    parser.add_argument("-y", "--yaml", type=str, default="")
     parser.add_argument("-f", "--file", type=str, default="")
     parser.add_argument("-sc", "--scenario", type=str, default="")
     parser.add_argument("-d", "--data", type=str, default="")
-    parser.add_argument("-tl", '--totalLoad', type=int, default=0)
     parser.add_argument("-v", '--video', type=bool, default=True)
     parser.add_argument("-r", '--report', action="append", type=str, default=['html'])
     parser.add_argument("-e", '--export', action="append", type=str, default=[])
