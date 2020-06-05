@@ -441,7 +441,8 @@ def compute_results_for_spa(old, new, current_command):
     latest_response = round(sorted_items[-1]['responseEnd'])
 
     result["performanceResources"] = sorted_items
-    timing['requestStart'] = first_result['requestStart']
+    timing['requestStart'] = round(first_result['requestStart'])
+    timing['responseStart'] = round(first_result['responseStart'])
     timing['loadEventEnd'] = round(latest_response)
     result['performancetiming'] = timing
     result['timing']['firstPaint'] = new['timing']['firstPaint'] - old['timing']['firstPaint']
