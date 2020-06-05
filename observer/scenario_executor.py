@@ -279,10 +279,9 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
             browser_actions.wait_for_visibility(next_command['target'])
 
             load_event_end = get_performance_timing()['loadEventEnd']
-            results = get_performance_metrics()
+            results = compute_results_for_simple_page()
             results['info']['testStart'] = int(current_time)
             dom = get_dom_size()
-
             screenshot_path = take_full_screenshot(f"/tmp/{uuid4()}.png")
             generate_report = True
         elif not is_navigation:
@@ -444,6 +443,15 @@ def compute_results_for_spa(old, new, current_command):
     timing['requestStart'] = round(first_result['requestStart'])
     timing['responseStart'] = round(first_result['responseStart'])
     timing['loadEventEnd'] = round(latest_response)
+
+    content_loading_time = 0
+    for item in sorted_items:
+        if item['decodedBodySize'] > 0:
+            content_loading_time += round(item["responseEnd"] - item["responseStart"])
+
+    timing['domContentLoadedEventStart'] = 1
+    timing['domContentLoadedEventEnd'] = timing['domContentLoadedEventStart']
+
     result['performancetiming'] = timing
     result['timing']['firstPaint'] = new['timing']['firstPaint'] - old['timing']['firstPaint']
 
@@ -456,3 +464,15 @@ def compute_results_for_spa(old, new, current_command):
         result['info']['title'] = title
 
     return result
+
+
+def compute_results_for_simple_page():
+    metrics = get_performance_metrics()
+    resources = copy.deepcopy(metrics['performanceResources'])
+
+    sorted_items = sorted(resources, key=lambda k: k['startTime'])
+    current_total = metrics['performancetiming']['loadEventEnd'] - metrics['performancetiming']['navigationStart']
+    fixed_end = sorted_items[-1]['responseEnd']
+    diff = fixed_end - current_total
+    metrics['performancetiming']['loadEventEnd'] += round(diff)
+    return metrics
