@@ -1,7 +1,9 @@
 import argparse
 
 from junit_xml import TestSuite, TestCase
+from selene.support.shared import SharedConfig, browser
 
+from observer.driver_manager import close_driver, set_config
 from observer.scenario_executor import execute_scenario
 from observer.util import parse_json_file, str2bool, logger, download_file, unzip, wait_for_agent
 
@@ -11,7 +13,7 @@ def create_parser():
     parser.add_argument("-f", "--file", type=str, default="")
     parser.add_argument("-sc", "--scenario", type=str, default="")
     parser.add_argument("-d", "--data", type=str, default="")
-    parser.add_argument("-v", '--video', type=bool, default=True)
+    parser.add_argument("-v", '--video', type=str2bool, default=True)
     parser.add_argument("-r", '--report', action="append", type=str, default=['html'])
     parser.add_argument("-e", '--export', action="append", type=str, default=[])
     parser.add_argument("-g", '--galloper', type=str2bool, default=True)
@@ -51,7 +53,7 @@ def main():
 
 def execute(args):
     logger.info(f"Start with args {args}")
-    if not args.video:
+    if args.video:
         wait_for_agent()
 
     if args.file:
@@ -61,9 +63,21 @@ def execute(args):
             unzip(file_path, "/tmp/data")
 
     scenario = parse_json_file(args.scenario)
+
+    config = SharedConfig()
+    config.base_url = scenario['url']
+    set_config(config)
+
     for i in range(0, args.loop):
-        logger.info(f"Executing scenario loop: {i+1}")
-        execute_scenario(scenario, args)
+        logger.info(f"Executing scenario loop: {i + 1}")
+
+        execute_scenario(scenario, config, args)
+
+        # logger.info(f"Closing driver: {i + 1}")
+        # close_driver()
+
+        # if args.video:
+        #     terminate_runner()
 
 
 if __name__ == "__main__":

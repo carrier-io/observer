@@ -15,10 +15,11 @@ from selene.support.shared import browser, SharedConfig
 
 from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
-    get_performance_entities, take_full_screenshot, get_dom_size, close_driver, get_current_url
+    get_performance_entities, take_full_screenshot, get_dom_size, get_current_url
 from observer.command_result import CommandExecutionResult
 from observer.constants import LISTENER_ADDRESS, GALLOPER_PROJECT_ID, REPORTS_BUCKET, GALLOPER_URL, ENV, \
     RESULTS_BUCKET, RESULTS_REPORT_NAME
+from observer.driver_manager import close_driver
 from observer.exporter import export, GalloperExporter, JsonExporter
 from observer.processors.results_processor import resultsProcessor
 from observer.processors.test_data_processor import get_test_data_processor
@@ -32,17 +33,9 @@ dom = None
 results = None
 
 
-def execute_scenario(scenario, args):
-    base_url = scenario['url']
-    config = SharedConfig()
-    config.base_url = base_url
-    browser._config = config
+def execute_scenario(scenario, config, args):
     for test in scenario['tests']:
-        _execute_test(base_url, config.browser_name, test, args)
-
-    close_driver()
-    if not args.video:
-        terminate_runner()
+        _execute_test(config.base_url, config.browser_name, test, args)
 
 
 def _execute_test(base_url, browser_name, test, args):
