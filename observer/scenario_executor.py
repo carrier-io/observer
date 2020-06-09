@@ -98,6 +98,7 @@ def _execute_test(base_url, browser_name, test, args):
         if args.galloper:
             notify_on_command_end(
                 report_id,
+                execution_result.results_type,
                 execution_result.computed_results,
                 threshold_results, locators, report_uuid, execution_result.report.title)
 
@@ -206,7 +207,7 @@ def send_report_locators(project_id: int, report_id: int, exception):
                  headers=get_headers())
 
 
-def notify_on_command_end(report_id: int, metrics, thresholds, locators, report_uuid,
+def notify_on_command_end(report_id: int, results_type, metrics, thresholds, locators, report_uuid,
                           name):
     logger.info(f"About to notify on command end for report {report_id}")
     result = GalloperExporter(metrics).export()
@@ -216,6 +217,7 @@ def notify_on_command_end(report_id: int, metrics, thresholds, locators, report_
 
     data = {
         "name": name,
+        "type": results_type,
         "metrics": result,
         "bucket_name": REPORTS_BUCKET,
         "file_name": file_name,
@@ -256,6 +258,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
     generate_report = False
     screenshot_path = None
     latest_results = None
+    results_type = "page"
 
     current_cmd = current_command['command']
     current_target = current_command['target']
@@ -297,6 +300,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
                 results = compute_results_for_spa(results, latest_results, current_command)
                 screenshot_path = take_full_screenshot(f"/tmp/{uuid4()}.png")
                 generate_report = True
+                results_type = "action"
 
     except Exception as e:
         logger.error(e)
@@ -327,7 +331,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
             title = comment
 
         page_identificator = f"{title}:{parsed_url.path}@{current_command['command']}({current_target})"
-    return CommandExecutionResult(page_identificator, report, latest_results, results, None)
+    return CommandExecutionResult(results_type, page_identificator, report, latest_results, results, None)
 
 
 def start_recording():

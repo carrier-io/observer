@@ -11,6 +11,7 @@ def test_main_with_data_params():
             #"-f", f"data.zip",
             # "-d", f"{ROOT_DIR}/data/data.json",
             "-sc", "/tmp/data/webmail.side",
-            "-g", "False"
+            #"-g", "False"
+            "-l", "2"
         ])
     execute(args)

@@ -15,6 +15,7 @@ def create_parser():
     parser.add_argument("-r", '--report', action="append", type=str, default=['html'])
     parser.add_argument("-e", '--export', action="append", type=str, default=[])
     parser.add_argument("-g", '--galloper', type=str2bool, default=True)
+    parser.add_argument("-l", "--loop", type=int, default=1)
     return parser
 
 
@@ -60,7 +61,9 @@ def execute(args):
             unzip(file_path, "/tmp/data")
 
     scenario = parse_json_file(args.scenario)
-    execute_scenario(scenario, args)
+    for i in range(0, args.loop):
+        logger.info(f"Executing scenario loop: {i+1}")
+        execute_scenario(scenario, args)
 
 
 if __name__ == "__main__":
