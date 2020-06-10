@@ -13,7 +13,7 @@ from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
     get_performance_entities, take_full_screenshot, get_dom_size, get_current_url
 from observer.command_result import CommandExecutionResult
-from observer.constants import LISTENER_ADDRESS, GALLOPER_PROJECT_ID, ENV
+from observer.constants import LISTENER_ADDRESS
 from observer.exporter import export, JsonExporter
 from observer.integrations.galloper import get_thresholds, notify_on_test_start, notify_on_command_end, \
     notify_on_test_end
@@ -22,7 +22,7 @@ from observer.processors.test_data_processor import get_test_data_processor
 from observer.reporters.html_reporter import complete_report
 from observer.reporters.junit_reporter import generate_junit_report
 from observer.thresholds import AggregatedThreshold
-from observer.util import _pairwise, logger, filter_thresholds_for
+from observer.util import _pairwise, logger
 
 load_event_end = 0
 perf_entities = []
@@ -74,9 +74,7 @@ def _execute_test(base_url, browser_name, test, args):
 
         visited_pages += 1
 
-        scoped_thresholds = filter_thresholds_for(execution_result.report.title, global_thresholds)
-
-        report_uuid, threshold_results = complete_report(execution_result, scoped_thresholds, args)
+        report_uuid, threshold_results = complete_report(execution_result, global_thresholds, args)
 
         if args.galloper:
             notify_on_command_end(

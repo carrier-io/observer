@@ -3,20 +3,22 @@ from uuid import uuid4
 
 from observer.exporter import JsonExporter
 from observer.thresholds import Threshold
-from observer.util import logger
+from observer.util import logger, filter_thresholds_for
 
 
-def complete_report(execution_results, thresholds, args):
+def complete_report(execution_result, thresholds, args):
     results = []
-    report_title = execution_results.report.title
-    threshold_results = {"total": len(thresholds), "failed": 0}
-    perf_results = JsonExporter(execution_results.computed_results).export()['fields']
+    report_title = execution_result.report.title
+    scoped_thresholds = filter_thresholds_for(execution_result.report.title, thresholds)
+
+    threshold_results = {"total": len(scoped_thresholds), "failed": 0}
+    perf_results = JsonExporter(execution_result.computed_results).export()['fields']
 
     if 'html' in args.report:
-        results.append({'html_report': execution_results.report.get_report(), 'title': report_title})
+        results.append({'html_report': execution_result.report.get_report(), 'title': report_title})
 
     logger.info(f"=====> Assert thresholds for {report_title}")
-    for gate in thresholds:
+    for gate in scoped_thresholds:
         target_metric_name = gate["target"]
         threshold = Threshold(gate, perf_results[target_metric_name])
         if not threshold.is_passed():
