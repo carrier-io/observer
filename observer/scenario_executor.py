@@ -1,7 +1,6 @@
 import copy
 import tempfile
 from os import path
-from shutil import rmtree
 from time import time
 from urllib.parse import urlparse
 from uuid import uuid4
@@ -17,9 +16,8 @@ from observer.constants import LISTENER_ADDRESS
 from observer.exporter import export, JsonExporter
 from observer.integrations.galloper import get_thresholds, notify_on_test_start, notify_on_command_end, \
     notify_on_test_end
-from observer.processors.results_processor import resultsProcessor
 from observer.processors.test_data_processor import get_test_data_processor
-from observer.reporters.html_reporter import complete_report
+from observer.reporters.html_reporter import generate_html_report, complete_report
 from observer.reporters.junit_reporter import generate_junit_report
 from observer.thresholds import AggregatedThreshold
 from observer.util import _pairwise, logger
@@ -66,22 +64,22 @@ def _execute_test(base_url, browser_name, test, args):
             exception = execution_result.ex
             break
 
-        if not execution_result.report:
+        if not execution_result.is_ready_for_report():
             continue
+
+        report_uuid, threshold_results = generate_html_report(execution_result, global_thresholds, args)
 
         if args.export:
             export(execution_result.computed_results, args)
 
         visited_pages += 1
 
-        report_uuid, threshold_results = complete_report(execution_result, global_thresholds, args)
-
         if args.galloper:
             notify_on_command_end(
                 report_id,
                 execution_result.results_type,
                 execution_result.computed_results,
-                threshold_results, locators, report_uuid, execution_result.report.title)
+                threshold_results, locators, report_uuid, results['info']['title'])
 
         if execution_result.raw_results:
             results = execution_result.raw_results
@@ -156,9 +154,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
         start_recording()
     current_time = time() - start_time
     try:
-
         current_cmd(current_target, current_value)
-
         is_navigation = is_navigation_happened()
 
         if is_navigation and next_is_actionable:
@@ -197,24 +193,32 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
         if enable_video and next_is_actionable:
             video_folder, video_path = stop_recording()
 
-    if generate_report and results and video_folder:
-        report = resultsProcessor(video_path, results, video_folder, screenshot_path, True, True)
-
-    if video_folder:
-        rmtree(video_folder)
+    # if generate_report and results and video_folder:
+    #     report = resultsProcessor(video_path, results, video_folder, screenshot_path, True, True)
+    #
+    # if video_folder:
+    #     rmtree(video_folder)
 
     page_identificator = None
     if report:
         # get url, action, locator here
         current_url = get_current_url()
         parsed_url = urlparse(current_url)
-        title = report.title
+        title = results['info']['title']
         comment = current_command['comment']
         if comment:
             title = comment
 
         page_identificator = f"{title}:{parsed_url.path}@{current_command['command']}({current_target})"
-    return CommandExecutionResult(results_type, page_identificator, report, latest_results, results, None)
+
+    return CommandExecutionResult(results_type=results_type,
+                                  page_identificator=page_identificator,
+                                  report=report, raw_results=latest_results,
+                                  computed_results=results,
+                                  video_folder=video_folder,
+                                  video_path=video_path,
+                                  screenshot_path=screenshot_path,
+                                  generate_report=generate_report)
 
 
 def start_recording():
@@ -224,7 +228,7 @@ def start_recording():
 def stop_recording():
     video_results = get(f'http://{LISTENER_ADDRESS}/record/stop').content
     video_folder = tempfile.mkdtemp()
-    video_path = path.join(video_folder, "Video.mp4")
+    video_path = path.join(video_folder, "video.mp4")
     with open(video_path, 'w+b') as f:
         f.write(video_results)
 

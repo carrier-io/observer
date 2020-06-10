@@ -5,7 +5,7 @@ from selene.support.shared import SharedConfig
 from observer.driver_manager import close_driver, set_config
 from observer.integrations.galloper import download_file
 from observer.scenario_executor import execute_scenario
-from observer.util import parse_json_file, str2bool, logger, unzip, wait_for_agent
+from observer.util import parse_json_file, str2bool, logger, unzip, wait_for_agent, terminate_runner
 
 
 def create_parser():
@@ -56,8 +56,8 @@ def execute(args):
 
         close_driver()
 
-    # if args.video:
-    #     terminate_runner()
+    if args.video:
+        terminate_runner()
 
 
 if __name__ == "__main__":
