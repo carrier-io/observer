@@ -4,12 +4,11 @@ import logging
 import math
 import os
 import zipfile
-from pathlib import Path
 from time import sleep
+
 import requests
 
-from observer.constants import GALLOPER_URL, GALLOPER_PROJECT_ID, TESTS_BUCKET, LISTENER_ADDRESS, ENV, \
-    TOKEN
+from observer.constants import LISTENER_ADDRESS
 
 logger = logging.getLogger('Observer')
 
@@ -20,13 +19,6 @@ logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
 
-def get_headers():
-    if TOKEN:
-        return {'Authorization': f"Bearer {TOKEN}"}
-    logger.warning("Auth TOKEN is not set!")
-    return None
-
-
 def parse_json_file(path):
     if not os.path.exists(path):
         raise Exception(f"No such file {path}")
@@ -34,34 +26,8 @@ def parse_json_file(path):
         return json.load(data)
 
 
-def download_file(file_path):
-    logger.info(f"Downloading data {file_path} from {TESTS_BUCKET} bucket")
-
-    file_name = Path(file_path).name
-    res = requests.get(f"{GALLOPER_URL}/api/v1/artifacts/{GALLOPER_PROJECT_ID}/{TESTS_BUCKET}/{file_name}",
-                       headers=get_headers())
-    if res.status_code != 200:
-        raise Exception(f"Unable to download file {file_name}. Reason {res.reason}")
-    file_path = f"/tmp/data/{file_name}"
-    os.makedirs("/tmp/data", exist_ok=True)
-    open(file_path, 'wb').write(res.content)
-    return file_path
-
-
 def terminate_runner():
     return requests.get(f'http://{LISTENER_ADDRESS}/terminate').content
-
-
-def get_thresholds(test_name):
-    logger.info(f"Get thresholds for: {test_name} {ENV}")
-    res = requests.get(
-        f"{GALLOPER_URL}/api/v1/thresholds/{GALLOPER_PROJECT_ID}/ui?name={test_name}&environment={ENV}&order=asc",
-        headers=get_headers())
-
-    if res.status_code != 200:
-        raise Exception(f"Can not get thresholds, Reasons {res.reason}")
-
-    return res.json()
 
 
 def wait_for_agent():

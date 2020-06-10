@@ -8,9 +8,11 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 def test_main_with_data_params():
     args = create_parser().parse_args(
         [
-            #"-f", f"data.zip",
+            "-f", f"data.zip",
             # "-d", f"{ROOT_DIR}/data/data.json",
             "-sc", "/tmp/data/webmail.side",
-            "-g", "False"
+            #"-g", "False",
+            # "-v", "False",
+            "-l", "1"
         ])
     execute(args)

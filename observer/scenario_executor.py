@@ -1,30 +1,26 @@
 import copy
 import tempfile
-from datetime import datetime
 from os import path
-from shutil import rmtree
 from time import time
 from urllib.parse import urlparse
 from uuid import uuid4
 
-import requests
 from deepdiff import DeepDiff
-from junit_xml import TestSuite, TestCase
 from requests import get
-from selene.support.shared import browser, SharedConfig
 
 from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
-    get_performance_entities, take_full_screenshot, get_dom_size, close_driver, get_current_url
+    get_performance_entities, take_full_screenshot, get_dom_size, get_current_url
+from observer.collector import ResultsCollector
 from observer.command_result import CommandExecutionResult
-from observer.constants import LISTENER_ADDRESS, GALLOPER_PROJECT_ID, REPORTS_BUCKET, GALLOPER_URL, ENV, \
-    RESULTS_BUCKET, RESULTS_REPORT_NAME
-from observer.exporter import export, GalloperExporter, JsonExporter
-from observer.processors.results_processor import resultsProcessor
+from observer.constants import LISTENER_ADDRESS
+from observer.exporter import Exporter
+from observer.integrations.galloper import GalloperIntegration
 from observer.processors.test_data_processor import get_test_data_processor
-from observer.reporter import complete_report
+from observer.reporters.html_reporter import generate_html_report
+from observer.reporters.junit_reporter import generate_junit_report
 from observer.thresholds import AggregatedThreshold
-from observer.util import _pairwise, logger, terminate_runner, get_thresholds, filter_thresholds_for, get_headers
+from observer.util import _pairwise, logger
 
 load_event_end = 0
 perf_entities = []
@@ -32,100 +28,61 @@ dom = None
 results = None
 
 
-def execute_scenario(scenario, args):
-    base_url = scenario['url']
-    config = SharedConfig()
-    config.base_url = base_url
-    browser._config = config
+def execute_scenario(scenario, config, args):
     for test in scenario['tests']:
-        _execute_test(base_url, config.browser_name, test, args)
-
-    close_driver()
-    if not args.video:
-        terminate_runner()
+        logger.info(f"Executing test: {test['name']}")
+        _execute_test(config.base_url, config.browser_name, test, args)
 
 
 def _execute_test(base_url, browser_name, test, args):
     global results
-    report_id = None
-    global_thresholds = []
-
+    is_video = is_video_enabled(args)
     test_name = test['name']
-    logger.info(f"Executing test: {test_name}")
-
-    test_data_processor = get_test_data_processor(test_name, args.data)
-
-    if args.galloper:
-        global_thresholds = get_thresholds(test_name)
-        report_id = notify_on_test_start(GALLOPER_PROJECT_ID, test_name, browser_name, ENV, base_url)
-
     locators = []
     exception = None
-    visited_pages = 0
-    total_thresholds = {
-        "total": 0,
-        "failed": 0,
-        "details": []
-    }
-    execution_results = {}
+    results_collector = ResultsCollector(test_name)
+    test_data_processor = get_test_data_processor(test_name, args.data)
+    galloper = GalloperIntegration(test_name, args.galloper)
+    exporter = Exporter(args.export)
+    global_thresholds = galloper.get_thresholds()
+    report_id = galloper.notify_on_test_start(browser_name, base_url)
 
     for current_command, next_command in _pairwise(test['commands']):
-        logger.info(
-            f"{current_command['comment']} [ {current_command['command']}({current_command['target']}) ] "
-            f"{current_command['value']}".strip())
-
         locators.append(current_command)
-
-        execution_result = _execute_command(current_command, next_command, test_data_processor,
-                                            is_video_enabled(args))
+        execution_result = _execute_command(current_command, next_command, test_data_processor, is_video)
 
         if execution_result.ex:
             exception = execution_result.ex
             break
 
-        if not execution_result.report:
+        if not execution_result.is_ready_for_report():
             continue
 
-        if args.export:
-            export(execution_result.computed_results, args)
+        report_uuid, threshold_results = generate_html_report(execution_result, global_thresholds, args)
+        exporter.export(execution_result.computed_results)
 
-        visited_pages += 1
-
-        scoped_thresholds = filter_thresholds_for(execution_result.report.title, global_thresholds)
-
-        report_uuid, threshold_results = complete_report(execution_result, scoped_thresholds, args)
-
-        if args.galloper:
-            notify_on_command_end(
-                report_id,
-                execution_result.computed_results,
-                threshold_results, locators, report_uuid, execution_result.report.title)
+        galloper.notify_on_command_end(
+            report_id,
+            execution_result.results_type,
+            execution_result.computed_results,
+            threshold_results, locators, report_uuid, results['info']['title'])
 
         if execution_result.raw_results:
             results = execution_result.raw_results
 
-        perf_results = JsonExporter(execution_result.computed_results).export()['fields']
-        page_identificator = execution_result.page_identificator
-        if page_identificator in execution_results.keys():
-            execution_results[page_identificator].append(perf_results)
-        else:
-            execution_results[page_identificator] = [perf_results]
+        perf_results = exporter.to_json(execution_result.computed_results)
+        results_collector.add(execution_result.page_identifier, perf_results)
 
-    if global_thresholds:
-        threshold_results = assert_test_thresholds(test_name, global_thresholds, execution_results)
-        total_thresholds["total"] += threshold_results["total"]
-        total_thresholds["failed"] += threshold_results["failed"]
-        total_thresholds['details'] = threshold_results["details"]
-
-    junit_report_name = generate_junit_report(test_name, total_thresholds)
-
-    if args.galloper:
-        notify_on_test_end(report_id, visited_pages, total_thresholds, exception,
-                           junit_report_name)
+    threshold_results = assert_test_thresholds(test_name, global_thresholds, results_collector.results)
+    junit_report_name = generate_junit_report(test_name, threshold_results)
+    galloper.notify_on_test_end(report_id, threshold_results, exception, junit_report_name)
 
 
 def assert_test_thresholds(test_name, all_scope_thresholds, execution_results):
     threshold_results = {"total": len(all_scope_thresholds), "failed": 0, "details": []}
+
+    if not all_scope_thresholds:
+        return threshold_results
 
     logger.info(f"=====> Assert aggregated thresholds for {test_name}")
     checking_result = []
@@ -141,112 +98,15 @@ def assert_test_thresholds(test_name, all_scope_thresholds, execution_results):
     return threshold_results
 
 
-def generate_junit_report(test_name, total_thresholds):
-    test_cases = []
-    file_name = f"junit_report_{RESULTS_REPORT_NAME}.xml"
-    logger.info(f"Generate report {file_name}")
-
-    for item in total_thresholds["details"]:
-        message = item['message']
-        test_case = TestCase(item['name'], classname=f"{item['scope']}",
-                             status="PASSED",
-                             stdout=f"{item['scope']} {item['name'].lower()} {item['aggregation']} {item['actual']} "
-                                    f"{item['rule']} {item['expected']}")
-        if message:
-            test_case.status = "FAILED"
-            test_case.add_failure_info(message)
-        test_cases.append(test_case)
-
-    ts = TestSuite(test_name, test_cases)
-
-    with open(f"/tmp/reports/{file_name}", 'w') as f:
-        TestSuite.to_file(f, [ts], prettyprint=True)
-
-    return file_name
-
-
-def notify_on_test_start(project_id: int, test_name, browser_name, environment, base_url):
-    data = {
-        "test_name": test_name,
-        "base_url": base_url,
-        "browser_name": browser_name,
-        "env": environment,
-        "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    }
-
-    res = requests.post(f"{GALLOPER_URL}/api/v1/observer/{project_id}", json=data,
-                        headers=get_headers())
-    return res.json()['id']
-
-
-def notify_on_test_end(report_id: int, visited_pages, total_thresholds, exception, junit_report_name):
-    logger.info(f"About to notify on test end for report {report_id}")
-
-    data = {
-        "report_id": report_id,
-        "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        "visited_pages": visited_pages,
-        "thresholds_total": total_thresholds["total"],
-        "thresholds_failed": total_thresholds["failed"]
-    }
-
-    if exception:
-        data["exception"] = str(exception)
-
-    res = requests.put(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}", json=data,
-                       headers=get_headers())
-
-    upload_artifacts(RESULTS_BUCKET, f"/tmp/reports/{junit_report_name}", junit_report_name)
-    return res.json()
-
-
-def send_report_locators(project_id: int, report_id: int, exception):
-    requests.put(f"{GALLOPER_URL}/api/v1/observer/{project_id}/{report_id}",
-                 json={"exception": exception, "status": ""},
-                 headers=get_headers())
-
-
-def notify_on_command_end(report_id: int, metrics, thresholds, locators, report_uuid,
-                          name):
-    logger.info(f"About to notify on command end for report {report_id}")
-    result = GalloperExporter(metrics).export()
-
-    file_name = f"{name}_{report_uuid}.html"
-    report_path = f"/tmp/reports/{file_name}"
-
-    data = {
-        "name": name,
-        "metrics": result,
-        "bucket_name": REPORTS_BUCKET,
-        "file_name": file_name,
-        "resolution": metrics['info']['windowSize'],
-        "browser_version": metrics['info']['browser'],
-        "thresholds_total": thresholds["total"],
-        "thresholds_failed": thresholds["failed"],
-        "locators": locators
-    }
-
-    res = requests.post(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}/{report_id}", json=data,
-                        headers=get_headers())
-
-    upload_artifacts(REPORTS_BUCKET, report_path, file_name)
-
-    return res.json()["id"]
-
-
-def upload_artifacts(bucket_name, artifact_path, file_name):
-    file = {'file': open(artifact_path, 'rb')}
-
-    res = requests.post(f"{GALLOPER_URL}/api/v1/artifacts/{GALLOPER_PROJECT_ID}/{bucket_name}/{file_name}", files=file,
-                        headers=get_headers())
-    return res.json()
-
-
 def is_video_enabled(args):
     return "html" in args.report and args.video
 
 
 def _execute_command(current_command, next_command, test_data_processor, enable_video=True):
+    logger.info(
+        f"{current_command['comment']} [ {current_command['command']}({current_command['target']}) ] "
+        f"{current_command['value']}".strip())
+
     global load_event_end
     global perf_entities
     global dom
@@ -256,6 +116,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
     generate_report = False
     screenshot_path = None
     latest_results = None
+    results_type = "page"
 
     current_cmd = current_command['command']
     current_target = current_command['target']
@@ -270,9 +131,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
         start_recording()
     current_time = time() - start_time
     try:
-
         current_cmd(current_target, current_value)
-
         is_navigation = is_navigation_happened()
 
         if is_navigation and next_is_actionable:
@@ -297,6 +156,7 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
                 results = compute_results_for_spa(results, latest_results, current_command)
                 screenshot_path = take_full_screenshot(f"/tmp/{uuid4()}.png")
                 generate_report = True
+                results_type = "action"
 
     except Exception as e:
         logger.error(e)
@@ -310,24 +170,26 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
         if enable_video and next_is_actionable:
             video_folder, video_path = stop_recording()
 
-    if generate_report and results and video_folder:
-        report = resultsProcessor(video_path, results, video_folder, screenshot_path, True, True)
+    page_identifier = get_page_identifier(results['info']['title'], current_command)
 
-    if video_folder:
-        rmtree(video_folder)
+    return CommandExecutionResult(results_type=results_type,
+                                  page_identifier=page_identifier,
+                                  report=report, raw_results=latest_results,
+                                  computed_results=results,
+                                  video_folder=video_folder,
+                                  video_path=video_path,
+                                  screenshot_path=screenshot_path,
+                                  generate_report=generate_report)
 
-    page_identificator = None
-    if report:
-        # get url, action, locator here
-        current_url = get_current_url()
-        parsed_url = urlparse(current_url)
-        title = report.title
-        comment = current_command['comment']
-        if comment:
-            title = comment
 
-        page_identificator = f"{title}:{parsed_url.path}@{current_command['command']}({current_target})"
-    return CommandExecutionResult(page_identificator, report, latest_results, results, None)
+def get_page_identifier(title, current_command):
+    current_url = get_current_url()
+    parsed_url = urlparse(current_url)
+    comment = current_command['comment']
+    if comment:
+        title = comment
+
+    return f"{title}:{parsed_url.path}@{current_command['command']}({current_command['target']})"
 
 
 def start_recording():
@@ -337,7 +199,7 @@ def start_recording():
 def stop_recording():
     video_results = get(f'http://{LISTENER_ADDRESS}/record/stop').content
     video_folder = tempfile.mkdtemp()
-    video_path = path.join(video_folder, "Video.mp4")
+    video_path = path.join(video_folder, "video.mp4")
     with open(video_path, 'w+b') as f:
         f.write(video_results)
 
