@@ -32,6 +32,7 @@ results = None
 
 def execute_scenario(scenario, config, args):
     for test in scenario['tests']:
+        logger.info(f"Executing test: {test['name']}")
         _execute_test(config.base_url, config.browser_name, test, args)
 
 
@@ -39,16 +40,6 @@ def _execute_test(base_url, browser_name, test, args):
     global results
     report_id = None
     global_thresholds = []
-
-    test_name = test['name']
-    logger.info(f"Executing test: {test_name}")
-
-    test_data_processor = get_test_data_processor(test_name, args.data)
-
-    if args.galloper:
-        global_thresholds = get_thresholds(test_name)
-        report_id = notify_on_test_start(GALLOPER_PROJECT_ID, test_name, browser_name, ENV, base_url)
-
     locators = []
     exception = None
     visited_pages = 0
@@ -59,13 +50,15 @@ def _execute_test(base_url, browser_name, test, args):
     }
     execution_results = {}
 
+    test_name = test['name']
+    test_data_processor = get_test_data_processor(test_name, args.data)
+
+    if args.galloper:
+        global_thresholds = get_thresholds(test_name)
+        report_id = notify_on_test_start(test_name, browser_name, base_url)
+
     for current_command, next_command in _pairwise(test['commands']):
-        logger.info(
-            f"{current_command['comment']} [ {current_command['command']}({current_command['target']}) ] "
-            f"{current_command['value']}".strip())
-
         locators.append(current_command)
-
         execution_result = _execute_command(current_command, next_command, test_data_processor,
                                             is_video_enabled(args))
 
@@ -137,6 +130,10 @@ def is_video_enabled(args):
 
 
 def _execute_command(current_command, next_command, test_data_processor, enable_video=True):
+    logger.info(
+        f"{current_command['comment']} [ {current_command['command']}({current_command['target']}) ] "
+        f"{current_command['value']}".strip())
+
     global load_event_end
     global perf_entities
     global dom

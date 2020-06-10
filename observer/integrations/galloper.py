@@ -43,16 +43,16 @@ def get_thresholds(test_name):
     return res.json()
 
 
-def notify_on_test_start(project_id: int, test_name, browser_name, environment, base_url):
+def notify_on_test_start(test_name, browser_name, base_url):
     data = {
         "test_name": test_name,
         "base_url": base_url,
         "browser_name": browser_name,
-        "env": environment,
+        "env": ENV,
         "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
-    res = requests.post(f"{GALLOPER_URL}/api/v1/observer/{project_id}", json=data,
+    res = requests.post(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}", json=data,
                         headers=get_headers())
     return res.json()['id']
 
