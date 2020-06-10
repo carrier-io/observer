@@ -3,8 +3,9 @@ import argparse
 from selene.support.shared import SharedConfig
 
 from observer.driver_manager import close_driver, set_config
+from observer.integrations.galloper import download_file
 from observer.scenario_executor import execute_scenario
-from observer.util import parse_json_file, str2bool, logger, download_file, unzip, wait_for_agent, terminate_runner
+from observer.util import parse_json_file, str2bool, logger, unzip, wait_for_agent
 
 
 def create_parser():

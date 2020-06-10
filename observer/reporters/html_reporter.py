@@ -1,6 +1,5 @@
 import os
 from uuid import uuid4
-from junit_xml import TestCase, TestSuite
 
 from observer.exporter import JsonExporter
 from observer.thresholds import Threshold
