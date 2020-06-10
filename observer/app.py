@@ -1,11 +1,10 @@
 import argparse
 
-from junit_xml import TestSuite, TestCase
-from selene.support.shared import SharedConfig, browser
+from selene.support.shared import SharedConfig
 
 from observer.driver_manager import close_driver, set_config
 from observer.scenario_executor import execute_scenario
-from observer.util import parse_json_file, str2bool, logger, download_file, unzip, wait_for_agent
+from observer.util import parse_json_file, str2bool, logger, download_file, unzip, wait_for_agent, terminate_runner
 
 
 def create_parser():
@@ -24,25 +23,6 @@ def create_parser():
 def parse_args():
     args, _ = create_parser().parse_known_args()
     return args
-
-
-def process_report(report, config):
-    test_cases = []
-    html_report = 0
-    for record in report:
-        if 'xml' in config and 'html_report' not in record.keys():
-            test_cases.append(TestCase(record['name'], record.get('class_name', 'observer'),
-                                       record['actual'], '', ''))
-            if record['message']:
-                test_cases[-1].add_failure_info(record['message'])
-        elif 'html' in config and 'html_report' in record.keys():
-            with open(f'/tmp/reports/{record["title"]}_{html_report}.html', 'w') as f:
-                f.write(record['html_report'])
-            html_report += 1
-
-    ts = TestSuite("Observer UI Benchmarking Test ", test_cases)
-    with open("/tmp/reports/report.xml", 'w') as f:
-        TestSuite.to_file(f, [ts], prettyprint=True)
 
 
 def main():
@@ -73,11 +53,10 @@ def execute(args):
 
         execute_scenario(scenario, config, args)
 
-        # logger.info(f"Closing driver: {i + 1}")
-        # close_driver()
+        close_driver()
 
-        # if args.video:
-        #     terminate_runner()
+    # if args.video:
+    #     terminate_runner()
 
 
 if __name__ == "__main__":
