@@ -1,7 +1,7 @@
 class CommandExecutionResult(object):
 
     def __init__(self, results_type=None,
-                 page_identificator=None,
+                 page_identifier=None,
                  report=None,
                  raw_results=None,
                  computed_results=None,
@@ -19,7 +19,7 @@ class CommandExecutionResult(object):
         self.video_path = video_path
         self.screenshot_path = screenshot_path
         self.ex = err
-        self.page_identificator = page_identificator
+        self.page_identifier = page_identifier
         self.generate_report = generate_report
 
     def is_ready_for_report(self):

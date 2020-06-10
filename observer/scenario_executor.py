@@ -11,13 +11,13 @@ from requests import get
 from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_performance_metrics, command_type, \
     get_performance_entities, take_full_screenshot, get_dom_size, get_current_url
+from observer.collector import ResultsCollector
 from observer.command_result import CommandExecutionResult
 from observer.constants import LISTENER_ADDRESS
-from observer.exporter import export, JsonExporter
-from observer.integrations.galloper import get_thresholds, notify_on_test_start, notify_on_command_end, \
-    notify_on_test_end
+from observer.exporter import Exporter
+from observer.integrations.galloper import GalloperIntegration
 from observer.processors.test_data_processor import get_test_data_processor
-from observer.reporters.html_reporter import generate_html_report, complete_report
+from observer.reporters.html_reporter import generate_html_report
 from observer.reporters.junit_reporter import generate_junit_report
 from observer.thresholds import AggregatedThreshold
 from observer.util import _pairwise, logger
@@ -36,29 +36,20 @@ def execute_scenario(scenario, config, args):
 
 def _execute_test(base_url, browser_name, test, args):
     global results
-    report_id = None
-    global_thresholds = []
+    is_video = is_video_enabled(args)
+    test_name = test['name']
     locators = []
     exception = None
-    visited_pages = 0
-    total_thresholds = {
-        "total": 0,
-        "failed": 0,
-        "details": []
-    }
-    execution_results = {}
-
-    test_name = test['name']
+    results_collector = ResultsCollector(test_name)
     test_data_processor = get_test_data_processor(test_name, args.data)
-
-    if args.galloper:
-        global_thresholds = get_thresholds(test_name)
-        report_id = notify_on_test_start(test_name, browser_name, base_url)
+    galloper = GalloperIntegration(test_name, args.galloper)
+    exporter = Exporter(args.export)
+    global_thresholds = galloper.get_thresholds()
+    report_id = galloper.notify_on_test_start(browser_name, base_url)
 
     for current_command, next_command in _pairwise(test['commands']):
         locators.append(current_command)
-        execution_result = _execute_command(current_command, next_command, test_data_processor,
-                                            is_video_enabled(args))
+        execution_result = _execute_command(current_command, next_command, test_data_processor, is_video)
 
         if execution_result.ex:
             exception = execution_result.ex
@@ -68,44 +59,30 @@ def _execute_test(base_url, browser_name, test, args):
             continue
 
         report_uuid, threshold_results = generate_html_report(execution_result, global_thresholds, args)
+        exporter.export(execution_result.computed_results)
 
-        if args.export:
-            export(execution_result.computed_results, args)
-
-        visited_pages += 1
-
-        if args.galloper:
-            notify_on_command_end(
-                report_id,
-                execution_result.results_type,
-                execution_result.computed_results,
-                threshold_results, locators, report_uuid, results['info']['title'])
+        galloper.notify_on_command_end(
+            report_id,
+            execution_result.results_type,
+            execution_result.computed_results,
+            threshold_results, locators, report_uuid, results['info']['title'])
 
         if execution_result.raw_results:
             results = execution_result.raw_results
 
-        perf_results = JsonExporter(execution_result.computed_results).export()['fields']
-        page_identificator = execution_result.page_identificator
-        if page_identificator in execution_results.keys():
-            execution_results[page_identificator].append(perf_results)
-        else:
-            execution_results[page_identificator] = [perf_results]
+        perf_results = exporter.to_json(execution_result.computed_results)
+        results_collector.add(execution_result.page_identifier, perf_results)
 
-    if global_thresholds:
-        threshold_results = assert_test_thresholds(test_name, global_thresholds, execution_results)
-        total_thresholds["total"] += threshold_results["total"]
-        total_thresholds["failed"] += threshold_results["failed"]
-        total_thresholds['details'] = threshold_results["details"]
-
-    junit_report_name = generate_junit_report(test_name, total_thresholds)
-
-    if args.galloper:
-        notify_on_test_end(report_id, visited_pages, total_thresholds, exception,
-                           junit_report_name)
+    threshold_results = assert_test_thresholds(test_name, global_thresholds, results_collector.results)
+    junit_report_name = generate_junit_report(test_name, threshold_results)
+    galloper.notify_on_test_end(report_id, threshold_results, exception, junit_report_name)
 
 
 def assert_test_thresholds(test_name, all_scope_thresholds, execution_results):
     threshold_results = {"total": len(all_scope_thresholds), "failed": 0, "details": []}
+
+    if not all_scope_thresholds:
+        return threshold_results
 
     logger.info(f"=====> Assert aggregated thresholds for {test_name}")
     checking_result = []
@@ -193,32 +170,26 @@ def _execute_command(current_command, next_command, test_data_processor, enable_
         if enable_video and next_is_actionable:
             video_folder, video_path = stop_recording()
 
-    # if generate_report and results and video_folder:
-    #     report = resultsProcessor(video_path, results, video_folder, screenshot_path, True, True)
-    #
-    # if video_folder:
-    #     rmtree(video_folder)
-
-    page_identificator = None
-    if report:
-        # get url, action, locator here
-        current_url = get_current_url()
-        parsed_url = urlparse(current_url)
-        title = results['info']['title']
-        comment = current_command['comment']
-        if comment:
-            title = comment
-
-        page_identificator = f"{title}:{parsed_url.path}@{current_command['command']}({current_target})"
+    page_identifier = get_page_identifier(results['info']['title'], current_command)
 
     return CommandExecutionResult(results_type=results_type,
-                                  page_identificator=page_identificator,
+                                  page_identifier=page_identifier,
                                   report=report, raw_results=latest_results,
                                   computed_results=results,
                                   video_folder=video_folder,
                                   video_path=video_path,
                                   screenshot_path=screenshot_path,
                                   generate_report=generate_report)
+
+
+def get_page_identifier(title, current_command):
+    current_url = get_current_url()
+    parsed_url = urlparse(current_url)
+    comment = current_command['comment']
+    if comment:
+        title = comment
+
+    return f"{title}:{parsed_url.path}@{current_command['command']}({current_command['target']})"
 
 
 def start_recording():

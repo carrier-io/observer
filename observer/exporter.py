@@ -149,8 +149,16 @@ class JsonExporter(Exporter):
         }
 
 
-def export(data, args):
-    if "telegraph" in args.export:
-        TelegraphJsonExporter(data).export()
-    if "influx" in args.export:
-        InfluxExporter(data).export()
+class Exporter(object):
+
+    def __init__(self, formats):
+        self.formats = formats
+
+    def export(self, data):
+        if "telegraph" in self.formats:
+            TelegraphJsonExporter(data).export()
+        if "influx" in self.formats:
+            InfluxExporter(data).export()
+
+    def to_json(self, data):
+        return JsonExporter(data).export()['fields']
