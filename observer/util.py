@@ -100,3 +100,7 @@ def get_aggregated_value(aggregation, metrics):
         return percentile(metrics, 50)
     else:
         raise Exception(f"No such aggregation {aggregation}")
+
+
+def flatten_list(l):
+    return [item for sublist in l for item in sublist]

@@ -1,7 +1,6 @@
 class ResultsCollector(object):
 
-    def __init__(self, test_name):
-        self.test_name = test_name
+    def __init__(self):
         self.results = {}
 
     def add(self, page_identifier, data):

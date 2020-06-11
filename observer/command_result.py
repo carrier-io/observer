@@ -2,8 +2,6 @@ class CommandExecutionResult(object):
 
     def __init__(self, results_type=None,
                  page_identifier=None,
-                 report=None,
-                 raw_results=None,
                  computed_results=None,
                  video_folder=None,
                  video_path=None,
@@ -12,8 +10,6 @@ class CommandExecutionResult(object):
                  err=None):
 
         self.results_type = results_type
-        self.report = report
-        self.raw_results = raw_results
         self.computed_results = computed_results
         self.video_folder = video_folder
         self.video_path = video_path
