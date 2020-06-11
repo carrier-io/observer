@@ -8,7 +8,6 @@ class CommandExecutionResult(object):
                  screenshot_path=None,
                  generate_report=False,
                  err=None):
-
         self.results_type = results_type
         self.computed_results = computed_results
         self.video_folder = video_folder
@@ -17,6 +16,7 @@ class CommandExecutionResult(object):
         self.ex = err
         self.page_identifier = page_identifier
         self.generate_report = generate_report
+        self.locators = None
 
     def is_ready_for_report(self):
         return self.generate_report and self.video_folder and self.computed_results

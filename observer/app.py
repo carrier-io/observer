@@ -3,8 +3,10 @@ import argparse
 from selene.support.shared import SharedConfig
 
 from observer.driver_manager import set_config
-from observer.integrations.galloper import download_file, notify_on_test_start, notify_on_test_end
+from observer.integrations.galloper import download_file, notify_on_test_start, notify_on_test_end, \
+    notify_on_command_end
 from observer.executors.scenario_executor import execute_scenario
+from observer.reporters.html_reporter import generate_html_report
 from observer.util import parse_json_file, str2bool, logger, unzip, wait_for_agent, terminate_runner, flatten_list
 
 
@@ -56,7 +58,9 @@ def execute(args):
 
     scenario_results = flatten_list(scenario_results)
 
-    print(scenario_results)
+    for execution_result in scenario_results:
+        report_uuid, threshold_results = generate_html_report(execution_result, [], args)
+        notify_on_command_end(report_uuid, execution_result, threshold_results)
 
     notify_on_test_end({"total": 0, "failed": 0}, None, "")
 

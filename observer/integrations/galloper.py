@@ -111,7 +111,7 @@ def upload_artifacts(bucket_name, artifact_path, file_name):
     return res.json()
 
 
-def notify_on_command_end(execution_result, thresholds, locators, report_uuid):
+def notify_on_command_end(report_uuid, execution_result, thresholds, ):
     # if not self.enabled:
     #     return None
     name = execution_result.computed_results['info']['title']
@@ -133,7 +133,7 @@ def notify_on_command_end(execution_result, thresholds, locators, report_uuid):
         "browser_version": metrics['info']['browser'],
         "thresholds_total": thresholds["total"],
         "thresholds_failed": thresholds["failed"],
-        "locators": locators
+        "locators": execution_result.locators
     }
 
     res = requests.post(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}/{report_id}", json=data,

@@ -22,18 +22,18 @@ def _execute_test(test, args):
 
     results = []
     for current_command, next_command in _pairwise(test['commands']):
-        locators.append(current_command)
         execution_result = execute_command(current_command, next_command, test_data_processor, is_video)
-
+        locators.append(current_command)
         if execution_result.ex:
             break
 
         if not execution_result.is_ready_for_report():
             continue
 
-        # report_uuid, threshold_results = generate_html_report(execution_result, [], args)
+        execution_result.locators = locators.copy()
         # exporter.export(execution_result.computed_results)
 
+        # report_uuid, threshold_results = generate_html_report(execution_result, [], args)
         # notify_on_command_end(execution_result, threshold_results, locators, report_uuid)
 
         # perf_results = exporter.to_json(execution_result.computed_results)
