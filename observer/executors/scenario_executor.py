@@ -45,25 +45,5 @@ def _execute_test(test, args):
     # junit_report_name = generate_junit_report(test_name, threshold_results)
 
 
-def assert_test_thresholds(test_name, all_scope_thresholds, execution_results):
-    threshold_results = {"total": len(all_scope_thresholds), "failed": 0, "details": []}
-
-    if not all_scope_thresholds:
-        return threshold_results
-
-    logger.info(f"=====> Assert aggregated thresholds for {test_name}")
-    checking_result = []
-    for gate in all_scope_thresholds:
-        threshold = AggregatedThreshold(gate, execution_results)
-        if not threshold.is_passed():
-            threshold_results['failed'] += 1
-        checking_result.append(threshold.get_result())
-
-    threshold_results["details"] = checking_result
-    logger.info("=====>")
-
-    return threshold_results
-
-
 def is_video_enabled(args):
     return "html" in args.report and args.video

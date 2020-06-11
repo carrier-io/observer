@@ -10,25 +10,26 @@ from observer.exporter import GalloperExporter
 from observer.util import logger
 
 
-class GalloperIntegration(object):
+# class GalloperIntegration(object):
+#
+#     def __init__(self, test_name, enabled):
+#         self.test_name = test_name
+#         self.enabled = enabled
 
-    def __init__(self, test_name, enabled):
-        self.test_name = test_name
-        self.enabled = enabled
 
-    def get_thresholds(self):
-        if not self.enabled:
-            return []
+def get_thresholds(test_name):
+    # if not self.enabled:
+    #     return []
 
-        logger.info(f"Get thresholds for: {self.test_name} {ENV}")
-        res = requests.get(
-            f"{GALLOPER_URL}/api/v1/thresholds/{GALLOPER_PROJECT_ID}/ui?name={self.test_name}&environment={ENV}&order=asc",
-            headers=get_headers())
+    logger.info(f"Get thresholds for: {test_name} {ENV}")
+    res = requests.get(
+        f"{GALLOPER_URL}/api/v1/thresholds/{GALLOPER_PROJECT_ID}/ui?name={test_name}&environment={ENV}&order=asc",
+        headers=get_headers())
 
-        if res.status_code != 200:
-            raise Exception(f"Can not get thresholds, Reasons {res.reason}")
+    if res.status_code != 200:
+        raise Exception(f"Can not get thresholds, Reasons {res.reason}")
 
-        return res.json()
+    return res.json()
 
 
 def notify_on_test_start(test_name, browser_name, base_url):

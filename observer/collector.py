@@ -4,6 +4,7 @@ class ResultsCollector(object):
         self.results = {}
 
     def add(self, page_identifier, data):
+
         if page_identifier in self.results.keys():
             self.results[page_identifier].append(data)
         else:
