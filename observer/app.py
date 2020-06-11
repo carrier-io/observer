@@ -8,6 +8,7 @@ from observer.integrations.galloper import download_file, notify_on_test_start, 
     notify_on_command_end, get_thresholds
 from observer.executors.scenario_executor import execute_scenario
 from observer.reporters.html_reporter import generate_html_report
+from observer.reporters.junit_reporter import generate_junit_report
 from observer.thresholds import AggregatedThreshold
 from observer.util import parse_json_file, str2bool, logger, unzip, wait_for_agent, terminate_runner, flatten_list
 
@@ -69,8 +70,8 @@ def execute(args):
         result_collector.add(r.page_identifier, r.to_json())
 
     threshold_results = assert_test_thresholds(scenario_name, result_collector.results)
-
-    notify_on_test_end(threshold_results, None, "")
+    junit_report_name = generate_junit_report(scenario_name, threshold_results)
+    notify_on_test_end(threshold_results, None, junit_report_name)
 
     if args.video:
         terminate_runner()

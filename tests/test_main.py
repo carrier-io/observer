@@ -13,6 +13,6 @@ def test_main_with_data_params():
             "-sc", "/tmp/data/webmail.side",
             # "-g", "False",
             # "-v", "False",
-            "-l", "1"
+            "-l", "2"
         ])
     execute(args)
