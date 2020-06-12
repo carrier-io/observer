@@ -32,7 +32,7 @@ def get_thresholds(test_name):
     return res.json()
 
 
-def notify_on_test_start(test_name, browser_name, base_url, loops):
+def notify_on_test_start(test_name, browser_name, base_url, args):
     # if not self.enabled:
     #     return None
 
@@ -41,7 +41,8 @@ def notify_on_test_start(test_name, browser_name, base_url, loops):
         "base_url": base_url,
         "browser_name": browser_name,
         "env": ENV,
-        "loops": loops,
+        "loops": args.loop,
+        "aggregation": args.aggregation,
         "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
