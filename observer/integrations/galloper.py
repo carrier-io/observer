@@ -1,102 +1,67 @@
 import os
+from datetime import datetime
 from pathlib import Path
 
 import requests
-from datetime import datetime
+
 from observer.constants import GALLOPER_URL, GALLOPER_PROJECT_ID, TESTS_BUCKET, TOKEN, ENV, RESULTS_BUCKET, \
     REPORTS_BUCKET
+from observer.db import save_to_storage, get_from_storage
 from observer.exporter import GalloperExporter
 from observer.util import logger
 
 
-class GalloperIntegration(object):
+def get_thresholds(test_name):
+    logger.info(f"Get thresholds for: {test_name} {ENV}")
+    res = requests.get(
+        f"{GALLOPER_URL}/api/v1/thresholds/{GALLOPER_PROJECT_ID}/ui?name={test_name}&environment={ENV}&order=asc",
+        headers=get_headers())
 
-    def __init__(self, test_name, enabled):
-        self.test_name = test_name
-        self.enabled = enabled
+    if res.status_code != 200:
+        raise Exception(f"Can not get thresholds, Reasons {res.reason}")
 
-    def get_thresholds(self):
-        if not self.enabled:
-            return []
+    return res.json()
 
-        logger.info(f"Get thresholds for: {self.test_name} {ENV}")
-        res = requests.get(
-            f"{GALLOPER_URL}/api/v1/thresholds/{GALLOPER_PROJECT_ID}/ui?name={self.test_name}&environment={ENV}&order=asc",
-            headers=get_headers())
 
-        if res.status_code != 200:
-            raise Exception(f"Can not get thresholds, Reasons {res.reason}")
+def notify_on_test_start(test_name, browser_name, base_url, args):
+    data = {
+        "test_name": test_name,
+        "base_url": base_url,
+        "browser_name": browser_name,
+        "env": ENV,
+        "loops": args.loop,
+        "aggregation": args.aggregation,
+        "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
 
-        return res.json()
+    res = requests.post(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}", json=data,
+                        headers=get_headers())
+    report_id = res.json()['id']
 
-    def notify_on_test_start(self, browser_name, base_url):
-        if not self.enabled:
-            return None
+    save_to_storage('report_id', report_id)
 
-        data = {
-            "test_name": self.test_name,
-            "base_url": base_url,
-            "browser_name": browser_name,
-            "env": ENV,
-            "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        }
+    return report_id
 
-        res = requests.post(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}", json=data,
-                            headers=get_headers())
-        return res.json()['id']
 
-    def notify_on_command_end(self, report_id: int, results_type, metrics, thresholds, locators, report_uuid,
-                              name):
-        if not self.enabled:
-            return None
+def notify_on_test_end(total_thresholds, exception, junit_report_name):
+    report_id = get_from_storage('report_id')
+    logger.info(f"About to notify on test end for report {report_id}")
 
-        logger.info(f"About to notify on command end for report {report_id}")
-        result = GalloperExporter(metrics).export()
+    data = {
+        "report_id": report_id,
+        "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        "thresholds_total": total_thresholds["total"],
+        "thresholds_failed": total_thresholds["failed"]
+    }
 
-        file_name = f"{name}_{report_uuid}.html"
-        report_path = f"/tmp/reports/{file_name}"
+    if exception:
+        data["exception"] = str(exception)
 
-        data = {
-            "name": name,
-            "type": results_type,
-            "metrics": result,
-            "bucket_name": REPORTS_BUCKET,
-            "file_name": file_name,
-            "resolution": metrics['info']['windowSize'],
-            "browser_version": metrics['info']['browser'],
-            "thresholds_total": thresholds["total"],
-            "thresholds_failed": thresholds["failed"],
-            "locators": locators
-        }
+    res = requests.put(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}", json=data,
+                       headers=get_headers())
 
-        res = requests.post(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}/{report_id}", json=data,
-                            headers=get_headers())
-
-        upload_artifacts(REPORTS_BUCKET, report_path, file_name)
-
-        return res.json()["id"]
-
-    def notify_on_test_end(self, report_id: int, total_thresholds, exception, junit_report_name):
-        if not self.enabled:
-            return None
-
-        logger.info(f"About to notify on test end for report {report_id}")
-
-        data = {
-            "report_id": report_id,
-            "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            "thresholds_total": total_thresholds["total"],
-            "thresholds_failed": total_thresholds["failed"]
-        }
-
-        if exception:
-            data["exception"] = str(exception)
-
-        res = requests.put(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}", json=data,
-                           headers=get_headers())
-
-        upload_artifacts(RESULTS_BUCKET, f"/tmp/reports/{junit_report_name}", junit_report_name)
-        return res.json()
+    upload_artifacts(RESULTS_BUCKET, f"/tmp/reports/{junit_report_name}", junit_report_name)
+    return res.json()
 
 
 def get_headers():
@@ -133,3 +98,34 @@ def upload_artifacts(bucket_name, artifact_path, file_name):
     res = requests.post(f"{GALLOPER_URL}/api/v1/artifacts/{GALLOPER_PROJECT_ID}/{bucket_name}/{file_name}", files=file,
                         headers=get_headers())
     return res.json()
+
+
+def notify_on_command_end(report_uuid, execution_result, thresholds, ):
+    name = execution_result.computed_results['info']['title']
+    metrics = execution_result.computed_results
+    report_id = get_from_storage('report_id')
+    logger.info(f"About to notify on command end for report {report_id}")
+    result = GalloperExporter(metrics).export()
+
+    file_name = f"{name}_{report_uuid}.html"
+    report_path = f"/tmp/reports/{file_name}"
+
+    data = {
+        "name": name,
+        "type": execution_result.results_type,
+        "metrics": result,
+        "bucket_name": REPORTS_BUCKET,
+        "file_name": file_name,
+        "resolution": metrics['info']['windowSize'],
+        "browser_version": metrics['info']['browser'],
+        "thresholds_total": thresholds["total"],
+        "thresholds_failed": thresholds["failed"],
+        "locators": execution_result.locators
+    }
+
+    res = requests.post(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}/{report_id}", json=data,
+                        headers=get_headers())
+
+    upload_artifacts(REPORTS_BUCKET, report_path, file_name)
+
+    return res.json()["id"]

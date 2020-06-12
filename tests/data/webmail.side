@@ -8,14 +8,14 @@
     "name": "webmail",
     "commands": [{
       "id": "f1fd02b9-20fd-4092-80e0-6bfa253d1be9",
-      "comment": "",
+      "comment": "Open main page",
       "command": "open",
       "target": "/showcase/typescript/webmail/",
       "targets": [],
       "value": ""
     }, {
       "id": "8ae65661-0aa3-45b4-a1d6-eeb9fe0f6db3",
-      "comment": "",
+      "comment": "resizeBrowser",
       "command": "setWindowSize",
       "target": "1853x1053",
       "targets": [],
@@ -69,7 +69,7 @@
       "value": ""
     }, {
       "id": "6d35bd84-0eab-4f0c-999e-858cb32d704f",
-      "comment": "",
+      "comment": "Assert text for last email",
       "command": "assertText",
       "target": "id=sub",
       "targets": [
