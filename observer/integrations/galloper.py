@@ -1,8 +1,9 @@
 import os
+from datetime import datetime
 from pathlib import Path
 
 import requests
-from datetime import datetime
+
 from observer.constants import GALLOPER_URL, GALLOPER_PROJECT_ID, TESTS_BUCKET, TOKEN, ENV, RESULTS_BUCKET, \
     REPORTS_BUCKET
 from observer.db import save_to_storage, get_from_storage
@@ -10,17 +11,7 @@ from observer.exporter import GalloperExporter
 from observer.util import logger
 
 
-# class GalloperIntegration(object):
-#
-#     def __init__(self, test_name, enabled):
-#         self.test_name = test_name
-#         self.enabled = enabled
-
-
 def get_thresholds(test_name):
-    # if not self.enabled:
-    #     return []
-
     logger.info(f"Get thresholds for: {test_name} {ENV}")
     res = requests.get(
         f"{GALLOPER_URL}/api/v1/thresholds/{GALLOPER_PROJECT_ID}/ui?name={test_name}&environment={ENV}&order=asc",
@@ -33,9 +24,6 @@ def get_thresholds(test_name):
 
 
 def notify_on_test_start(test_name, browser_name, base_url, args):
-    # if not self.enabled:
-    #     return None
-
     data = {
         "test_name": test_name,
         "base_url": base_url,
@@ -56,8 +44,6 @@ def notify_on_test_start(test_name, browser_name, base_url, args):
 
 
 def notify_on_test_end(total_thresholds, exception, junit_report_name):
-    # if not self.enabled:
-    #     return None
     report_id = get_from_storage('report_id')
     logger.info(f"About to notify on test end for report {report_id}")
 
@@ -115,8 +101,6 @@ def upload_artifacts(bucket_name, artifact_path, file_name):
 
 
 def notify_on_command_end(report_uuid, execution_result, thresholds, ):
-    # if not self.enabled:
-    #     return None
     name = execution_result.computed_results['info']['title']
     metrics = execution_result.computed_results
     report_id = get_from_storage('report_id')
