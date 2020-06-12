@@ -23,6 +23,7 @@ def create_parser():
     parser.add_argument("-e", '--export', action="append", type=str, default=[])
     parser.add_argument("-g", '--galloper', type=str2bool, default=True)
     parser.add_argument("-l", "--loop", type=int, default=1)
+    parser.add_argument("-a", "--aggregation", type=str)
     return parser
 
 
@@ -50,7 +51,7 @@ def execute(args):
 
     scenario_name = scenario['name']
 
-    notify_on_test_start(scenario_name, config.browser_name, config.base_url, args.loop)
+    notify_on_test_start(scenario_name, config.browser_name, config.base_url, args)
 
     scenario_results = []
     for i in range(0, args.loop):
