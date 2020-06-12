@@ -32,7 +32,7 @@ def get_thresholds(test_name):
     return res.json()
 
 
-def notify_on_test_start(test_name, browser_name, base_url):
+def notify_on_test_start(test_name, browser_name, base_url, loops):
     # if not self.enabled:
     #     return None
 
@@ -41,6 +41,7 @@ def notify_on_test_start(test_name, browser_name, base_url):
         "base_url": base_url,
         "browser_name": browser_name,
         "env": ENV,
+        "loops": loops,
         "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
@@ -72,7 +73,7 @@ def notify_on_test_end(total_thresholds, exception, junit_report_name):
     res = requests.put(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}", json=data,
                        headers=get_headers())
 
-    # upload_artifacts(RESULTS_BUCKET, f"/tmp/reports/{junit_report_name}", junit_report_name)
+    upload_artifacts(RESULTS_BUCKET, f"/tmp/reports/{junit_report_name}", junit_report_name)
     return res.json()
 
 

@@ -50,7 +50,7 @@ def execute(args):
 
     scenario_name = scenario['name']
 
-    notify_on_test_start(scenario_name, config.browser_name, config.base_url)
+    notify_on_test_start(scenario_name, config.browser_name, config.base_url, args.loop)
 
     scenario_results = []
     for i in range(0, args.loop):
