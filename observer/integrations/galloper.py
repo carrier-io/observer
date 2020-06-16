@@ -7,7 +7,7 @@ import requests
 from observer.constants import GALLOPER_URL, GALLOPER_PROJECT_ID, TESTS_BUCKET, TOKEN, ENV, RESULTS_BUCKET, \
     REPORTS_BUCKET
 from observer.db import save_to_storage, get_from_storage
-from observer.exporter import GalloperExporter
+from observer.models.exporters import GalloperExporter
 from observer.util import logger
 
 

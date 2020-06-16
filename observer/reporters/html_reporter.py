@@ -3,7 +3,7 @@ from shutil import rmtree
 from uuid import uuid4
 
 from observer.audits import performance_audit, bestpractice_audit, accessibility_audit, privacy_audit
-from observer.command_result import CommandExecutionResult
+from observer.models.command_result import CommandExecutionResult
 from observer.constants import FFMPEG_PATH, REPORT_PATH
 from subprocess import Popen, PIPE
 import base64

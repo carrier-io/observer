@@ -1,5 +1,5 @@
-from observer.exporter import JsonExporter
-from observer.thresholds import AggregatedThreshold, Threshold
+from observer.models.exporters import JsonExporter
+from observer.models.thresholds import AggregatedThreshold, Threshold
 from observer.util import logger, filter_thresholds_for
 
 

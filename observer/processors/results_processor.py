@@ -1,5 +1,5 @@
 from observer.assertions import assert_test_thresholds, assert_page_thresholds
-from observer.collector import ResultsCollector
+from observer.models.collector import ResultsCollector
 from observer.integrations.galloper import notify_on_test_end, notify_on_command_end
 from observer.reporters.html_reporter import generate_html_report
 from observer.reporters.junit_reporter import generate_junit_report

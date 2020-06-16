@@ -1,4 +1,4 @@
-from observer.exporter import JsonExporter
+from observer.models.exporters import JsonExporter
 
 
 class CommandExecutionResult(object):
