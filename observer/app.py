@@ -2,15 +2,18 @@ import argparse
 
 from selene.support.shared import SharedConfig
 
+from observer.assertions import assert_page_thresholds, assert_test_thresholds
 from observer.collector import ResultsCollector
 from observer.driver_manager import set_config
+from observer.exporter import JsonExporter
 from observer.integrations.galloper import download_file, notify_on_test_start, notify_on_test_end, \
     notify_on_command_end, get_thresholds
 from observer.executors.scenario_executor import execute_scenario
 from observer.reporters.html_reporter import generate_html_report
 from observer.reporters.junit_reporter import generate_junit_report
-from observer.thresholds import AggregatedThreshold
-from observer.util import parse_json_file, str2bool, logger, unzip, wait_for_agent, terminate_runner, flatten_list
+from observer.thresholds import AggregatedThreshold, Threshold
+from observer.util import parse_json_file, str2bool, logger, unzip, wait_for_agent, terminate_runner, flatten_list, \
+    filter_thresholds_for
 
 
 def create_parser():
@@ -60,23 +63,31 @@ def execute(args):
         scenario_results.append(results)
         # close_driver()
 
-    result_collector = ResultsCollector()
     scenario_results = flatten_list(scenario_results)
-
-    all_scope_thresholds = get_thresholds(scenario_name)
-    for execution_result in scenario_results:
-        report_uuid, threshold_results = generate_html_report(execution_result, all_scope_thresholds, args)
-        notify_on_command_end(report_uuid, execution_result, threshold_results)
-
-    for r in scenario_results:
-        result_collector.add(r.page_identifier, r.to_json())
-
-    threshold_results = assert_test_thresholds(scenario_name, all_scope_thresholds, result_collector.results)
-    junit_report_name = generate_junit_report(scenario_name, threshold_results)
-    notify_on_test_end(threshold_results, None, junit_report_name)
+    thresholds = get_thresholds(scenario_name)
+    process_results_for_pages(scenario_results, thresholds)
+    process_results_for_test(scenario_name, scenario_results, thresholds)
 
     if args.video:
         terminate_runner()
+
+
+def process_results_for_pages(scenario_results, thresholds):
+    for execution_result in scenario_results:
+        threshold_results = assert_page_thresholds(execution_result, thresholds)
+
+        report_uuid, threshold_results = generate_html_report(execution_result, threshold_results)
+        notify_on_command_end(report_uuid, execution_result, threshold_results)
+
+
+def process_results_for_test(scenario_name, scenario_results, thresholds):
+    result_collector = ResultsCollector()
+    for r in scenario_results:
+        result_collector.add(r.page_identifier, r.to_json())
+
+    threshold_results = assert_test_thresholds(scenario_name, thresholds, result_collector.results)
+    junit_report_name = generate_junit_report(scenario_name, threshold_results)
+    notify_on_test_end(threshold_results, None, junit_report_name)
 
 
 def get_scenario(args):
@@ -87,26 +98,6 @@ def get_scenario(args):
             unzip(file_path, "/tmp/data")
 
     return parse_json_file(args.scenario)
-
-
-def assert_test_thresholds(test_name, all_scope_thresholds, execution_results):
-    threshold_results = {"total": len(all_scope_thresholds), "failed": 0, "details": []}
-
-    if not all_scope_thresholds:
-        return threshold_results
-
-    logger.info(f"=====> Assert aggregated thresholds for {test_name}")
-    checking_result = []
-    for gate in all_scope_thresholds:
-        threshold = AggregatedThreshold(gate, execution_results)
-        if not threshold.is_passed():
-            threshold_results['failed'] += 1
-        checking_result.append(threshold.get_result())
-
-    threshold_results["details"] = checking_result
-    logger.info("=====>")
-
-    return threshold_results
 
 
 if __name__ == "__main__":

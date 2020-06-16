@@ -29,10 +29,8 @@ def trim_screenshot(kwargs):
 
 
 class resultsProcessor(object):
-    def __init__(self, video_path, request_params, processing_path, screenshot_path, return_report=True,
-                 generate_html=True, ):
+    def __init__(self, test_result, video_path, request_params, processing_path, screenshot_path):
         self.processing_path = processing_path
-        self.return_report = return_report
         self.title = request_params['info']['title']
         self.performance_timing = request_params['performancetiming']
         self.timing = request_params['timing']
@@ -40,38 +38,32 @@ class resultsProcessor(object):
         self.bp_score, self.bp_data = self.bestpractice_audit(request_params['bestPractices'])
         self.perf_score, self.perf_data = self.performance_audit(request_params['performance'])
         self.priv_score, self.priv_data = self.privacy_audit(request_params['privacy'])
-        self.test_result = 'fail'
-        self.total_score = (
-                                   self.acc_score * 30 + self.priv_score * 50 + self.bp_score * 22 + self.perf_score * 44) / 146
-        if self.total_score > 90 and request_params['timing']['speedIndex'] < 1000:
-            self.test_result = 'pass'
-        elif self.total_score > 75 and request_params['timing']['speedIndex'] < 3000:
-            self.test_result = 'warning'
-        if generate_html:
-            base64_encoded_string = ""
-            if screenshot_path:
-                with open(screenshot_path, 'rb') as image_file:
-                    base64_encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+        self.test_result = test_result
 
-            self.report = self.generate_html(page_name=request_params['info']['title'],
-                                             video_path=video_path,
-                                             test_status=self.test_result,
-                                             start_time=request_params['info'].get('testStart', 0),
-                                             perf_score=self.perf_score,
-                                             priv_score=self.priv_score,
-                                             acc_score=self.acc_score,
-                                             bp_score=self.bp_score,
-                                             acc_findings=self.acc_data,
-                                             perf_findings=self.perf_data,
-                                             bp_findings=self.bp_data,
-                                             priv_findings=self.priv_data,
-                                             resource_timing=request_params['performanceResources'],
-                                             marks=request_params['marks'],
-                                             measures=request_params['measures'],
-                                             navigation_timing=request_params['performancetiming'],
-                                             info=request_params['info'],
-                                             timing=request_params['timing'],
-                                             base64_full_page_screen=base64_encoded_string)
+        base64_encoded_string = ""
+        if screenshot_path:
+            with open(screenshot_path, 'rb') as image_file:
+                base64_encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+
+        self.html = self.generate_html(page_name=request_params['info']['title'],
+                                       video_path=video_path,
+                                       test_status=self.test_result,
+                                       start_time=request_params['info'].get('testStart', 0),
+                                       perf_score=self.perf_score,
+                                       priv_score=self.priv_score,
+                                       acc_score=self.acc_score,
+                                       bp_score=self.bp_score,
+                                       acc_findings=self.acc_data,
+                                       perf_findings=self.perf_data,
+                                       bp_findings=self.bp_data,
+                                       priv_findings=self.priv_data,
+                                       resource_timing=request_params['performanceResources'],
+                                       marks=request_params['marks'],
+                                       measures=request_params['measures'],
+                                       navigation_timing=request_params['performancetiming'],
+                                       info=request_params['info'],
+                                       timing=request_params['timing'],
+                                       base64_full_page_screen=base64_encoded_string)
 
     @staticmethod
     def privacy_audit(privacy_data):
@@ -560,15 +552,7 @@ class resultsProcessor(object):
             loader=PackageLoader('observer', 'templates'),
             autoescape=select_autoescape(['html', 'xml'])
         )
-        if test_status == 'pass':
-            str_test_status = 'PASSED'
-            test_status = 'ok'
-        elif test_status == 'warning':
-            str_test_status = 'WARNING'
-            test_status = 'warning'
-        else:
-            str_test_status = 'FAILED'
-            test_status = 'error'
+
         last_response_end = max([resource['responseEnd'] for resource in resource_timing])
         end = int(max([navigation_timing['loadEventEnd'] - navigation_timing['navigationStart'], last_response_end]))
         screenshots_dict = []
@@ -576,8 +560,10 @@ class resultsProcessor(object):
             if each:
                 screenshots_dict.append(each)
         screenshots = [list(e.values())[0] for e in sorted(screenshots_dict, key=lambda d: list(d.keys()))]
+
         template = env.get_template('perfreport.html')
-        res = template.render(page_name=page_name, str_test_status=str_test_status, test_status=test_status,
+
+        res = template.render(page_name=page_name, test_status=test_status,
                               perf_score=perf_score, priv_score=priv_score, acc_score=acc_score, bp_score=bp_score,
                               screenshots=screenshots, full_page_screen=base64_full_page_screen,
                               acc_findings=acc_findings,
@@ -585,15 +571,5 @@ class resultsProcessor(object):
                               bp_findings=bp_findings, priv_findings=priv_findings, resource_timing=resource_timing,
                               marks=marks, measures=measures, navigation_timing=navigation_timing,
                               info=info, timing=timing)
-        report_name = f'{page_name}.html'
-        report_name = path.join(report_path, f'{report_name}.html')
-        if self.return_report:
-            return re.sub(r'[^\x00-\x7f]', r'', res)
-        else:
-            with open(report_name, "w") as f:
-                f.write(re.sub(r'[^\x00-\x7f]', r'', res))
-            return report_name
 
-    def get_report(self):
-        if self.report:
-            return self.report
+        return re.sub(r'[^\x00-\x7f]', r'', res)
