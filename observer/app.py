@@ -19,7 +19,7 @@ def create_parser():
     parser.add_argument("-e", '--export', action="append", type=str, default=[])
     parser.add_argument("-g", '--galloper', type=str2bool, default=True)
     parser.add_argument("-l", "--loop", type=int, default=1)
-    parser.add_argument("-a", "--aggregation", type=str)
+    parser.add_argument("-a", "--aggregation", type=str, default="max")
     return parser
 
 
