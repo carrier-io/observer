@@ -63,14 +63,15 @@ def execute(args):
     result_collector = ResultsCollector()
     scenario_results = flatten_list(scenario_results)
 
+    all_scope_thresholds = get_thresholds(scenario_name)
     for execution_result in scenario_results:
-        report_uuid, threshold_results = generate_html_report(execution_result, [], args)
+        report_uuid, threshold_results = generate_html_report(execution_result, all_scope_thresholds, args)
         notify_on_command_end(report_uuid, execution_result, threshold_results)
 
     for r in scenario_results:
         result_collector.add(r.page_identifier, r.to_json())
 
-    threshold_results = assert_test_thresholds(scenario_name, result_collector.results)
+    threshold_results = assert_test_thresholds(scenario_name, all_scope_thresholds, result_collector.results)
     junit_report_name = generate_junit_report(scenario_name, threshold_results)
     notify_on_test_end(threshold_results, None, junit_report_name)
 
@@ -88,9 +89,7 @@ def get_scenario(args):
     return parse_json_file(args.scenario)
 
 
-def assert_test_thresholds(test_name, execution_results):
-    all_scope_thresholds = get_thresholds(test_name)
-
+def assert_test_thresholds(test_name, all_scope_thresholds, execution_results):
     threshold_results = {"total": len(all_scope_thresholds), "failed": 0, "details": []}
 
     if not all_scope_thresholds:
