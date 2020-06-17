@@ -12,6 +12,8 @@ REPORTS_BUCKET = environ.get("REPORTS_BUCKET", "reports")
 TESTS_BUCKET = environ.get("TESTS_BUCKET", "tests")
 RESULTS_BUCKET = environ.get("RESULTS_BUCKET", "")
 RESULTS_REPORT_NAME = environ.get("RESULTS_REPORT_NAME", f'{uuid4()}')
+FFMPEG_PATH = environ.get("ffmpeg_path", "ffmpeg")
+REPORT_PATH = '/tmp/reports/'
 
 check_ui_performance = '''return (function() {
 var metas=Array.prototype.slice.call(document.querySelectorAll('meta[name][content]'));

@@ -11,7 +11,7 @@ from requests import get
 from observer.actions import browser_actions
 from observer.actions.browser_actions import command_type, get_performance_timing, get_dom_size, take_full_screenshot, \
     get_performance_entities, get_performance_metrics, get_current_url
-from observer.command_result import CommandExecutionResult
+from observer.models.command_result import CommandExecutionResult
 from observer.constants import LISTENER_ADDRESS
 from observer.db import save_to_storage, get_from_storage
 from observer.util import logger
