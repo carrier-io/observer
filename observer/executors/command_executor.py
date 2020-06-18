@@ -47,6 +47,11 @@ def execute_command(current_command, next_command, test_data_processor, enable_v
             load_event_end = get_performance_timing()['loadEventEnd']
             results = compute_results_for_simple_page()
             results['info']['testStart'] = int(current_time)
+
+            comment = current_command['comment']
+            if comment:
+                results['info']['title'] = comment
+
             dom = get_dom_size()
 
             save_to_storage("command_results", {
@@ -254,13 +259,9 @@ def compute_results_for_spa(old, new, current_command):
     result['performancetiming'] = timing
     result['timing']['firstPaint'] = new['timing']['firstPaint'] - old['timing']['firstPaint']
 
-    if old['info']['title'] == new['info']['title']:
-        title = new['info']['title']
-        comment = current_command['comment']
-        if comment:
-            title = comment
-
-        result['info']['title'] = title
+    comment = current_command['comment']
+    if comment:
+        result['info']['title'] = comment
 
     return result
 

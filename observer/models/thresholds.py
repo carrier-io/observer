@@ -1,4 +1,4 @@
-from observer.util import logger, percentile, is_values_match, get_aggregated_value
+from observer.util import logger, percentile, is_values_match, get_aggregated_value, flatten_list
 
 
 class Threshold(object):
@@ -51,8 +51,7 @@ class AggregatedThreshold(object):
                 metrics = [d[self.metric_name] for d in results]
                 result.append(metrics)
 
-            result = [item for sublist in result for item in sublist]
-            yield get_aggregated_value(self.aggregation, result)
+            yield get_aggregated_value(self.aggregation, flatten_list(result))
         else:
             result = {k: v for k, v in self.values.items() if k.startswith(self.scope)}
             for page, results in result.items():
@@ -86,7 +85,8 @@ class AggregatedThreshold(object):
                        "rule": self.comparison,
                        "scope": self.scope,
                        "aggregation": self.aggregation,
-                       "actual": actual_value, "expected": self.expected_value,
+                       "actual": actual_value,
+                       "expected": self.expected_value,
                        "message": ''}
 
         return True

@@ -31,7 +31,8 @@ class JiraClient(object):
             'issuetype': 'Bug',
             'summary': title,
             'description': description,
-            'priority': {'name': priority}
+            'priority': {'name': priority},
+            'labels': ['observer', 'ui_performance']
         }
 
         issue = self.client.create_issue(fields=issue_data)
