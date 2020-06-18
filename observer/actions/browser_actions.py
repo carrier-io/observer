@@ -7,6 +7,7 @@ from selenium.webdriver.common.keys import Keys
 
 from observer.constants import check_ui_performance
 from observer.driver_manager import get_driver
+from observer.util import logger
 
 
 def command(func, actionable=True):
@@ -49,6 +50,11 @@ def setWindowSize(size, value):
 def click(locator, value):
     css_or_xpath = get_locator_strategy(locator)
     get_driver().element(css_or_xpath).click()
+
+
+def double_click(locator, value):
+    css_or_xpath = get_locator_strategy(locator)
+    get_driver().element(css_or_xpath).double_click()
 
 
 def type(locator, text):
@@ -135,11 +141,27 @@ def take_full_screenshot(save_path):
     return save_path
 
 
-command_type = {
+def close():
+    get_driver().quit()
+
+
+__command_type = {
     "open": command(open_url),
     "setWindowSize": command(setWindowSize, actionable=False),
     "click": command(click),
+    "clickAt": command(click),
+    "doubleClick": command(double_click),
+    "doubleClickAt": command(double_click),
     "type": command(type),
     "sendKeys": command(sendKeys),
-    "assertText": command(assert_text)
+    "assertText": command(assert_text),
+    "close": command(close)
 }
+
+
+def get_command(current_cmd):
+    try:
+        return __command_type[current_cmd]
+    except KeyError as e:
+        logger.error(f"No such command processor for [{current_cmd}] in {__command_type.keys()}")
+        raise e
