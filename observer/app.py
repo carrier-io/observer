@@ -56,6 +56,7 @@ def execute(args):
         scenario_results.append(results)
         # close_driver()
 
+    logger.info("=====> Reports generation")
     scenario_results = flatten_list(scenario_results)
     thresholds = get_thresholds(scenario_name)
     process_results_for_pages(scenario_results, thresholds)

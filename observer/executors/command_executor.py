@@ -9,11 +9,11 @@ from deepdiff import DeepDiff
 from requests import get
 
 from observer.actions import browser_actions
-from observer.actions.browser_actions import command_type, get_performance_timing, get_dom_size, take_full_screenshot, \
-    get_performance_entities, get_performance_metrics, get_current_url
-from observer.models.command_result import CommandExecutionResult
+from observer.actions.browser_actions import get_performance_timing, get_dom_size, take_full_screenshot, \
+    get_performance_entities, get_performance_metrics, get_current_url, get_command
 from observer.constants import LISTENER_ADDRESS
 from observer.db import save_to_storage, get_from_storage
+from observer.models.command_result import CommandExecutionResult
 from observer.util import logger
 
 
@@ -27,13 +27,11 @@ def execute_command(current_command, next_command, test_data_processor, enable_v
     results = None
     results_type = "page"
 
-    current_cmd = current_command['command']
     current_target = current_command['target']
     current_value = test_data_processor.process(current_command['value'])
-    current_cmd, current_is_actionable = command_type[current_cmd]
+    current_cmd, current_is_actionable = get_command(current_command['command'])
 
-    next_cmd = next_command['command']
-    next_cmd, next_is_actionable = command_type[next_cmd]
+    _, next_is_actionable = get_command(next_command['command'])
 
     start_time = time()
     if enable_video and current_is_actionable:
