@@ -37,12 +37,23 @@ class JiraClient(object):
         }
 
         issue = self.client.create_issue(fields=issue_data)
-
         logger.info(f'  \u2713 was created: {issue.key}')
+
+    def create_issues(self, data):
+        field_list = []
+        for d in data:
+            field_list.append({
+                'project': {'key': self.project},
+                'issuetype': 'Bug',
+                'summary': d['message'],
+                'description': '',
+                'priority': {'name': "High"},
+                'labels': ['observer', 'ui_performance']
+            })
+
+        self.client.create_issues(field_list)
 
 
 def notify_jira(threshold_results):
     jira = JiraClient(JIRA_URL, JIRA_USER, JIRA_PASSWORD, JIRA_PROJECT)
-
-    for detail in threshold_results["details"]:
-        jira.create_issue(detail, "High", "")
+    jira.create_issues(threshold_results["details"])
