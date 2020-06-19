@@ -21,3 +21,4 @@ def process_results_for_test(scenario_name, scenario_results, thresholds):
     threshold_results = assert_test_thresholds(scenario_name, thresholds, result_collector.results)
     junit_report_name = generate_junit_report(scenario_name, threshold_results)
     notify_on_test_end(threshold_results, None, junit_report_name)
+    return threshold_results
