@@ -26,21 +26,17 @@ class JiraClient(object):
 
         return jira
 
-    def create_issue(self, title, priority, description):
-        issue_data = {
-            'project': {'key': self.project},
-            'issuetype': 'Bug',
-            'summary': title,
-            'description': description,
-            'priority': {'name': priority},
-            'labels': ['observer', 'ui_performance']
-        }
+    def add_attachment(self, issue, report):
+        if not report:
+            return
 
-        issue = self.client.create_issue(fields=issue_data)
-        logger.info(f'  \u2713 was created: {issue.key}')
+        try:
+            self.client.add_attachment(issue, attachment=report.path)
+        except Exception as e:
+            logger.error(e)
 
     def create_issues(self, scenario, data):
-        field_list = []
+        logger.info(f"=====> About to crate JIRA issues")
         for d in data:
             steps = []
             for i, locator in enumerate(d['raw_result'].locators, 1):
@@ -57,16 +53,18 @@ class JiraClient(object):
                           
                           Steps:\n {steps}"""
 
-            field_list.append({
+            field_list = {
                 'project': {'key': self.project},
                 'issuetype': 'Bug',
                 'summary': d['message'],
                 'description': description,
                 'priority': {'name': "High"},
                 'labels': ['observer', 'ui_performance', scenario['name']]
-            })
+            }
 
-        self.client.create_issues(field_list)
+            issue = self.client.create_issue(field_list)
+            self.add_attachment(issue, d['raw_result'].report)
+            logger.info(f"JIRA {issue} has been created")
 
 
 def notify_jira(scenario, threshold_results):

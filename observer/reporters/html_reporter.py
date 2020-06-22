@@ -13,6 +13,14 @@ from multiprocessing import Pool
 from observer.util import logger
 
 
+class HtmlReport(object):
+
+    def __init__(self, title, report_uuid):
+        self.report_uuid = report_uuid
+        self.file_name = f"{title}_{report_uuid}.html"
+        self.path = f"/tmp/reports/{self.file_name}"
+
+
 def generate_html_report(execution_result: CommandExecutionResult, threshold_results):
     video_folder = execution_result.video_folder
     test_status = get_test_status(threshold_results)
@@ -25,8 +33,9 @@ def generate_html_report(execution_result: CommandExecutionResult, threshold_res
     if os.path.exists(video_folder):
         rmtree(video_folder)
 
-    report_uuid = reporter.save_report()
-    return report_uuid, threshold_results
+    report = reporter.save_report()
+
+    return report
 
 
 def get_test_status(threshold_results):
@@ -148,4 +157,4 @@ class HtmlReporter(object):
         os.makedirs(REPORT_PATH, exist_ok=True)
         with open(f'{REPORT_PATH}{self.title}_{report_uuid}.html', 'w') as f:
             f.write(self.html)
-        return report_uuid
+        return HtmlReport(self.title, report_uuid)
