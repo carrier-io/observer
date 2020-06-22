@@ -1,4 +1,4 @@
-from observer.util import logger, percentile, is_values_match, get_aggregated_value, flatten_list
+from observer.util import logger, percentile, is_values_match, get_aggregated_value, flatten_list, closest
 
 
 class Threshold(object):
@@ -43,25 +43,25 @@ class AggregatedThreshold(object):
     def get_actual_aggregated_value(self):
         if self.scope == 'every':
             for page, results in self.values.items():
-                metrics = [d[self.metric_name] for d in results]
+                metrics = [d.to_json()[self.metric_name] for d in results]
                 yield get_aggregated_value(self.aggregation, metrics)
         elif self.scope == 'all':
             result = []
             for page, results in self.values.items():
-                metrics = [d[self.metric_name] for d in results]
+                metrics = [d.to_json()[self.metric_name] for d in results]
                 result.append(metrics)
 
             yield get_aggregated_value(self.aggregation, flatten_list(result))
         else:
             result = {k: v for k, v in self.values.items() if k.startswith(self.scope)}
             for page, results in result.items():
-                metrics = [d[self.metric_name] for d in results]
+                metrics = [d.to_json()[self.metric_name] for d in results]
                 yield get_aggregated_value(self.aggregation, metrics)
 
     def is_passed(self):
         actual_value = None
 
-        for actual in self.get_actual_aggregated_value():
+        for actual, metrics in self.get_actual_aggregated_value():
             actual_value = actual
 
             if not is_values_match(actual, self.comparison, self.expected_value):
@@ -69,27 +69,44 @@ class AggregatedThreshold(object):
                           f"{self.comparison} {self.expected_value}"
                 logger.info(f"{message} [FAILED]")
 
-                self.result = {"name": f"{self.name}",
-                               "rule": self.comparison,
-                               "scope": self.scope,
-                               "aggregation": self.aggregation,
-                               "actual": actual, "expected": self.expected_value,
-                               "message": message}
+                failed_result = self.__find_actual_result(metrics, actual)
+
+                self.result = {
+                    "name": f"{self.name}",
+                    "status": "failed",
+                    "rule": self.comparison,
+                    "scope": self.scope,
+                    "aggregation": self.aggregation,
+                    "actual": actual,
+                    "expected": self.expected_value,
+                    "message": message,
+                    "raw_result": failed_result
+                }
                 return False
 
         logger.info(
             f"Threshold: {self.scope} [{self.name}] {self.aggregation} value {actual_value} comply with rule {self.comparison} "
             f"{self.expected_value} [PASSED]")
 
-        self.result = {"name": f"{self.name}",
-                       "rule": self.comparison,
-                       "scope": self.scope,
-                       "aggregation": self.aggregation,
-                       "actual": actual_value,
-                       "expected": self.expected_value,
-                       "message": ''}
+        self.result = {
+            "name": f"{self.name}",
+            "status": "passed",
+            "rule": self.comparison,
+            "scope": self.scope,
+            "aggregation": self.aggregation,
+            "actual": actual_value,
+            "expected": self.expected_value,
+            "message": ''
+        }
 
         return True
 
     def get_result(self):
         return self.result
+
+    def __find_actual_result(self, metrics, actual):
+        value = closest(metrics, actual)
+        for _, data in self.values.items():
+            for v in data:
+                if v.to_json()[self.name.lower()] == value:
+                    return v

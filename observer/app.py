@@ -64,7 +64,7 @@ def execute(args):
     threshold_results = process_results_for_test(scenario_name, scenario_results, thresholds)
 
     if "jira" in args.report:
-        notify_jira(threshold_results)
+        notify_jira(scenario, threshold_results)
 
     if args.video:
         terminate_runner()
