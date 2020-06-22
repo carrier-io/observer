@@ -41,9 +41,11 @@ class JiraClient(object):
             steps = []
             for i, locator in enumerate(d['raw_result'].locators, 1):
                 command = locator['command']
-                text = f"{command} {locator['target']}"
+                value = locator["value"]
+                action = "to" if value != "" else "on"
+                text = f"*{command}* {value} {action}  *{locator['target']}*"
                 if command == "open":
-                    text = f"{command} {scenario['url']}{locator['target']}"
+                    text = f"*{command}* {action} {scenario['url']}{locator['target']}"
 
                 steps.append(f"{i}. {text}")
 
