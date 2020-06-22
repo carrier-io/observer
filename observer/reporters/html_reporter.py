@@ -18,7 +18,7 @@ class HtmlReport(object):
     def __init__(self, title, report_uuid):
         self.report_uuid = report_uuid
         self.file_name = f"{title}_{report_uuid}.html"
-        self.path = f"/tmp/reports/{self.file_name}"
+        self.path = f"{REPORT_PATH}{self.file_name}"
 
 
 def generate_html_report(execution_result: CommandExecutionResult, threshold_results):
