@@ -92,30 +92,28 @@ def send_report_locators(project_id: int, report_id: int, exception):
                  headers=get_headers())
 
 
-def upload_artifacts(bucket_name, artifact_path, file_name):
-    file = {'file': open(artifact_path, 'rb')}
+def upload_artifacts(bucket_name, file_path, file_name):
+    file = {'file': open(file_path, 'rb')}
 
-    res = requests.post(f"{GALLOPER_URL}/api/v1/artifacts/{GALLOPER_PROJECT_ID}/{bucket_name}/{file_name}", files=file,
+    res = requests.post(f"{GALLOPER_URL}/api/v1/artifacts/{GALLOPER_PROJECT_ID}/{bucket_name}/{file_name}",
+                        files=file,
                         headers=get_headers())
     return res.json()
 
 
-def notify_on_command_end(report_uuid, execution_result, thresholds, ):
+def notify_on_command_end(report, execution_result, thresholds):
     name = execution_result.computed_results['info']['title']
     metrics = execution_result.computed_results
     report_id = get_from_storage('report_id')
     logger.info(f"About to notify on command end for report {report_id}")
     result = GalloperExporter(metrics).export()
 
-    file_name = f"{name}_{report_uuid}.html"
-    report_path = f"/tmp/reports/{file_name}"
-
     data = {
         "name": name,
         "type": execution_result.results_type,
         "metrics": result,
         "bucket_name": REPORTS_BUCKET,
-        "file_name": file_name,
+        "file_name": report.file_name,
         "resolution": metrics['info']['windowSize'],
         "browser_version": metrics['info']['browser'],
         "thresholds_total": thresholds["total"],
@@ -126,6 +124,6 @@ def notify_on_command_end(report_uuid, execution_result, thresholds, ):
     res = requests.post(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}/{report_id}", json=data,
                         headers=get_headers())
 
-    upload_artifacts(REPORTS_BUCKET, report_path, file_name)
+    upload_artifacts(REPORTS_BUCKET, report.path, report.file_name)
 
     return res.json()["id"]

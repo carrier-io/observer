@@ -9,15 +9,17 @@ def process_results_for_pages(scenario_results, thresholds):
     for execution_result in scenario_results:
         threshold_results = assert_page_thresholds(execution_result, thresholds)
 
-        report_uuid, threshold_results = generate_html_report(execution_result, threshold_results)
-        notify_on_command_end(report_uuid, execution_result, threshold_results)
+        report = generate_html_report(execution_result, threshold_results)
+        notify_on_command_end(report, execution_result, threshold_results)
+        execution_result.report = report
 
 
 def process_results_for_test(scenario_name, scenario_results, thresholds):
     result_collector = ResultsCollector()
     for r in scenario_results:
-        result_collector.add(r.page_identifier, r.to_json())
+        result_collector.add(r.page_identifier, r)
 
     threshold_results = assert_test_thresholds(scenario_name, thresholds, result_collector.results)
     junit_report_name = generate_junit_report(scenario_name, threshold_results)
     notify_on_test_end(threshold_results, None, junit_report_name)
+    return threshold_results

@@ -26,7 +26,11 @@ def assert_test_thresholds(test_name, all_scope_thresholds, execution_results):
 def assert_page_thresholds(execution_result, thresholds):
     report_title = execution_result.computed_results['info']['title']
     scoped_thresholds = filter_thresholds_for(report_title, thresholds)
+
     threshold_results = {"total": len(scoped_thresholds), "failed": 0}
+    if not thresholds:
+        return threshold_results
+
     perf_results = JsonExporter(execution_result.computed_results).export()['fields']
 
     logger.info(f"=====> Assert thresholds for {report_title}")

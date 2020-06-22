@@ -89,18 +89,22 @@ def is_values_match(actual, comparison, expected):
 
 def get_aggregated_value(aggregation, metrics):
     if aggregation == 'max':
-        return max(metrics)
+        return max(metrics), metrics
     elif aggregation == 'min':
-        return min(metrics)
+        return min(metrics), metrics
     elif aggregation == 'avg':
-        return round(sum(metrics) / len(metrics), 2)
+        return round(sum(metrics) / len(metrics), 2), metrics
     elif aggregation == 'pct95':
-        return percentile(metrics, 95)
+        return percentile(metrics, 95), metrics
     elif aggregation == 'pct50':
-        return percentile(metrics, 50)
+        return percentile(metrics, 50), metrics
     else:
         raise Exception(f"No such aggregation {aggregation}")
 
 
 def flatten_list(l):
     return [item for sublist in l for item in sublist]
+
+
+def closest(lst, val):
+    return lst[min(range(len(lst)), key=lambda i: abs(lst[i] - val))]
