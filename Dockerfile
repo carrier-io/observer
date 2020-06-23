@@ -5,6 +5,17 @@ RUN apk add  --no-cache ffmpeg
 RUN apk add build-base jpeg-dev zlib-dev
 ENV LIBRARY_PATH=/lib:/usr/lib
 
+# Fix for cryptography https://stackoverflow.com/questions/35736598/cannot-pip-install-cryptography-in-docker-alpine-linux-3-3-with-openssl-1-0-2g
+RUN apk add --no-cache \
+        libressl-dev \
+        musl-dev \
+        libffi-dev && \
+    pip install --no-cache-dir cryptography && \
+    apk del \
+        libressl-dev \
+        musl-dev \
+        libffi-dev
+
 RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools
 ADD MANIFEST.in /tmp/MANIFEST.in
