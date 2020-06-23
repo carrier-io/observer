@@ -2,6 +2,7 @@ import argparse
 
 from selene.support.shared import SharedConfig
 
+from observer.constants import JIRA_URL
 from observer.driver_manager import set_config
 from observer.executors.scenario_executor import execute_scenario
 from observer.integrations.galloper import download_file, notify_on_test_start, get_thresholds
@@ -63,7 +64,7 @@ def execute(args):
     process_results_for_pages(scenario_results, thresholds)
     threshold_results = process_results_for_test(scenario_name, scenario_results, thresholds)
 
-    if "jira" in args.report:
+    if JIRA_URL:
         notify_jira(scenario, threshold_results)
 
     if args.video:
