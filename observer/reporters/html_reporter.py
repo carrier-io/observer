@@ -22,6 +22,7 @@ class HtmlReport(object):
 
 
 def generate_html_report(execution_result: CommandExecutionResult, threshold_results):
+    logger.info("=====> Reports generation")
     video_folder = execution_result.video_folder
     test_status = get_test_status(threshold_results)
 

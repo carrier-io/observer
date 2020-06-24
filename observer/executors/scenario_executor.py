@@ -13,7 +13,6 @@ def execute_scenario(scenario, args):
 
 
 def _execute_test(test, args):
-    is_video = is_video_enabled(args)
     test_name = test['name']
     locators = []
 
@@ -21,7 +20,7 @@ def _execute_test(test, args):
 
     results = []
     for current_command, next_command in _pairwise(test['commands']):
-        execution_result = execute_command(current_command, next_command, test_data_processor, is_video)
+        execution_result = execute_command(current_command, next_command, test_data_processor, args.video)
         locators.append(current_command)
         if execution_result.ex:
             break
@@ -33,7 +32,3 @@ def _execute_test(test, args):
         results.append(execution_result)
 
     return results
-
-
-def is_video_enabled(args):
-    return "html" in args.report and args.video

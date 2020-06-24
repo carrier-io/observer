@@ -17,7 +17,7 @@ def create_parser():
     parser.add_argument("-sc", "--scenario", type=str, default="")
     parser.add_argument("-d", "--data", type=str, default="")
     parser.add_argument("-v", '--video', type=str2bool, default=True)
-    parser.add_argument("-r", '--report', action="append", type=str, default=['html'])
+    parser.add_argument("-r", '--report', action="append", type=str, default=[])
     parser.add_argument("-e", '--export', action="append", type=str, default=[])
     parser.add_argument("-g", '--galloper', type=str2bool, default=True)
     parser.add_argument("-l", "--loop", type=int, default=1)
@@ -58,13 +58,12 @@ def execute(args):
         scenario_results.append(results)
         # close_driver()
 
-    logger.info("=====> Reports generation")
     scenario_results = flatten_list(scenario_results)
     thresholds = get_thresholds(scenario_name)
     process_results_for_pages(scenario_results, thresholds)
-    threshold_results = process_results_for_test(scenario_name, scenario_results, thresholds)
+    threshold_results = process_results_for_test(scenario_name, scenario_results, thresholds, args)
 
-    if JIRA_URL:
+    if "jira" in args.report:
         notify_jira(scenario, threshold_results)
 
     if args.video:

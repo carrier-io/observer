@@ -18,7 +18,7 @@ REPORT_PATH = '/tmp/reports/'
 JIRA_URL = environ.get("JIRA_URL", None)
 JIRA_USER = environ.get("JIRA_USER", None)
 JIRA_PASSWORD = environ.get("JIRA_PASSWORD", None)
-JIRA_PROJECT = environ.get("JIRA_PROJECT", None)
+JIRA_PROJECT = environ.get("JIRA_PROJECT", "")
 
 check_ui_performance = '''return (function() {
 var metas=Array.prototype.slice.call(document.querySelectorAll('meta[name][content]'));
