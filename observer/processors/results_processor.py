@@ -14,12 +14,16 @@ def process_results_for_pages(scenario_results, thresholds):
         execution_result.report = report
 
 
-def process_results_for_test(scenario_name, scenario_results, thresholds):
+def process_results_for_test(scenario_name, scenario_results, thresholds, args):
     result_collector = ResultsCollector()
     for r in scenario_results:
         result_collector.add(r.page_identifier, r)
 
     threshold_results = assert_test_thresholds(scenario_name, thresholds, result_collector.results)
-    junit_report_name = generate_junit_report(scenario_name, threshold_results)
+
+    junit_report_name = None
+    if "junit" in args.report:
+        junit_report_name = generate_junit_report(scenario_name, threshold_results)
+
     notify_on_test_end(threshold_results, None, junit_report_name)
     return threshold_results
