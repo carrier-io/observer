@@ -43,7 +43,7 @@ class JiraClient(object):
                 continue
 
             issue_hash = hashlib.sha256(
-                f"{d['scope']} {d['name']} {d['aggregation']} {d['rule']} {d['raw_result'].page_identifier}".encode(
+                f"{d['scope']} {d['name']} {d['aggregation']} {d['raw_result'].page_identifier}".encode(
                     'utf-8')).hexdigest()
 
             if len(self.get_issues(issue_hash)) > 0:
@@ -64,9 +64,10 @@ class JiraClient(object):
 
             steps = "\n".join(steps)
 
-            summary = f"Threshold: {d['scope']} [{d['name']}] {d['aggregation']} value violates rule for {scenario['name']}"
+            summary = f"{d['scope'].capitalize()} [{d['name']}] {d['aggregation']} value violates threshold rule for {scenario['name']}"
 
-            description = f"""{summary}
+            description = f"""Value {d['actual']} violates threshold rule: {d['scope']} [{d['name']}] {d['aggregation']}
+{d['rule']} {d['expected']} for {scenario['name']}"
                           
                           Steps:\n {steps}
                           
