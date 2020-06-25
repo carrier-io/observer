@@ -2,10 +2,11 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+import pytz
 import requests
 
 from observer.constants import GALLOPER_URL, GALLOPER_PROJECT_ID, TESTS_BUCKET, TOKEN, ENV, RESULTS_BUCKET, \
-    REPORTS_BUCKET, REPORT_PATH
+    REPORTS_BUCKET, REPORT_PATH, TZ
 from observer.db import save_to_storage, get_from_storage
 from observer.models.exporters import GalloperExporter
 from observer.util import logger
@@ -31,7 +32,7 @@ def notify_on_test_start(test_name, browser_name, base_url, args):
         "env": ENV,
         "loops": args.loop,
         "aggregation": args.aggregation,
-        "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        "time": datetime.now(tz=pytz.timezone(TZ)).strftime('%Y-%m-%d %H:%M:%S')
     }
 
     res = requests.post(f"{GALLOPER_URL}/api/v1/observer/{GALLOPER_PROJECT_ID}", json=data,
@@ -49,7 +50,7 @@ def notify_on_test_end(total_thresholds, exception, junit_report_name):
 
     data = {
         "report_id": report_id,
-        "time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        "time": datetime.now(tz=pytz.timezone(TZ)).strftime('%Y-%m-%d %H:%M:%S'),
         "thresholds_total": total_thresholds["total"],
         "thresholds_failed": total_thresholds["failed"]
     }
