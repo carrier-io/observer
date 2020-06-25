@@ -2,6 +2,7 @@ import argparse
 
 from selene.support.shared import SharedConfig
 
+from observer.constants import TZ
 from observer.driver_manager import set_config
 from observer.executors.scenario_executor import execute_scenario
 from observer.integrations.galloper import download_file, notify_on_test_start, get_thresholds
@@ -32,6 +33,7 @@ def parse_args():
 
 def main():
     logger.info("Starting analysis...")
+    logger.info(f"Time zone {TZ}")
     args = parse_args()
     execute(args)
 
