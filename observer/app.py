@@ -2,11 +2,11 @@ import argparse
 
 from selene.support.shared import SharedConfig
 
-from observer.constants import JIRA_URL
 from observer.driver_manager import set_config
 from observer.executors.scenario_executor import execute_scenario
 from observer.integrations.galloper import download_file, notify_on_test_start, get_thresholds
 from observer.processors.results_processor import process_results_for_pages, process_results_for_test
+from observer.reporters.azure_devops import notify_azure_devops
 from observer.reporters.jira_reporter import notify_jira
 from observer.util import parse_json_file, str2bool, logger, unzip, wait_for_agent, terminate_runner, flatten_list
 
@@ -65,6 +65,8 @@ def execute(args):
 
     if "jira" in args.report:
         notify_jira(scenario, threshold_results)
+    if "ado" in args.report:
+        notify_azure_devops(scenario, threshold_results)
 
     if args.video:
         terminate_runner()

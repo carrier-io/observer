@@ -20,6 +20,11 @@ JIRA_USER = environ.get("JIRA_USER", None)
 JIRA_PASSWORD = environ.get("JIRA_PASSWORD", None)
 JIRA_PROJECT = environ.get("JIRA_PROJECT", "")
 
+ADO_ORGANIZATION = environ.get("ADO_ORGANIZATION", None)
+ADO_PROJECT = environ.get("ADO_PROJECT", None)
+ADO_TOKEN = environ.get("ADO_TOKEN", None)
+ADO_TEAM = environ.get("ADO_TEAM", None)
+
 check_ui_performance = '''return (function() {
 var metas=Array.prototype.slice.call(document.querySelectorAll('meta[name][content]'));
 var navigation = window.performance.getEntriesByType('navigation');
