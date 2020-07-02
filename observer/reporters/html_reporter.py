@@ -31,7 +31,7 @@ def generate_html_report(execution_result: CommandExecutionResult, threshold_res
                             video_folder,
                             execution_result.screenshot_path)
 
-    if os.path.exists(video_folder):
+    if video_folder and os.path.exists(video_folder):
         rmtree(video_folder)
 
     report = reporter.save_report()
