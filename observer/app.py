@@ -23,6 +23,7 @@ def create_parser():
     parser.add_argument("-g", '--galloper', type=str2bool, default=True)
     parser.add_argument("-l", "--loop", type=int, default=1)
     parser.add_argument("-a", "--aggregation", type=str, default="max")
+    parser.add_argument("-b", "--browser", type=str, default="chrome")
     return parser
 
 
@@ -47,6 +48,7 @@ def execute(args):
 
     config = SharedConfig()
     config.base_url = scenario['url']
+    config.browser_name = args.browser
     set_config(config)
 
     scenario_name = scenario['name']
