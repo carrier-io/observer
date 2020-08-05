@@ -41,8 +41,6 @@ def main():
 
 def execute(args):
     logger.info(f"Start with args {args}")
-    if args.video:
-        wait_for_agent()
 
     scenario = get_scenario(args)
 
@@ -72,13 +70,9 @@ def execute(args):
     if "ado" in args.report:
         notify_azure_devops(scenario, threshold_results)
 
-    if args.video:
-        terminate_runner()
-
 
 def get_scenario(args):
     if args.file:
-
         file_path = download_file(args.file)
         if file_path.endswith(".zip"):
             unzip(file_path, "/tmp/data")

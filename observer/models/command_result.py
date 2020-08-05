@@ -22,7 +22,7 @@ class CommandExecutionResult(object):
         self.locators = None
 
     def is_ready_for_report(self):
-        return self.generate_report and self.video_folder and self.computed_results
+        return self.generate_report and self.computed_results
 
     def to_json(self):
         return JsonExporter(self.computed_results).export()['fields']

@@ -25,6 +25,9 @@ def get_thresholds(test_name):
 
 
 def notify_on_test_start(test_name, browser_name, base_url, args):
+    if not args.galloper:
+        return
+
     data = {
         "test_name": test_name,
         "base_url": base_url,
