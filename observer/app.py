@@ -73,7 +73,6 @@ def execute(args):
 
 def get_scenario(args):
     if args.file:
-
         file_path = download_file(args.file)
         if file_path.endswith(".zip"):
             unzip(file_path, "/tmp/data")
