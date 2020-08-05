@@ -134,12 +134,7 @@ class HtmlReporter(object):
 
         last_response_end = max([resource['responseEnd'] for resource in resource_timing])
         end = int(max([navigation_timing['loadEventEnd'] - navigation_timing['navigationStart'], last_response_end]))
-        screenshots_dict = []
-        for each in self.concut_video(start_time, end, page_name, video_path):
-            if each:
-                screenshots_dict.append(each)
-        screenshots = [list(e.values())[0] for e in sorted(screenshots_dict, key=lambda d: list(d.keys()))]
-
+        screenshots = self.cut_video_to_screenshots(start_time, end, page_name, video_path)
         template = env.get_template('perfreport.html')
 
         res = template.render(page_name=page_name, test_status=test_status,
@@ -153,9 +148,21 @@ class HtmlReporter(object):
 
         return re.sub(r'[^\x00-\x7f]', r'', res)
 
+    def cut_video_to_screenshots(self, start_time, end, page_name, video_path):
+        if video_path is None:
+            return []
+
+        screenshots_dict = []
+        for each in self.concut_video(start_time, end, page_name, video_path):
+            if each:
+                screenshots_dict.append(each)
+        return [list(e.values())[0] for e in sorted(screenshots_dict, key=lambda d: list(d.keys()))]
+
     def save_report(self):
         report_uuid = uuid4()
         os.makedirs(REPORT_PATH, exist_ok=True)
-        with open(f'{REPORT_PATH}{self.title}_{report_uuid}.html', 'w') as f:
+        report_file_name = f'{REPORT_PATH}{self.title}_{report_uuid}.html'
+        logger.info(f"Generate html report {report_file_name}")
+        with open(report_file_name, 'w') as f:
             f.write(self.html)
         return HtmlReport(self.title, report_uuid)

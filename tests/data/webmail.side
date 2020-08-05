@@ -60,10 +60,10 @@
       "id": "0769ceed-3cce-4cdf-b83f-a03e1bcc1267",
       "comment": "Click on last email",
       "command": "click",
-      "target": "xpath=//div[2]/div/div[2]/div/ul/li[2]/div",
+      "target": "xpath=//div[2]/div/div[2]/div/ul/li[2]",
       "targets": [
         ["css=.e-hover > .template-container", "css:finder"],
-        ["xpath=//div[@id='listview-grp']/div/ul/li[2]/div", "xpath:idRelative"],
+        ["xpath=//div[@id='listview-grp']/div/ul/li[2]", "xpath:idRelative"],
         ["xpath=//div[2]/div/div[2]/div/ul/li[2]/div", "xpath:position"]
       ],
       "value": ""

@@ -10,7 +10,7 @@ from requests import get
 
 from observer.actions import browser_actions
 from observer.actions.browser_actions import get_performance_timing, get_dom_size, take_full_screenshot, \
-    get_performance_entities, get_performance_metrics, get_current_url, get_command
+    get_performance_entities, get_performance_metrics, get_current_url, get_command, get_current_session_id
 from observer.constants import LISTENER_ADDRESS
 from observer.db import save_to_storage, get_from_storage
 from observer.models.command_result import CommandExecutionResult
@@ -129,11 +129,11 @@ def get_page_identifier(title, current_command):
 
 
 def start_recording():
-    get(f'http://{LISTENER_ADDRESS}/record/start')
+    get(f'http://{LISTENER_ADDRESS}/record/start?sessionId={get_current_session_id()}')
 
 
 def stop_recording():
-    video_results = get(f'http://{LISTENER_ADDRESS}/record/stop').content
+    video_results = get(f'http://{LISTENER_ADDRESS}/record/stop?sessionId={get_current_session_id()}').content
     video_folder = tempfile.mkdtemp()
     video_path = os.path.join(video_folder, "video.mp4")
     with open(video_path, 'w+b') as f:

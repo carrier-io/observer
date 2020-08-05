@@ -41,8 +41,6 @@ def main():
 
 def execute(args):
     logger.info(f"Start with args {args}")
-    if args.video:
-        wait_for_agent()
 
     scenario = get_scenario(args)
 
@@ -71,9 +69,6 @@ def execute(args):
         notify_jira(scenario, threshold_results)
     if "ado" in args.report:
         notify_azure_devops(scenario, threshold_results)
-
-    if args.video:
-        terminate_runner()
 
 
 def get_scenario(args):

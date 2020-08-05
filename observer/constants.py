@@ -2,7 +2,7 @@ from os import environ
 from uuid import uuid4
 
 TZ = environ.get("TZ", "UTC")
-LISTENER_ADDRESS = environ.get("LISTENER_URL", "127.0.0.1:9999")
+LISTENER_ADDRESS = environ.get("LISTENER_URL", "127.0.0.1:4444")
 EXPORTERS_PATH = environ.get("EXPORTERS_PATH", "/tmp/reports")
 REMOTE_DRIVER_ADDRESS = environ.get("REMOTE_URL", "127.0.0.1:4444")
 TOKEN = environ.get('token', "")

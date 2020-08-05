@@ -100,6 +100,10 @@ def get_current_url():
     return get_driver().driver.current_url
 
 
+def get_current_session_id():
+    return get_driver().driver.session_id
+
+
 def take_full_screenshot(save_path):
     driver = get_driver()
     # initiate value
