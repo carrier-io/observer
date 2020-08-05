@@ -24,7 +24,7 @@ def get_driver():
 def get_browser_options(browser_name):
     if "chrome" == browser_name:
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--window-size=1360,1020')
+        chrome_options.add_argument('--window-size=1920,1080')
         return chrome_options
 
     if "firefox" == browser_name:
