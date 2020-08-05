@@ -17,6 +17,7 @@ def get_driver():
             options=options)
 
         cfg.driver = driver
+        driver.set_window_position(0, 0)
         browser = SharedBrowser(cfg)
     return browser
 
