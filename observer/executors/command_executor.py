@@ -93,7 +93,7 @@ def execute_command(current_command, next_command, test_data_processor, enable_v
                 results_type = "action"
 
     except Exception as e:
-        logger.error(e)
+        logger.error(f'======> Exception {e}')
         return CommandExecutionResult(err=e)
     finally:
         if not next_is_actionable:
