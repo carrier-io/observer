@@ -26,10 +26,12 @@ def get_browser_options(browser_name):
     if "chrome" == browser_name:
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--window-size=1920,1080')
+        chrome_options.set_capability("version", "83.0")
         return chrome_options
 
     if "firefox" == browser_name:
         ff_options = webdriver.FirefoxOptions()
+        ff_options.set_capability("version", "63.0")
         return ff_options
 
     raise Exception(f"Unsupported browser {browser_name}")
