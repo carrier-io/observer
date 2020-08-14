@@ -50,13 +50,13 @@ def execute(args):
     set_config(config)
 
     scenario_name = scenario['name']
-    notify_on_test_start(scenario_name, config.browser_name, config.base_url, args)
+    # notify_on_test_start(scenario_name, config.browser_name, config.base_url, args)
 
-    scenario_results = []
+    # scenario_results = []
     for i in range(0, args.loop):
         logger.info(f"Executing scenario {scenario_name} loop: {i + 1}")
         results = execute_scenario(scenario, args)
-        scenario_results.append(results)
+        # scenario_results.append(results)
 
     # scenario_results = flatten_list(scenario_results)
     # thresholds = get_thresholds(scenario_name)

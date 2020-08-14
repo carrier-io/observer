@@ -22,10 +22,10 @@ def execute_command(current_command, next_command, test_data_processor, enable_v
         f"{current_command['comment']} [ {current_command['command']}({current_command['target']}) ] "
         f"{current_command['value']}".strip())
 
-    generate_report = False
-    screenshot_path = None
-    results = None
-    results_type = "page"
+    # generate_report = False
+    # screenshot_path = None
+    # results = None
+    # results_type = "page"
 
     current_target = current_command['target']
     current_value = test_data_processor.process(current_command['value'])
@@ -33,12 +33,12 @@ def execute_command(current_command, next_command, test_data_processor, enable_v
 
     # _, next_is_actionable = get_command(next_command['command'])
 
-    start_time = time()
+    # start_time = time()
     # if enable_video and current_is_actionable:
     #     start_recording()
     # current_time = time() - start_time
-    try:
-        current_cmd(current_target, current_value)
+    # try:
+    current_cmd(current_target, current_value)
         # is_navigation = is_navigation_happened()
 
         # if is_navigation and next_is_actionable:
@@ -93,29 +93,29 @@ def execute_command(current_command, next_command, test_data_processor, enable_v
         #         generate_report = True
         #         results_type = "action"
 
-    except Exception as e:
-        logger.error(f'======> Exception {e}')
-        return CommandExecutionResult(err=e)
-    finally:
+    # except Exception as e:
+    #     logger.error(f'======> Exception {e}')
+    #     return CommandExecutionResult(err=e)
+    # finally:
         # if not next_is_actionable:
         #     return CommandExecutionResult()
 
-        video_folder = None
-        video_path = None
+        # video_folder = None
+        # video_path = None
         # if enable_video and next_is_actionable:
             # video_folder, video_path = stop_recording()
 
     # if not results:
     #     return CommandExecutionResult()
     # page_identifier = get_page_identifier(results['info']['title'], current_command)
-    page_identifier = ""
-    return CommandExecutionResult(results_type=results_type,
-                                  page_identifier=page_identifier,
-                                  computed_results=results,
-                                  video_folder=video_folder,
-                                  video_path=video_path,
-                                  screenshot_path=screenshot_path,
-                                  generate_report=generate_report)
+    # page_identifier = ""
+    # return CommandExecutionResult(results_type=results_type,
+    #                               page_identifier=page_identifier,
+    #                               computed_results=results,
+    #                               video_folder=video_folder,
+    #                               video_path=video_path,
+    #                               screenshot_path=screenshot_path,
+    #                               generate_report=generate_report)
 
 
 def get_page_identifier(title, current_command):
