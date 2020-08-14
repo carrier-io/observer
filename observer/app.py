@@ -3,7 +3,7 @@ import argparse
 from selene.support.shared import SharedConfig
 
 from observer.constants import TZ
-from observer.driver_manager import set_config
+from observer.driver_manager import set_config, close_driver
 from observer.executors.scenario_executor import execute_scenario
 from observer.integrations.galloper import download_file, notify_on_test_start, get_thresholds
 from observer.processors.results_processor import process_results_for_pages, process_results_for_test
@@ -50,7 +50,6 @@ def execute(args):
     set_config(config)
 
     scenario_name = scenario['name']
-
     notify_on_test_start(scenario_name, config.browser_name, config.base_url, args)
 
     scenario_results = []
@@ -58,17 +57,17 @@ def execute(args):
         logger.info(f"Executing scenario {scenario_name} loop: {i + 1}")
         results = execute_scenario(scenario, args)
         scenario_results.append(results)
-        # close_driver()
 
-    scenario_results = flatten_list(scenario_results)
-    thresholds = get_thresholds(scenario_name)
-    process_results_for_pages(scenario_results, thresholds)
-    threshold_results = process_results_for_test(scenario_name, scenario_results, thresholds, args)
+    # scenario_results = flatten_list(scenario_results)
+    # thresholds = get_thresholds(scenario_name)
+    # process_results_for_pages(scenario_results, thresholds)
+    # threshold_results = process_results_for_test(scenario_name, scenario_results, thresholds, args)
 
-    if "jira" in args.report:
-        notify_jira(scenario, threshold_results)
-    if "ado" in args.report:
-        notify_azure_devops(scenario, threshold_results)
+    # if "jira" in args.report:
+    #     notify_jira(scenario, threshold_results)
+    # if "ado" in args.report:
+    #     notify_azure_devops(scenario, threshold_results)
+    close_driver()
 
 
 def get_scenario(args):

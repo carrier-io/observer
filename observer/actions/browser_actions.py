@@ -104,8 +104,13 @@ def get_current_session_id():
     return get_driver().driver.session_id
 
 
+def take_screenshot():
+    return get_driver().take_screenshot("tmp", "screen.png")
+
+
 def take_full_screenshot(save_path):
     driver = get_driver()
+
     # initiate value
     save_path = save_path + '.png' if save_path[-4::] != '.png' else save_path
     img_li = []  # to store image fragment

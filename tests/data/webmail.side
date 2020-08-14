@@ -17,14 +17,14 @@
       "id": "8ae65661-0aa3-45b4-a1d6-eeb9fe0f6db3",
       "comment": "resizeBrowser",
       "command": "setWindowSize",
-      "target": "1853x1053",
+      "target": "1920x1080",
       "targets": [],
       "value": ""
     }, {
       "id": "1f58bcbf-ec87-4a30-bb0f-2608ab49d3fd",
       "comment": "Click on Trash icon",
       "command": "click",
-      "target": "xpath=//span[contains(.,'Trash')]",
+      "target": "css=#tree li.e-level-2[data-uid='21']",
       "targets": [
         ["css=#tree_active .e-list-text", "css:finder"],
         ["xpath=//li[@id='tree_active']/div[2]/span", "xpath:idRelative"],
@@ -36,7 +36,7 @@
       "id": "35cd8bc3-5582-4129-881a-9ceb64cb93a7",
       "comment": "Click on Fletcher email",
       "command": "click",
-      "target": "css=#listview-grp > div > ul > li:nth-child(1)",
+      "target": "css=li.e-level-1[data-uid='SF10205']",
       "targets": [
         ["css=.e-hover > .template-container", "css:finder"],
         ["xpath=//div[@id='listview-grp']/div/ul/li/div", "xpath:idRelative"],
@@ -60,7 +60,7 @@
       "id": "0769ceed-3cce-4cdf-b83f-a03e1bcc1267",
       "comment": "Click on last email",
       "command": "click",
-      "target": "xpath=//div[2]/div/div[2]/div/ul/li[2]",
+      "target": "css=li.e-level-1[data-uid='SF10202']",
       "targets": [
         ["css=.e-hover > .template-container", "css:finder"],
         ["xpath=//div[@id='listview-grp']/div/ul/li[2]", "xpath:idRelative"],

@@ -31,84 +31,84 @@ def execute_command(current_command, next_command, test_data_processor, enable_v
     current_value = test_data_processor.process(current_command['value'])
     current_cmd, current_is_actionable = get_command(current_command['command'])
 
-    _, next_is_actionable = get_command(next_command['command'])
+    # _, next_is_actionable = get_command(next_command['command'])
 
     start_time = time()
-    if enable_video and current_is_actionable:
-        start_recording()
-    current_time = time() - start_time
+    # if enable_video and current_is_actionable:
+    #     start_recording()
+    # current_time = time() - start_time
     try:
         current_cmd(current_target, current_value)
-        is_navigation = is_navigation_happened()
+        # is_navigation = is_navigation_happened()
 
-        if is_navigation and next_is_actionable:
-            browser_actions.wait_for_visibility(next_command['target'])
-
-            load_event_end = get_performance_timing()['loadEventEnd']
-            results = compute_results_for_simple_page()
-            results['info']['testStart'] = int(current_time)
-
-            comment = current_command['comment']
-            if comment:
-                results['info']['title'] = comment
-
-            dom = get_dom_size()
-
-            save_to_storage("command_results", {
-                "dom_size": dom,
-                "results": results,
-                "load_event_end": load_event_end,
-                "perf_entities": []
-            })
-
-            screenshot_path = take_full_screenshot(f"/tmp/{uuid4()}.png")
-            generate_report = True
-
-        elif not is_navigation:
-            previous_res = get_from_storage("command_results")
-            perf_entities = previous_res['perf_entities']
-            dom = previous_res['dom_size']
-            previous_results = previous_res['results']
-
-            load_event_end = get_performance_timing()['loadEventEnd']
-            latest_pef_entries = get_performance_entities()
-
-            is_entities_changed = is_performance_entities_changed(perf_entities, latest_pef_entries)
-
-            if is_entities_changed and is_dom_changed(dom):
-                dom = get_dom_size()
-                latest_results = get_performance_metrics()
-                latest_results['info']['testStart'] = int(current_time)
-                results = compute_results_for_spa(previous_results, latest_results, current_command)
-
-                save_to_storage("command_results", {
-                    "dom_size": dom,
-                    "results": latest_results,
-                    "load_event_end": load_event_end,
-                    "perf_entities": latest_pef_entries
-                })
-
-                screenshot_path = take_full_screenshot(f"/tmp/{uuid4()}.png")
-                generate_report = True
-                results_type = "action"
+        # if is_navigation and next_is_actionable:
+        #     browser_actions.take_screenshot()
+            # browser_actions.wait_for_visibility(next_command['target'])
+        #
+        #     load_event_end = get_performance_timing()['loadEventEnd']
+        #     results = compute_results_for_simple_page()
+        #     results['info']['testStart'] = int(current_time)
+        #
+        #     comment = current_command['comment']
+        #     if comment:
+        #         results['info']['title'] = comment
+        #
+        #     dom = get_dom_size()
+        #
+        #     save_to_storage("command_results", {
+        #         "dom_size": dom,
+        #         "results": results,
+        #         "load_event_end": load_event_end,
+        #         "perf_entities": []
+        #     })
+        #
+        # screenshot_path = take_full_screenshot(f"/tmp/{uuid4()}.png")
+        #     generate_report = True
+        #
+        # elif not is_navigation:
+        #     previous_res = get_from_storage("command_results")
+        #     perf_entities = previous_res['perf_entities']
+        #     dom = previous_res['dom_size']
+        #     previous_results = previous_res['results']
+        #
+        #     load_event_end = get_performance_timing()['loadEventEnd']
+        #     latest_pef_entries = get_performance_entities()
+        #
+        # is_entities_changed = is_performance_entities_changed(perf_entities, latest_pef_entries)
+        #
+        # if is_entities_changed and is_dom_changed(dom):
+        #         dom = get_dom_size()
+        #         latest_results = get_performance_metrics()
+        #         latest_results['info']['testStart'] = int(current_time)
+        #         results = compute_results_for_spa(previous_results, latest_results, current_command)
+        #
+        #         save_to_storage("command_results", {
+        #             "dom_size": dom,
+        #             "results": latest_results,
+        #             "load_event_end": load_event_end,
+        #             "perf_entities": latest_pef_entries
+        #         })
+        #
+        #         screenshot_path = take_full_screenshot(f"/tmp/{uuid4()}.png")
+        #         generate_report = True
+        #         results_type = "action"
 
     except Exception as e:
         logger.error(f'======> Exception {e}')
         return CommandExecutionResult(err=e)
     finally:
-        if not next_is_actionable:
-            return CommandExecutionResult()
+        # if not next_is_actionable:
+        #     return CommandExecutionResult()
 
         video_folder = None
         video_path = None
-        if enable_video and next_is_actionable:
-            video_folder, video_path = stop_recording()
+        # if enable_video and next_is_actionable:
+            # video_folder, video_path = stop_recording()
 
-    if not results:
-        return CommandExecutionResult()
-
-    page_identifier = get_page_identifier(results['info']['title'], current_command)
-
+    # if not results:
+    #     return CommandExecutionResult()
+    # page_identifier = get_page_identifier(results['info']['title'], current_command)
+    page_identifier = ""
     return CommandExecutionResult(results_type=results_type,
                                   page_identifier=page_identifier,
                                   computed_results=results,
