@@ -1,7 +1,7 @@
 from selene.support.shared import SharedBrowser
 from selenium import webdriver
 
-from observer.constants import REMOTE_DRIVER_ADDRESS
+from observer.constants import REMOTE_DRIVER_ADDRESS, RESULTS_REPORT_NAME, RESULTS_BUCKET
 
 browser = None
 cfg = None
@@ -27,6 +27,8 @@ def get_browser_options(browser_name):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--window-size=1920,1080')
         chrome_options.set_capability("version", "83.0")
+        chrome_options.set_capability("junit_report", RESULTS_REPORT_NAME)
+        chrome_options.set_capability("junit_report_bucket", RESULTS_BUCKET)
         return chrome_options
 
     if "firefox" == browser_name:
