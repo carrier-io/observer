@@ -25,5 +25,4 @@ services:
     volumes:
       - /dev/shm:/dev/shm
     ports:
-      - 4445:4444
-      - 9999:9999
+      - 4444:4444
