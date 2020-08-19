@@ -26,4 +26,3 @@ services:
       - /dev/shm:/dev/shm
     ports:
       - 4444:4444
-      - 9999:9999
