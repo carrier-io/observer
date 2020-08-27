@@ -1,6 +1,6 @@
 from observer.executors.command_executor import execute_command
 from observer.processors.test_data_processor import get_test_data_processor
-from observer.util import _pairwise, logger
+from observer.util import  logger
 
 
 def execute_scenario(scenario, args):

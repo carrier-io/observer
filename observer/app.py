@@ -3,10 +3,10 @@ import argparse
 from selene.support.shared import SharedConfig
 
 from observer.constants import TZ
-from observer.driver_manager import set_config, close_driver
+from observer.driver_manager import set_config, close_driver, set_args
 from observer.executors.scenario_executor import execute_scenario
 from observer.integrations.galloper import download_file
-from observer.util import parse_json_file, str2bool, logger, unzip
+from observer.util import parse_json_file, logger, unzip
 
 
 def create_parser():
@@ -14,10 +14,8 @@ def create_parser():
     parser.add_argument("-f", "--file", type=str, default="")
     parser.add_argument("-sc", "--scenario", type=str, default="")
     parser.add_argument("-d", "--data", type=str, default="")
-    parser.add_argument("-v", '--video', type=str2bool, default=True)
     parser.add_argument("-r", '--report', action="append", type=str, default=[])
     parser.add_argument("-e", '--export', action="append", type=str, default=[])
-    parser.add_argument("-g", '--galloper', type=str2bool, default=True)
     parser.add_argument("-l", "--loop", type=int, default=1)
     parser.add_argument("-a", "--aggregation", type=str, default="max")
     parser.add_argument("-b", "--browser", type=str, default="chrome")
@@ -45,6 +43,7 @@ def execute(args):
     config.base_url = scenario['url']
     config.browser_name = args.browser
     set_config(config)
+    set_args(args)
 
     scenario_name = scenario['name']
 
