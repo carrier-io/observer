@@ -5,7 +5,6 @@ from PIL import Image
 from selene import have, by, be
 from selenium.webdriver.common.keys import Keys
 
-from observer.constants import check_ui_performance
 from observer.driver_manager import get_driver
 from observer.util import logger
 
@@ -78,10 +77,6 @@ def wait_for_visibility(locator):
 
 def get_performance_timing():
     return get_driver().execute_script("return performance.timing")
-
-
-def get_performance_metrics():
-    return get_driver().driver.execute_script(check_ui_performance)
 
 
 def get_performance_entities():

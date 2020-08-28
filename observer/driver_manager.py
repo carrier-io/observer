@@ -1,16 +1,18 @@
 from selene.support.shared import SharedBrowser
 from selenium import webdriver
+from selenium.webdriver.webkitgtk.options import Options
 
-from observer.constants import REMOTE_DRIVER_ADDRESS, RESULTS_REPORT_NAME, RESULTS_BUCKET
+from observer.constants import REMOTE_DRIVER_ADDRESS, RESULTS_REPORT_NAME, RESULTS_BUCKET, ENV, TZ, GALLOPER_PROJECT_ID
 
 browser = None
 cfg = None
+exec_args = None
 
 
 def get_driver():
     global browser
     if browser is None:
-        options = get_browser_options(cfg.browser_name)
+        options = get_browser_options(cfg.browser_name, exec_args)
 
         driver = webdriver.Remote(
             command_executor=f'http://{REMOTE_DRIVER_ADDRESS}/wd/hub',
@@ -22,21 +24,31 @@ def get_driver():
     return browser
 
 
-def get_browser_options(browser_name):
+def get_browser_options(browser_name, args):
+    options = Options()
+
     if "chrome" == browser_name:
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--window-size=1920,1080')
-        chrome_options.set_capability("version", "83.0")
-        chrome_options.set_capability("junit_report", RESULTS_REPORT_NAME)
-        chrome_options.set_capability("junit_report_bucket", RESULTS_BUCKET)
-        return chrome_options
+        options = webdriver.ChromeOptions()
+        options.add_argument('--window-size=1920,1080')
+        options.set_capability("version", "83.0")
 
     if "firefox" == browser_name:
-        ff_options = webdriver.FirefoxOptions()
-        ff_options.set_capability("version", "63.0")
-        return ff_options
+        options = webdriver.FirefoxOptions()
+        options.set_capability("version", "63.0")
 
-    raise Exception(f"Unsupported browser {browser_name}")
+    if options.capabilities.get("browserName") == 'MiniBrowser':
+        raise Exception(f"Unsupported browser {browser_name}")
+
+    if 'junit' in args.report:
+        options.set_capability("junit_report", RESULTS_REPORT_NAME)
+        options.set_capability("junit_report_bucket", RESULTS_BUCKET)
+
+    options.set_capability("env", ENV)
+    options.set_capability('tz', TZ)
+    options.set_capability('galloper_project_id', GALLOPER_PROJECT_ID)
+    options.set_capability('aggregation', args.aggregation)
+
+    return options
 
 
 def close_driver():
@@ -49,3 +61,8 @@ def close_driver():
 def set_config(config):
     global cfg
     cfg = config
+
+
+def set_args(args):
+    global exec_args
+    exec_args = args
