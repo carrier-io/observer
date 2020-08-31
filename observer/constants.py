@@ -3,6 +3,7 @@ from uuid import uuid4
 
 TZ = environ.get("TZ", "UTC")
 ENV = environ.get("ENV", "")
+BROWSER_VERSION = environ.get('BROWSER_VERSION', '')
 
 EXPORTERS_PATH = environ.get("EXPORTERS_PATH", "/tmp/reports")
 REMOTE_DRIVER_ADDRESS = environ.get("REMOTE_URL", "127.0.0.1:4444")

@@ -2,7 +2,8 @@ from selene.support.shared import SharedBrowser
 from selenium import webdriver
 from selenium.webdriver.webkitgtk.options import Options
 
-from observer.constants import REMOTE_DRIVER_ADDRESS, RESULTS_REPORT_NAME, RESULTS_BUCKET, ENV, TZ, GALLOPER_PROJECT_ID
+from observer.constants import REMOTE_DRIVER_ADDRESS, RESULTS_REPORT_NAME, RESULTS_BUCKET, ENV, TZ, GALLOPER_PROJECT_ID, \
+    BROWSER_VERSION
 
 browser = None
 cfg = None
@@ -29,12 +30,9 @@ def get_browser_options(browser_name, args):
 
     if "chrome" == browser_name:
         options = webdriver.ChromeOptions()
-        options.add_argument('--window-size=1920,1080')
-        options.set_capability("version", "83.0")
 
     if "firefox" == browser_name:
         options = webdriver.FirefoxOptions()
-        options.set_capability("version", "63.0")
 
     if options.capabilities.get("browserName") == 'MiniBrowser':
         raise Exception(f"Unsupported browser {browser_name}")
@@ -43,6 +41,7 @@ def get_browser_options(browser_name, args):
         options.set_capability("junit_report", RESULTS_REPORT_NAME)
         options.set_capability("junit_report_bucket", RESULTS_BUCKET)
 
+    options.set_capability("version", BROWSER_VERSION)
     options.set_capability("env", ENV)
     options.set_capability('tz', TZ)
     options.set_capability('galloper_project_id', GALLOPER_PROJECT_ID)
