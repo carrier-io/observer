@@ -42,7 +42,7 @@ def get_browser_options(browser_name, args):
         options.set_capability("junit_report_bucket", RESULTS_BUCKET)
 
     options.set_capability("version", BROWSER_VERSION)
-    options.set_capability("env", ENV)
+    options.set_capability("venv", ENV)
     options.set_capability('tz', TZ)
     options.set_capability('galloper_project_id', GALLOPER_PROJECT_ID)
     options.set_capability('aggregation', args.aggregation)
