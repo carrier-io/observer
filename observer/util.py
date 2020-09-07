@@ -35,3 +35,7 @@ def unzip(path_to_zip_file, target_dir):
     logger.info(f"Unzip {path_to_zip_file} to {target_dir}")
     with zipfile.ZipFile(path_to_zip_file, 'r') as zip_ref:
         zip_ref.extractall(target_dir)
+
+
+def get_browser_version(info: str):
+    return info.lower().split("_")

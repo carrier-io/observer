@@ -36,12 +36,10 @@ def main():
 
 def execute(args):
     logger.info(f"Start with args {args}")
-
     scenario = get_scenario(args)
 
     config = SharedConfig()
     config.base_url = scenario['url']
-    config.browser_name = args.browser
     set_config(config)
     set_args(args)
 
