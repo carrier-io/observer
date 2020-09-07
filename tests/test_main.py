@@ -15,7 +15,7 @@ def test_main_with_data_params():
             "-sc", "/tmp/data/webmail.side",
             # "-r", "ado",
             "-l", "1",
-            "-b", "chrome",
+            "-b", "Chrome_83.0",
             "-a", "max"
         ])
     execute(args)
