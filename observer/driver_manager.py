@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.webkitgtk.options import Options
 
 from observer.constants import REMOTE_DRIVER_ADDRESS, RESULTS_REPORT_NAME, RESULTS_BUCKET, ENV, TZ, GALLOPER_PROJECT_ID, \
-    BROWSER_VERSION
+    BROWSER_VERSION, GALLOPER_URL, TOKEN
 from observer.util import get_browser_version
 
 browser = None
@@ -51,6 +51,8 @@ def get_browser_options(browser_name, version, args):
     options.set_capability("venv", ENV)
     options.set_capability('tz', TZ)
     options.set_capability('galloper_project_id', GALLOPER_PROJECT_ID)
+    options.set_capability('galloper_url', GALLOPER_URL)
+    options.set_capability('galloper_token', TOKEN)
     options.set_capability('aggregation', args.aggregation)
 
     return options
