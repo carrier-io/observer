@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.webkitgtk.options import Options
 
 from observer.constants import REMOTE_DRIVER_ADDRESS, RESULTS_REPORT_NAME, RESULTS_BUCKET, ENV, TZ, GALLOPER_PROJECT_ID, \
-    BROWSER_VERSION, GALLOPER_URL, TOKEN
+    BROWSER_VERSION, GALLOPER_URL, TOKEN, OBSERVER_USER, OBSERVER_PASSWORD
 from observer.util import get_browser_version
 
 browser = None
@@ -18,7 +18,7 @@ def get_driver():
         options = get_browser_options(browser_name, version, exec_args)
 
         driver = webdriver.Remote(
-            command_executor=f'http://{REMOTE_DRIVER_ADDRESS}/wd/hub',
+            command_executor=f'http://{OBSERVER_USER}:{OBSERVER_PASSWORD}@{REMOTE_DRIVER_ADDRESS}/wd/hub',
             options=options)
 
         cfg.browser_name = browser_name

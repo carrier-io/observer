@@ -18,6 +18,9 @@ TESTS_BUCKET = environ.get("TESTS_BUCKET", "tests")
 RESULTS_BUCKET = environ.get("RESULTS_BUCKET", "")
 RESULTS_REPORT_NAME = environ.get("RESULTS_REPORT_NAME", f'{uuid4()}')
 
+OBSERVER_USER = environ.get('OBSERVER_USER', "")
+OBSERVER_PASSWORD = environ.get('OBSERVER_PASSWORD', "")
+
 JIRA_URL = environ.get("JIRA_URL", None)
 JIRA_USER = environ.get("JIRA_USER", None)
 JIRA_PASSWORD = environ.get("JIRA_PASSWORD", None)
