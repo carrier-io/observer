@@ -2,7 +2,7 @@ from os import environ
 from uuid import uuid4
 
 TZ = environ.get("TZ", "UTC")
-ENV = environ.get("ENV", "")
+ENV = environ.get("ENV", "Default")
 BROWSER_VERSION = environ.get('BROWSER_VERSION', '')
 
 EXPORTERS_PATH = environ.get("EXPORTERS_PATH", "/tmp/reports")
@@ -20,6 +20,8 @@ RESULTS_REPORT_NAME = environ.get("RESULTS_REPORT_NAME", f'{uuid4()}')
 
 OBSERVER_USER = environ.get('OBSERVER_USER', "")
 OBSERVER_PASSWORD = environ.get('OBSERVER_PASSWORD', "")
+
+JOB_NAME = environ.get('JOB_NAME', "")
 
 JIRA_URL = environ.get("JIRA_URL", None)
 JIRA_USER = environ.get("JIRA_USER", None)
