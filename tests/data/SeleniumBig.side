@@ -1,0 +1,233 @@
+{
+  "id": "cce56a58-3ede-4c14-bbad-27801fa52c5a",
+  "version": "2.0",
+  "name": "Selenium",
+  "url": "https://www.selenium.dev",
+  "tests": [{
+    "id": "e13e0ce7-e0aa-40d8-bcfb-9e5f4947b7cb",
+    "name": "selenium",
+    "commands": [{
+      "id": "3b21ccc3-3ecf-438f-9e1f-c25a4061f86c",
+      "comment": "",
+      "command": "open",
+      "target": "/selenium-ide/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "b65530a0-772a-46f1-9fbc-b1f12e328a70",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1280x731",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "80cc8c8f-6c34-4308-9f8f-93ecc828a139",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=the Control Flow documentation",
+      "targets": [
+        ["linkText=the Control Flow documentation", "linkText"],
+        ["css=p > a:nth-child(4)", "css:finder"],
+        ["xpath=//a[contains(text(),'the Control Flow documentation')]", "xpath:link"],
+        ["xpath=//a[contains(@href, '/selenium-ide/docs/en/introduction/control-flow')]", "xpath:href"],
+        ["xpath=//div[5]/div/div/div/div[2]/div/span/p/a", "xpath:position"],
+        ["xpath=//a[contains(.,'the Control Flow documentation')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "07e2eefd-3f26-48af-a8fc-7cef6b0d320f",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Arguments",
+      "targets": [
+        ["linkText=Arguments", "linkText"],
+        ["css=.navGroup:nth-child(2) .navListItem:nth-child(2) > .navItem", "css:finder"],
+        ["xpath=//a[contains(text(),'Arguments')]", "xpath:link"],
+        ["xpath=//div[@id='docsNav']/nav/div/section/div[2]/div[2]/ul/li[2]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/selenium-ide/docs/en/api/arguments')]", "xpath:href"],
+        ["xpath=//div[2]/ul/li[2]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Arguments')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "069fe863-0850-47e5-bc24-943f73a6ca85",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Commands",
+      "targets": [
+        ["linkText=Commands", "linkText"],
+        ["css=.navGroup:nth-child(2) .navListItem:nth-child(1) > .navItem", "css:finder"],
+        ["xpath=//a[contains(text(),'Commands')]", "xpath:link"],
+        ["xpath=//div[@id='docsNav']/nav/div/section/div[2]/div[2]/ul/li/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '/selenium-ide/docs/en/api/commands')])[2]", "xpath:href"],
+        ["xpath=//div[2]/ul/li/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Commands')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "aa55a115-eba3-4b73-9685-4e547846a2a7",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Control Flow",
+      "targets": [
+        ["linkText=Control Flow", "linkText"],
+        ["css=.navListItem:nth-child(3) > .navItem", "css:finder"],
+        ["xpath=//a[contains(text(),'Control Flow')]", "xpath:link"],
+        ["xpath=//div[@id='docsNav']/nav/div/section/div[2]/div/ul/li[3]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/selenium-ide/docs/en/introduction/control-flow')]", "xpath:href"],
+        ["xpath=//div/ul/li[3]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Control Flow')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "de54eb36-07e3-453c-8fca-7a83df41f9ca",
+      "comment": "",
+      "command": "click",
+      "target": "css=.headerTitleWithLogo",
+      "targets": [
+        ["css=.headerTitleWithLogo", "css:finder"],
+        ["xpath=//h2", "xpath:position"],
+        ["xpath=//h2[contains(.,'Selenium IDE')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "c2d9c60a-a155-496b-af2d-0b8bbf675854",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=API",
+      "targets": [
+        ["linkText=API", "linkText"],
+        ["css=li:nth-child(2) > a", "css:finder"],
+        ["xpath=//a[contains(text(),'API')]", "xpath:link"],
+        ["xpath=//a[contains(@href, '/selenium-ide/docs/en/api/commands')]", "xpath:href"],
+        ["xpath=//li[2]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'API')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "50eaa86a-6376-4372-9bde-f8adf19ec971",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Getting Started",
+      "targets": [
+        ["linkText=Getting Started", "linkText"],
+        ["css=.navGroup:nth-child(1) .navListItem:nth-child(1) > .navItem", "css:finder"],
+        ["xpath=//a[contains(text(),'Getting Started')]", "xpath:link"],
+        ["xpath=//div[@id='docsNav']/nav/div/section/div[2]/div/ul/li/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '/selenium-ide/docs/en/introduction/getting-started')])[2]", "xpath:href"],
+        ["xpath=//div/ul/li/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Getting Started')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "438f703d-8ce8-4c2f-8655-e7904e12b31e",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Plugins",
+      "targets": [
+        ["linkText=Plugins", "linkText"],
+        ["css=.nav-site > li:nth-child(3) > a", "css:finder"],
+        ["xpath=//a[contains(text(),'Plugins')]", "xpath:link"],
+        ["xpath=//a[contains(@href, '/selenium-ide/docs/en/plugins/plugins-getting-started')]", "xpath:href"],
+        ["xpath=//li[3]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Plugins')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "0c481c58-f40e-4f2c-92da-13a3da82c9eb",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Selenium IDE Extension ID",
+      "targets": [
+        ["linkText=Selenium IDE Extension ID", "linkText"],
+        ["css=.navGroup:nth-child(1) .navListItem:nth-child(2) > .navItem", "css:finder"],
+        ["xpath=//a[contains(text(),'Selenium IDE Extension ID')]", "xpath:link"],
+        ["xpath=//div[@id='docsNav']/nav/div/section/div[2]/div/ul/li[2]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/selenium-ide/docs/en/plugins/extension-id')]", "xpath:href"],
+        ["xpath=//div/ul/li[2]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Selenium IDE Extension ID')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "e1d367b6-001b-4ac5-b0cd-6f01dda40aec",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Health Checks",
+      "targets": [
+        ["linkText=Health Checks", "linkText"],
+        ["css=.navGroup:nth-child(1) .navListItem:nth-child(3) > .navItem", "css:finder"],
+        ["xpath=//a[contains(text(),'Health Checks')]", "xpath:link"],
+        ["xpath=//div[@id='docsNav']/nav/div/section/div[2]/div/ul/li[3]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/selenium-ide/docs/en/plugins/health-checks')]", "xpath:href"],
+        ["xpath=//div/ul/li[3]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Health Checks')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "60a7765e-a2a6-4b57-9ec7-60093594c100",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Requests",
+      "targets": [
+        ["linkText=Requests", "linkText"],
+        ["css=.navGroup:nth-child(2) .navListItem:nth-child(1) > .navItem", "css:finder"],
+        ["xpath=//a[contains(text(),'Requests')]", "xpath:link"],
+        ["xpath=//div[@id='docsNav']/nav/div/section/div[2]/div[2]/ul/li/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/selenium-ide/docs/en/plugins/requests')]", "xpath:href"],
+        ["xpath=//div[2]/ul/li/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Requests')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "5d88f0e6-6820-490e-bb35-e3a1572bde1f",
+      "comment": "",
+      "command": "click",
+      "target": "css=.logo",
+      "targets": [
+        ["css=.logo", "css:finder"],
+        ["xpath=//img[@alt='Selenium IDE']", "xpath:img"],
+        ["xpath=//img", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "a4b7d231-5f21-4336-b437-033e6dcb6236",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Build a Plugin",
+      "targets": [
+        ["linkText=Build a Plugin", "linkText"],
+        ["css=div:nth-child(2) > a:nth-child(4)", "css:finder"],
+        ["xpath=//a[contains(text(),'Build a Plugin')]", "xpath:link"],
+        ["xpath=//footer[@id='footer']/section/div/a[3]", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '/selenium-ide/docs/en/plugins/plugins-getting-started')])[3]", "xpath:href"],
+        ["xpath=//a[3]", "xpath:position"],
+        ["xpath=//a[contains(.,'Build a Plugin')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "9204314b-244f-4b88-9d6b-b63bea25f71a",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Help",
+      "targets": [
+        ["linkText=Help", "linkText"],
+        ["css=.nav-site > li:nth-child(5) > a", "css:finder"],
+        ["xpath=//a[contains(text(),'Help')]", "xpath:link"],
+        ["xpath=//a[contains(@href, '/selenium-ide/help')]", "xpath:href"],
+        ["xpath=//li[5]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Help')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "f65146e8-0a88-48b2-9f41-84977ccdf0d3",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["e13e0ce7-e0aa-40d8-bcfb-9e5f4947b7cb"]
+  }],
+  "urls": ["https://www.selenium.dev/"],
+  "plugins": []
+}
