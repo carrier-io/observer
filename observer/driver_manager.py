@@ -3,7 +3,8 @@ from selenium import webdriver
 from selenium.webdriver.webkitgtk.options import Options
 
 from observer.constants import REMOTE_DRIVER_ADDRESS, RESULTS_REPORT_NAME, RESULTS_BUCKET, ENV, TZ, GALLOPER_PROJECT_ID, \
-    BROWSER_VERSION, GALLOPER_URL, TOKEN, OBSERVER_USER, OBSERVER_PASSWORD, JOB_NAME, ENABLE_VNC
+    BROWSER_VERSION, GALLOPER_URL, TOKEN, OBSERVER_USER, OBSERVER_PASSWORD, JOB_NAME, ENABLE_VNC, JIRA_URL, \
+    JIRA_PROJECT, JIRA_USER, JIRA_PASSWORD
 from observer.util import get_browser_version
 
 browser = None
@@ -43,6 +44,12 @@ def get_browser_options(browser_name, version, args):
     if 'junit' in args.report:
         options.set_capability("junit_report", RESULTS_REPORT_NAME)
         options.set_capability("junit_report_bucket", RESULTS_BUCKET)
+
+    if 'jira' in args.report:
+        options.set_capability("jira_url", JIRA_URL)
+        options.set_capability("jira_project", JIRA_PROJECT)
+        options.set_capability("jira_user", JIRA_USER)
+        options.set_capability("jira_password", JIRA_PASSWORD)
 
     if BROWSER_VERSION:
         version = BROWSER_VERSION

@@ -16,4 +16,5 @@ def test_main_with_data_params():
             "-b", "chrome_84.0",
             "-a", "max"
         ])
+
     execute(args)
