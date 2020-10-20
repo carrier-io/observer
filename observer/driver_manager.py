@@ -2,7 +2,8 @@ from selene.support.shared import SharedBrowser
 from selenium import webdriver
 from selenium.webdriver.webkitgtk.options import Options
 
-from observer.constants import REMOTE_DRIVER_ADDRESS, RESULTS_REPORT_NAME, RESULTS_BUCKET, ENV, TZ, GALLOPER_PROJECT_ID
+from observer.constants import REMOTE_DRIVER_ADDRESS, RESULTS_REPORT_NAME, RESULTS_BUCKET, ENV, TZ, GALLOPER_PROJECT_ID, \
+    JIRA_URL, JIRA_PROJECT, JIRA_USER, JIRA_PASSWORD
 
 browser = None
 cfg = None
@@ -42,6 +43,12 @@ def get_browser_options(browser_name, args):
     if 'junit' in args.report:
         options.set_capability("junit_report", RESULTS_REPORT_NAME)
         options.set_capability("junit_report_bucket", RESULTS_BUCKET)
+
+    if 'jira' in args.report:
+        options.set_capability("jira_url", JIRA_URL)
+        options.set_capability("jira_project", JIRA_PROJECT)
+        options.set_capability("jira_user", JIRA_USER)
+        options.set_capability("jira_password", JIRA_PASSWORD)
 
     options.set_capability("env", ENV)
     options.set_capability('tz', TZ)
