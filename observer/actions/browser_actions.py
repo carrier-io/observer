@@ -149,6 +149,15 @@ def close():
     get_driver().quit()
 
 
+def mouseOver(locator, text):
+    css_or_xpath = get_locator_strategy(locator)
+    get_driver().element(css_or_xpath).hover()
+
+
+def mouseOut(locator, text):
+    pass
+
+
 __command_type = {
     "open": command(open_url),
     "setWindowSize": command(setWindowSize, actionable=False),
@@ -159,7 +168,9 @@ __command_type = {
     "type": command(type),
     "sendKeys": command(sendKeys),
     "assertText": command(assert_text),
-    "close": command(close)
+    "close": command(close),
+    'mouseOver': command(mouseOver),
+    'mouseOut': command(mouseOut)
 }
 
 

@@ -1,0 +1,371 @@
+{
+  "id": "4dd9bbc7-c9e9-45be-832f-beb164770a33",
+  "version": "2.0",
+  "name": "Selenium",
+  "url": "https://www.newyorklife.com",
+  "tests": [{
+    "id": "c2bb0798-6a72-45d6-b29d-fc114dfdc0b3",
+    "name": "newyorklife",
+    "commands": [{
+      "id": "b909ec17-f3a6-408b-9adf-2b24c414ffd9",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "a3c16663-2538-4289-81f1-63923bdc2023",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1920x1057",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "cdd1a22a-0f84-405d-bf02-1eaaea981c50",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Who We Are",
+      "targets": [
+        ["linkText=Who We Are", "linkText"],
+        ["css=.nav-item:nth-child(1) > .h4", "css:finder"],
+        ["xpath=//a[contains(text(),'Who We Are')]", "xpath:link"],
+        ["xpath=//nav[@id='mega-nav']/div/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '#megamenu-0')]", "xpath:href"],
+        ["xpath=//div/nav/div/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Who We Are')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "9d16a6c7-5874-4058-a332-bb87dda89742",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Corporate Careers",
+      "targets": [
+        ["linkText=Corporate Careers", "linkText"],
+        ["css=#cmp-linkList--1440645455_1 > li:nth-child(1) > a", "css:finder"],
+        ["xpath=//a[contains(text(),'Corporate Careers')]", "xpath:link"],
+        ["xpath=//ul[@id='cmp-linkList--1440645455_1']/li/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/careers')]", "xpath:href"],
+        ["xpath=//li/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Corporate Careers')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "6353bd6a-e472-4813-95b0-4816c915aa87",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Who We Are",
+      "targets": [
+        ["linkText=Who We Are", "linkText"],
+        ["css=.nav-item:nth-child(1) > .h4", "css:finder"],
+        ["xpath=//a[contains(text(),'Who We Are')]", "xpath:link"],
+        ["xpath=//nav[@id='mega-nav']/div/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '#megamenu-0')]", "xpath:href"],
+        ["xpath=//div/nav/div/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Who We Are')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "61728414-e73f-44ad-825a-79a440a6b5f2",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Agent Careers",
+      "targets": [
+        ["linkText=Agent Careers", "linkText"],
+        ["css=#cmp-linkList--1440645455_1 > li:nth-child(2) > a", "css:finder"],
+        ["xpath=//a[contains(text(),'Agent Careers')]", "xpath:link"],
+        ["xpath=//ul[@id='cmp-linkList--1440645455_1']/li[2]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/careers/agents')]", "xpath:href"],
+        ["xpath=//li[2]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Agent Careers')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "38d26a51-a1f0-41d2-a38f-6009ba211317",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Who We Are",
+      "targets": [
+        ["linkText=Who We Are", "linkText"],
+        ["css=.nav-item:nth-child(1) > .h4", "css:finder"],
+        ["xpath=//a[contains(text(),'Who We Are')]", "xpath:link"],
+        ["xpath=//nav[@id='mega-nav']/div/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '#megamenu-0')]", "xpath:href"],
+        ["xpath=//div/nav/div/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Who We Are')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "4371cda4-12dc-472a-aabd-2d34c90ff731",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Newsroom",
+      "targets": [
+        ["linkText=Newsroom", "linkText"],
+        ["css=#cmp-linkList--1440645455_1 > li:nth-child(3) > a", "css:finder"],
+        ["xpath=//a[contains(text(),'Newsroom')]", "xpath:link"],
+        ["xpath=//ul[@id='cmp-linkList--1440645455_1']/li[3]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/newsroom')]", "xpath:href"],
+        ["xpath=//li[3]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Newsroom')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "3cdb5889-5271-462a-873e-7bef76b9ccb0",
+      "comment": "",
+      "command": "click",
+      "target": "css=.brand-logo",
+      "targets": [
+        ["css=.brand-logo", "css:finder"],
+        ["xpath=//img[@alt='New York Life Insurance | Home']", "xpath:img"],
+        ["xpath=//nav[@id='header']/div/a/img", "xpath:idRelative"],
+        ["xpath=//img", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "3c24d523-0922-4531-ac6c-d00c70eb5e90",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Prepare For Life",
+      "targets": [
+        ["linkText=Prepare For Life", "linkText"],
+        ["css=.nav-item:nth-child(3) > .h4", "css:finder"],
+        ["xpath=//a[contains(text(),'Prepare For Life')]", "xpath:link"],
+        ["xpath=//nav[@id='mega-nav']/div[2]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '#megamenu-1')]", "xpath:href"],
+        ["xpath=//div[2]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Prepare For Life')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "3495977f-e188-4895-a3e2-1e0d579ea88e",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Getting Married",
+      "targets": [
+        ["linkText=Getting Married", "linkText"],
+        ["css=#cmp-linkList-594325616_3 > li:nth-child(1) > a", "css:finder"],
+        ["xpath=//a[contains(text(),'Getting Married')]", "xpath:link"],
+        ["xpath=//ul[@id='cmp-linkList-594325616_3']/li/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/prepare-for-life/getting-married')]", "xpath:href"],
+        ["xpath=//nav[2]/div/div/div/div/div/div[2]/div/div/ul/li/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Getting Married')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "e4446faf-aebe-409a-b988-0a9e5f1e809b",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Prepare For Life",
+      "targets": [
+        ["linkText=Prepare For Life", "linkText"],
+        ["css=.nav-item:nth-child(3) > .h4", "css:finder"],
+        ["xpath=//a[contains(text(),'Prepare For Life')]", "xpath:link"],
+        ["xpath=//nav[@id='mega-nav']/div[2]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '#megamenu-1')]", "xpath:href"],
+        ["xpath=//div[2]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Prepare For Life')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "59359eff-8064-4e1a-a01d-67924519cdef",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Growing Your Family",
+      "targets": [
+        ["linkText=Growing Your Family", "linkText"],
+        ["css=#cmp-linkList-594325616_3 > li:nth-child(2) > a", "css:finder"],
+        ["xpath=//a[contains(text(),'Growing Your Family')]", "xpath:link"],
+        ["xpath=//ul[@id='cmp-linkList-594325616_3']/li[2]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/prepare-for-life/growing-your-family')]", "xpath:href"],
+        ["xpath=//nav[2]/div/div/div/div/div/div[2]/div/div/ul/li[2]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Growing Your Family')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "0cca3105-4cd5-46a7-8f81-6efb58f347eb",
+      "comment": "",
+      "command": "click",
+      "target": "css=.brand-logo",
+      "targets": [
+        ["css=.brand-logo", "css:finder"],
+        ["xpath=//img[@alt='New York Life Insurance | Home']", "xpath:img"],
+        ["xpath=//nav[@id='header']/div/a/img", "xpath:idRelative"],
+        ["xpath=//img", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "3f96d829-30f4-4b38-aae7-49671a504135",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=What We Offer",
+      "targets": [
+        ["linkText=What We Offer", "linkText"],
+        ["css=.nav-item:nth-child(5) > .h4", "css:finder"],
+        ["xpath=//a[contains(text(),'What We Offer')]", "xpath:link"],
+        ["xpath=//nav[@id='mega-nav']/div[3]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '#megamenu-2')]", "xpath:href"],
+        ["xpath=//div[3]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'What We Offer')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "37eb71c7-63e0-4dc9-9065-f5404ce326b8",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Term Life Insurance",
+      "targets": [
+        ["linkText=Term Life Insurance", "linkText"],
+        ["css=#cmp-linkList-1736953803_5 > li:nth-child(1) > a", "css:finder"],
+        ["xpath=//a[contains(text(),'Term Life Insurance')]", "xpath:link"],
+        ["xpath=//ul[@id='cmp-linkList-1736953803_5']/li/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/products/life-insurance/term-life')]", "xpath:href"],
+        ["xpath=//nav[3]/div/div/div/div/div/div/div/ul/li/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Term Life Insurance')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "3f26a74d-9198-46e8-87b5-9023acc68e82",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=What We Offer",
+      "targets": [
+        ["linkText=What We Offer", "linkText"],
+        ["css=.nav-item:nth-child(5) > .h4", "css:finder"],
+        ["xpath=//a[contains(text(),'What We Offer')]", "xpath:link"],
+        ["xpath=//nav[@id='mega-nav']/div[3]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '#megamenu-2')]", "xpath:href"],
+        ["xpath=//div[3]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'What We Offer')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "d4b2ecd9-630f-4c40-8c13-8d812cfdf048",
+      "comment": "",
+      "command": "mouseOver",
+      "target": "linkText=What We Offer",
+      "targets": [
+        ["linkText=What We Offer", "linkText"],
+        ["css=.nav-item:nth-child(5) > .h4", "css:finder"],
+        ["xpath=//a[contains(text(),'What We Offer')]", "xpath:link"],
+        ["xpath=//nav[@id='mega-nav']/div[3]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '#megamenu-2')]", "xpath:href"],
+        ["xpath=//div[3]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'What We Offer')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "e6992322-b9fc-48ed-aba5-2fe38c60b4a4",
+      "comment": "",
+      "command": "mouseOut",
+      "target": "linkText=What We Offer",
+      "targets": [
+        ["linkText=What We Offer", "linkText"],
+        ["css=.nav-item:nth-child(5) > .h4", "css:finder"],
+        ["xpath=//a[contains(text(),'What We Offer')]", "xpath:link"],
+        ["xpath=//nav[@id='mega-nav']/div[3]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '#megamenu-2')]", "xpath:href"],
+        ["xpath=//div[3]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'What We Offer')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "d18b03ef-7fad-4578-90dc-00488c7af425",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Whole Life Insurance",
+      "targets": [
+        ["linkText=Whole Life Insurance", "linkText"],
+        ["css=#cmp-linkList-1736953803_5 > li:nth-child(2) > a", "css:finder"],
+        ["xpath=//a[contains(text(),'Whole Life Insurance')]", "xpath:link"],
+        ["xpath=//ul[@id='cmp-linkList-1736953803_5']/li[2]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/products/life-insurance/whole-life')]", "xpath:href"],
+        ["xpath=//nav[3]/div/div/div/div/div/div/div/ul/li[2]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Whole Life Insurance')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "d5c5a666-c3f3-4e5a-ba24-2dcb71820f59",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=What We Offer",
+      "targets": [
+        ["linkText=What We Offer", "linkText"],
+        ["css=.nav-item:nth-child(5) > .h4", "css:finder"],
+        ["xpath=//a[contains(text(),'What We Offer')]", "xpath:link"],
+        ["xpath=//nav[@id='mega-nav']/div[3]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '#megamenu-2')]", "xpath:href"],
+        ["xpath=//div[3]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'What We Offer')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "7fa17016-4753-4ab8-9430-e2f93025df51",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Universal Life Insurance",
+      "targets": [
+        ["linkText=Universal Life Insurance", "linkText"],
+        ["css=#cmp-linkList-1736953803_5 > li:nth-child(3) > a", "css:finder"],
+        ["xpath=//a[contains(text(),'Universal Life Insurance')]", "xpath:link"],
+        ["xpath=//ul[@id='cmp-linkList-1736953803_5']/li[3]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/products/life-insurance/universal-life')]", "xpath:href"],
+        ["xpath=//nav[3]/div/div/div/div/div/div/div/ul/li[3]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Universal Life Insurance')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "5f99fbd6-af51-4867-9f4a-691b0ebe11a2",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=What We Offer",
+      "targets": [
+        ["linkText=What We Offer", "linkText"],
+        ["css=.nav-item:nth-child(5) > .h4", "css:finder"],
+        ["xpath=//a[contains(text(),'What We Offer')]", "xpath:link"],
+        ["xpath=//nav[@id='mega-nav']/div[3]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '#megamenu-2')]", "xpath:href"],
+        ["xpath=//div[3]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'What We Offer')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "dec5cc4d-401b-43de-867b-de4fbb854456",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Variable Universal Life Insurance",
+      "targets": [
+        ["linkText=Variable Universal Life Insurance", "linkText"],
+        ["css=#cmp-linkList-1736953803_5 > li:nth-child(4) > a", "css:finder"],
+        ["xpath=//a[contains(text(),'Variable Universal Life Insurance')]", "xpath:link"],
+        ["xpath=//ul[@id='cmp-linkList-1736953803_5']/li[4]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/products/life-insurance/variable-universal-life')]", "xpath:href"],
+        ["xpath=//li[4]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Variable Universal Life Insurance')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "5d4284d5-2ece-48d4-93f6-ffd5149eb0e4",
+      "comment": "",
+      "command": "click",
+      "target": "css=.brand-logo",
+      "targets": [
+        ["css=.brand-logo", "css:finder"],
+        ["xpath=//img[@alt='New York Life Insurance | Home']", "xpath:img"],
+        ["xpath=//nav[@id='header']/div/a/img", "xpath:idRelative"],
+        ["xpath=//img", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "744ee1dd-6ad7-46b9-8b81-02150ee8d2e8",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["c2bb0798-6a72-45d6-b29d-fc114dfdc0b3"]
+  }],
+  "urls": ["https://www.newyorklife.com/"],
+  "plugins": []
+}

@@ -3,7 +3,9 @@ from selenium import webdriver
 from selenium.webdriver.webkitgtk.options import Options
 
 from observer.constants import REMOTE_DRIVER_ADDRESS, RESULTS_REPORT_NAME, RESULTS_BUCKET, ENV, TZ, GALLOPER_PROJECT_ID, \
-    JIRA_URL, JIRA_PROJECT, JIRA_USER, JIRA_PASSWORD
+    BROWSER_VERSION, GALLOPER_URL, TOKEN, OBSERVER_USER, OBSERVER_PASSWORD, JOB_NAME, ENABLE_VNC, JIRA_URL, \
+    JIRA_PROJECT, JIRA_USER, JIRA_PASSWORD
+from observer.util import get_browser_version
 
 browser = None
 cfg = None
@@ -13,29 +15,28 @@ exec_args = None
 def get_driver():
     global browser
     if browser is None:
-        options = get_browser_options(cfg.browser_name, exec_args)
+        browser_name, version = get_browser_version(exec_args.browser)
+        options = get_browser_options(browser_name, version, exec_args)
 
         driver = webdriver.Remote(
-            command_executor=f'http://{REMOTE_DRIVER_ADDRESS}/wd/hub',
+            command_executor=f'http://{OBSERVER_USER}:{OBSERVER_PASSWORD}@{REMOTE_DRIVER_ADDRESS}/wd/hub',
             options=options)
 
+        cfg.browser_name = browser_name
         cfg.driver = driver
         driver.set_window_position(0, 0)
         browser = SharedBrowser(cfg)
     return browser
 
 
-def get_browser_options(browser_name, args):
+def get_browser_options(browser_name, version, args):
     options = Options()
 
     if "chrome" == browser_name:
         options = webdriver.ChromeOptions()
-        options.add_argument('--window-size=1920,1080')
-        options.set_capability("version", "83.0")
 
     if "firefox" == browser_name:
         options = webdriver.FirefoxOptions()
-        options.set_capability("version", "63.0")
 
     if options.capabilities.get("browserName") == 'MiniBrowser':
         raise Exception(f"Unsupported browser {browser_name}")
@@ -50,11 +51,18 @@ def get_browser_options(browser_name, args):
         options.set_capability("jira_user", JIRA_USER)
         options.set_capability("jira_password", JIRA_PASSWORD)
 
-    options.set_capability("env", ENV)
+    if BROWSER_VERSION:
+        version = BROWSER_VERSION
+
+    options.set_capability("version", version)
+    options.set_capability("venv", ENV)
     options.set_capability('tz', TZ)
     options.set_capability('galloper_project_id', GALLOPER_PROJECT_ID)
+    options.set_capability('galloper_url', GALLOPER_URL)
+    options.set_capability('galloper_token', TOKEN)
     options.set_capability('aggregation', args.aggregation)
-
+    options.set_capability('job_name', JOB_NAME)
+    options.set_capability("vnc", ENABLE_VNC)
     return options
 
 
