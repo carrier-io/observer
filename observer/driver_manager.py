@@ -4,7 +4,7 @@ from selenium.webdriver.webkitgtk.options import Options
 
 from observer.constants import REMOTE_DRIVER_ADDRESS, RESULTS_REPORT_NAME, RESULTS_BUCKET, ENV, TZ, GALLOPER_PROJECT_ID, \
     BROWSER_VERSION, GALLOPER_URL, TOKEN, OBSERVER_USER, OBSERVER_PASSWORD, JOB_NAME, ENABLE_VNC, JIRA_URL, \
-    JIRA_PROJECT, JIRA_USER, JIRA_PASSWORD
+    JIRA_PROJECT, JIRA_USER, JIRA_PASSWORD, ADO_PROJECT, ADO_ORGANIZATION, ADO_TOKEN, ADO_TEAM
 from observer.util import get_browser_version
 
 browser = None
@@ -50,6 +50,12 @@ def get_browser_options(browser_name, version, args):
         options.set_capability("jira_project", JIRA_PROJECT)
         options.set_capability("jira_user", JIRA_USER)
         options.set_capability("jira_password", JIRA_PASSWORD)
+
+    if 'ado' in args.report:
+        options.set_capability("ado_organization", ADO_ORGANIZATION)
+        options.set_capability("ado_project", ADO_PROJECT)
+        options.set_capability("ado_token", ADO_TOKEN)
+        options.set_capability("ado_team", ADO_TEAM)
 
     if BROWSER_VERSION:
         version = BROWSER_VERSION
