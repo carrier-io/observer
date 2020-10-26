@@ -57,6 +57,9 @@ def get_browser_options(browser_name, version, args):
         options.set_capability("ado_token", ADO_TOKEN)
         options.set_capability("ado_team", ADO_TEAM)
 
+    if 'email' in args.report:
+        options.set_capability("email_report", True)
+
     if BROWSER_VERSION:
         version = BROWSER_VERSION
 
