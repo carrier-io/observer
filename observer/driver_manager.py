@@ -63,6 +63,7 @@ def get_browser_options(browser_name, version, args):
     if BROWSER_VERSION:
         version = BROWSER_VERSION
 
+    options.set_capability("test_id", args.test_id)
     options.set_capability("version", version)
     options.set_capability("venv", ENV)
     options.set_capability('tz', TZ)
