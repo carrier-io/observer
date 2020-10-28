@@ -158,6 +158,10 @@ def mouseOut(locator, text):
     pass
 
 
+def runScript(locator, text):
+    get_driver().execute_script(locator)
+
+
 __command_type = {
     "open": command(open_url),
     "setWindowSize": command(setWindowSize, actionable=False),
@@ -170,13 +174,13 @@ __command_type = {
     "assertText": command(assert_text),
     "close": command(close),
     'mouseOver': command(mouseOver),
-    'mouseOut': command(mouseOut)
+    'mouseOut': command(mouseOut),
+    'runScript': command(runScript)
 }
 
 
 def get_command(current_cmd):
     try:
         return __command_type[current_cmd]
-    except KeyError as e:
-        logger.error(f"No such command processor for [{current_cmd}] in {__command_type.keys()}")
-        raise e
+    except KeyError:
+        raise Exception(f"No such command processor for [{current_cmd}]")
