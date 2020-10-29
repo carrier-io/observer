@@ -1,0 +1,55 @@
+{
+  "id": "6752b67c-0057-4b6d-ae0f-7795da3c3253",
+  "version": "2.0",
+  "name": "Swarovski",
+  "url": "https://www.swarovski.com",
+  "tests": [{
+    "id": "03a7c46e-84b9-4886-8848-ca132e463b88",
+    "name": "swarovski",
+    "commands": [{
+      "id": "fc5d59ec-eec2-42f9-982b-6370b6bdcb5a",
+      "comment": "",
+      "command": "open",
+      "target": "/en-AA/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "c08dbc90-a024-48db-a724-af9c74bcb90f",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1280x700",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "a7f281a7-4212-4fb4-a8ca-a78d1e415d7a",
+      "comment": "",
+      "command": "runScript",
+      "target": "window.scrollTo(0,235)",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "3ff0ae19-4e5a-4d6c-b42d-82406e3704b7",
+      "comment": "",
+      "command": "click",
+      "target": "css=.swa-teaser-small__item__button",
+      "targets": [
+        ["css=.swa-teaser-small__item__button", "css:finder"],
+        ["xpath=//a[contains(text(),'SHOP NOW')]", "xpath:link"],
+        ["xpath=//main[@id='swa-main']/div[2]/section[2]/div/div/div/div[2]/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '/c-swa-root/Categories/f/collection/collection-annual-editions')])[2]", "xpath:href"],
+        ["xpath=//section[2]/div/div/div/div[2]/a", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "f769661c-68ea-4a4e-afdb-53b600e80e40",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["03a7c46e-84b9-4886-8848-ca132e463b88"]
+  }],
+  "urls": ["https://www.swarovski.com/"],
+  "plugins": []
+}

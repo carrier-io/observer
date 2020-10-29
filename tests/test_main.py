@@ -10,7 +10,7 @@ def test_main_with_data_params():
         [
             # "-f", f"data.zip",
             # "-d", f"{ROOT_DIR}/data/data.json",
-            "-sc", "/tmp/data/newyorklife.side",
+            "-sc", "webmail.side",
             # "-r", "ado",
             "-l", "1",
             "-b", "chrome_84.0",
