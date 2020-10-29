@@ -14,6 +14,7 @@ GALLOPER_PROJECT_ID = int(environ.get("GALLOPER_PROJECT_ID", "1"))
 
 REPORTS_BUCKET = environ.get("REPORTS_BUCKET", "reports")
 TESTS_BUCKET = environ.get("TESTS_BUCKET", "tests")
+ARTIFACT = environ.get("ARTIFACT")
 
 RESULTS_BUCKET = environ.get("RESULTS_BUCKET", "")
 RESULTS_REPORT_NAME = environ.get("RESULTS_REPORT_NAME", f'{uuid4()}')

@@ -1,8 +1,9 @@
 import argparse
+import os
 
 from selene.support.shared import SharedConfig
 
-from observer.constants import TZ
+from observer.constants import TZ, ARTIFACT
 from observer.driver_manager import set_config, close_driver, set_args
 from observer.executors.scenario_executor import execute_scenario
 from observer.integrations.galloper import download_file
@@ -54,12 +55,16 @@ def execute(args):
 
 
 def get_scenario(args):
-    if args.file:
-        file_path = download_file(args.file)
-        if file_path.endswith(".zip"):
-            unzip(file_path, "/tmp/data")
+    file_name = ARTIFACT
+    if not file_name:
+        file_name = args.file
 
-    return parse_json_file(args.scenario)
+    file_path = download_file(file_name)
+    target_folder = "/tmp/data"
+    if file_path.endswith(".zip"):
+        unzip(file_path, target_folder)
+
+    return parse_json_file(os.path.join(target_folder, args.scenario))
 
 
 if __name__ == "__main__":
