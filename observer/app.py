@@ -20,6 +20,7 @@ def create_parser():
     parser.add_argument("-l", "--loop", type=int, default=1)
     parser.add_argument("-a", "--aggregation", type=str, default="max")
     parser.add_argument("-b", "--browser", type=str, default="chrome")
+    parser.add_argument("-tid", '--test_id', type=str, default="")
     return parser
 
 
