@@ -23,6 +23,7 @@ OBSERVER_USER = environ.get('OBSERVER_USER', "")
 OBSERVER_PASSWORD = environ.get('OBSERVER_PASSWORD', "")
 
 JOB_NAME = environ.get('JOB_NAME', "")
+REPORT_ID= environ.get('REPORT_ID', "")
 
 JIRA_URL = environ.get("JIRA_URL", None)
 JIRA_USER = environ.get("JIRA_USER", None)

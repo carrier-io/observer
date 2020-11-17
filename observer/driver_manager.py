@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.webkitgtk.options import Options
 
 from observer.constants import REMOTE_DRIVER_ADDRESS, RESULTS_REPORT_NAME, RESULTS_BUCKET, ENV, TZ, GALLOPER_PROJECT_ID, \
-    BROWSER_VERSION, GALLOPER_URL, TOKEN, OBSERVER_USER, OBSERVER_PASSWORD, JOB_NAME, ENABLE_VNC, JIRA_URL, \
+    BROWSER_VERSION, GALLOPER_URL, TOKEN, OBSERVER_USER, OBSERVER_PASSWORD, JOB_NAME, REPORT_ID, ENABLE_VNC, JIRA_URL, \
     JIRA_PROJECT, JIRA_USER, JIRA_PASSWORD, ADO_PROJECT, ADO_ORGANIZATION, ADO_TOKEN, ADO_TEAM
 from observer.util import get_browser_version
 
@@ -72,6 +72,7 @@ def get_browser_options(browser_name, version, args):
     options.set_capability('galloper_token', TOKEN)
     options.set_capability('aggregation', args.aggregation)
     options.set_capability('job_name', JOB_NAME)
+    options.set_capability('report_uid', REPORT_ID)
     options.set_capability("vnc", ENABLE_VNC)
     return options
 
