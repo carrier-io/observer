@@ -3,7 +3,7 @@ import os
 
 from selene.support.shared import SharedConfig
 
-from observer.constants import TZ, ARTIFACT
+from observer.constants import TZ, DATA_FOLDER, ARTIFACT
 from observer.driver_manager import set_config, close_driver, set_args
 from observer.executors.scenario_executor import execute_scenario
 from observer.integrations.galloper import download_file
@@ -20,7 +20,6 @@ def create_parser():
     parser.add_argument("-l", "--loop", type=int, default=1)
     parser.add_argument("-a", "--aggregation", type=str, default="max")
     parser.add_argument("-b", "--browser", type=str, default="chrome")
-    parser.add_argument("-tid", '--test_id', type=str, default="")
     return parser
 
 
@@ -60,11 +59,10 @@ def get_scenario(args):
         file_name = args.file
 
     file_path = download_file(file_name)
-    target_folder = "/tmp/data"
     if file_path.endswith(".zip"):
-        unzip(file_path, target_folder)
+        unzip(file_path, DATA_FOLDER)
 
-    return parse_json_file(os.path.join(target_folder, args.scenario))
+    return parse_json_file(os.path.join(DATA_FOLDER, args.scenario))
 
 
 if __name__ == "__main__":
