@@ -4,6 +4,7 @@ RUN apk add  --no-cache ffmpeg
 # Fix for Pillow https://github.com/python-pillow/Pillow/issues/1763#issuecomment-204252397
 RUN apk add build-base jpeg-dev zlib-dev
 ENV LIBRARY_PATH=/lib:/usr/lib
+ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
 
 # Fix for cryptography https://stackoverflow.com/questions/35736598/cannot-pip-install-cryptography-in-docker-alpine-linux-3-3-with-openssl-1-0-2g
 RUN apk add --no-cache \
